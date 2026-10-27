@@ -49,6 +49,10 @@ svg {
   display: block;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 button,
 input,
 select,
@@ -199,6 +203,11 @@ time {
   }
 }
 
+.btn--danger {
+  border-color: rgba(255, 122, 89, 0.45);
+  color: var(--error-text);
+}
+
 .btn--cue {
   border: 0;
   background: var(--cue);
@@ -246,6 +255,41 @@ textarea.field {
   border-color: var(--chip-on, var(--disk));
   background: var(--chip-on, var(--disk));
   color: var(--bg);
+}
+
+/* Controllo segmentato (vista, difficoltà) */
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 12px;
+  border: 1px solid var(--line-2);
+}
+
+.segmented__item {
+  min-height: var(--tap);
+  min-width: 4.25rem;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.segmented__item[aria-checked='true'],
+.segmented__item[aria-pressed='true'] {
+  background: var(--disk);
+  color: var(--bg);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .segmented__item:hover:not([aria-checked='true']):not([aria-pressed='true']) {
+    color: var(--text);
+  }
 }
 
 /* Contenuto che cambia (fascia d'energia, piano): si riaccende sfumando. */

@@ -1,10 +1,10 @@
-import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { toast } from '../app/toast'
 import { logSession, logWeight, logWorkout } from '../db/actions'
 import type { Course, SessionType, WorkoutType } from '../db/schema'
 import { formatMinutes, todayISO } from '../lib/dates'
 import { examsAhead } from '../rules/rules'
-import './QuickLog.css'
+import { Sheet } from './Sheet'
 
 type Kind = 'studio' | 'lavoro' | 'arrampicata' | 'corsa' | 'palestra' | 'peso' | 'lean' | 'elsa' | 'lettura'
 
@@ -30,8 +30,6 @@ interface QuickLogProps {
 
 /** Il pannello "Registra" di Oggi (SPEC §3.1). */
 export function QuickLog({ open, onClose, courses }: QuickLogProps) {
-  const ref = useRef<HTMLDialogElement>(null)
-  const titleId = useId()
   const today = todayISO()
   const [kind, setKind] = useState<Kind>('studio')
   const [minutes, setMinutes] = useState('90')
@@ -47,14 +45,9 @@ export function QuickLog({ open, onClose, courses }: QuickLogProps) {
   }, [courses, today])
 
   useEffect(() => {
-    const dialog = ref.current
-    if (!dialog) return
-    if (open && !dialog.open) {
-      setDate(todayISO())
-      setError('')
-      dialog.showModal()
-    }
-    if (!open && dialog.open) dialog.close()
+    if (!open) return
+    setDate(todayISO())
+    setError('')
   }, [open])
 
   useEffect(() => {
@@ -100,26 +93,9 @@ export function QuickLog({ open, onClose, courses }: QuickLogProps) {
   }
 
   return (
-    <dialog
-      ref={ref}
-      className="quicklog"
-      aria-labelledby={titleId}
-      onClose={onClose}
-      onClick={(e) => {
-        if (e.target === ref.current) onClose()
-      }}
-    >
-      <form className="quicklog__form" onSubmit={(e) => void submit(e)}>
-        <div className="quicklog__head">
-          <h2 id={titleId}>Registra</h2>
-          <button type="button" className="quicklog__close" onClick={onClose} aria-label="Chiudi">
-            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-              <path d="M3.5 3.5l9 9M12.5 3.5l-9 9" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-            </svg>
-          </button>
-        </div>
-
-        <div className="quicklog__kinds" role="radiogroup" aria-label="Cosa registri">
+    <Sheet open={open} title="Registra" onClose={onClose}>
+      <form className="form" onSubmit={(e) => void submit(e)}>
+        <div className="choices" role="radiogroup" aria-label="Cosa registri">
           {KINDS.map((k) => (
             <button key={k.id} type="button" role="radio" aria-checked={kind === k.id} className="chip" onClick={() => pick(k.id)}>
               {k.label}
@@ -127,20 +103,20 @@ export function QuickLog({ open, onClose, courses }: QuickLogProps) {
           ))}
         </div>
 
-        <div className="quicklog__fields">
+        <div className="form-grid">
           {kind === 'peso' ? (
-            <label className="quicklog__field">
+            <label className="form-field">
               <span>Chilogrammi</span>
               <input className="field" inputMode="decimal" value={kg} onChange={(e) => setKg(e.target.value)} placeholder="72,5" required />
             </label>
           ) : (
-            <label className="quicklog__field">
+            <label className="form-field">
               <span>Minuti</span>
               <input className="field" type="number" inputMode="numeric" min={1} max={1440} value={minutes} onChange={(e) => setMinutes(e.target.value)} required />
             </label>
           )}
           {kind === 'studio' ? (
-            <label className="quicklog__field quicklog__field--wide">
+            <label className="form-field form-field--wide">
               <span>Corso</span>
               <select className="field" value={courseId} onChange={(e) => setCourseId(e.target.value)}>
                 {sortedCourses.map((c) => (
@@ -152,22 +128,22 @@ export function QuickLog({ open, onClose, courses }: QuickLogProps) {
             </label>
           ) : null}
           {kind === 'elsa' ? (
-            <label className="quicklog__field">
+            <label className="form-field">
               <span>Punteggio</span>
               <input className="field" inputMode="decimal" value={score} onChange={(e) => setScore(e.target.value)} placeholder="0–100" />
             </label>
           ) : null}
-          <label className="quicklog__field">
+          <label className="form-field">
             <span>Giorno</span>
             <input className="field" type="date" value={date} max={today} onChange={(e) => setDate(e.target.value || today)} />
           </label>
         </div>
 
-        <p className="quicklog__error" role="alert">
+        <p className="form-error" role="alert">
           {error}
         </p>
 
-        <div className="quicklog__actions">
+        <div className="sheet-actions">
           <button type="button" className="btn" onClick={onClose}>
             Annulla
           </button>
@@ -176,6 +152,6 @@ export function QuickLog({ open, onClose, courses }: QuickLogProps) {
           </button>
         </div>
       </form>
-    </dialog>
+    </Sheet>
   )
 }
