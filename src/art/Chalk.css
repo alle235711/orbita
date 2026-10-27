@@ -43,3 +43,29 @@
     fill-opacity: var(--ink-opacity, 0.45);
   }
 }
+
+/* Tratteggio leggero che compare dopo il disegno (campo di vettori, assi) */
+.chf {
+  fill: none;
+  stroke: var(--chalk);
+  stroke-opacity: 0;
+  stroke-width: 1.2;
+  stroke-dasharray: 3 5;
+  animation: chalk-fade 1s ease-out 1.5s forwards;
+}
+
+@keyframes chalk-fade {
+  to {
+    stroke-opacity: 0.3;
+  }
+}
+
+.chalk--stats {
+  --chalk-opacity: 0.24;
+  --ink-opacity: 0.38;
+}
+
+.chalk--stats .ch {
+  stroke-width: 1.4;
+  animation-duration: 2.6s;
+}

@@ -1,0 +1,445 @@
+/* Statistiche: contenuti e gesso di design/Lavagna-Statistiche.dc.html in
+   Schibsted Grotesk, sezioni separate da filetti come nella copertina,
+   campo profondo di galassie sullo sfondo. */
+
+.stats__field {
+  position: absolute;
+  inset: 0 0 auto;
+  width: 100%;
+  height: min(1100px, 140vh);
+  opacity: 0.85;
+  mask-image: linear-gradient(180deg, #000 55%, transparent);
+  -webkit-mask-image: linear-gradient(180deg, #000 55%, transparent);
+  pointer-events: none;
+}
+
+.stats__chalk {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: min(1180px, 100%);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.stats > :not(.stats__field):not(.stats__chalk) {
+  position: relative;
+  z-index: 1;
+}
+
+.stats__head {
+  display: grid;
+  justify-items: start;
+  gap: 16px;
+  padding-top: 26px;
+  max-width: 1200px;
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 18px 26px;
+  max-width: 1200px;
+  margin: 28px 0 0;
+}
+
+.kpis dt {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.kpis dd {
+  margin: 2px 0 0;
+  font-size: clamp(36px, 2rem + 1.4vw, 50px);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.kpis dd span {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--text-2);
+}
+
+/* ——— griglia delle sezioni: larghezze diverse, niente schede uguali ——— */
+
+.stats__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 36px;
+  max-width: 1200px;
+  margin-top: 36px;
+}
+
+@media (min-width: 600px) {
+  .stats__grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 36px 34px;
+  }
+}
+
+.panel {
+  grid-column: 1 / -1;
+  min-width: 0;
+  padding-top: 14px;
+  border-top: 2px solid var(--text);
+}
+
+@media (min-width: 900px) {
+  .panel--wide {
+    grid-column: span 7;
+  }
+
+  .panel--side {
+    grid-column: span 5;
+  }
+
+  .panel--third {
+    grid-column: span 4;
+  }
+
+  .panel--half {
+    grid-column: span 6;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 899px) {
+  .panel--third,
+  .panel--half {
+    grid-column: span 6;
+  }
+}
+
+.panel h2 {
+  font-size: var(--fs-h2);
+  font-weight: 800;
+  word-spacing: var(--ws-heavy);
+}
+
+.panel h3 {
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-2);
+}
+
+.panel__head {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.panel__head p,
+.panel__note {
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.panel__note {
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.panel--future {
+  border-top: 1px dashed var(--line-3);
+}
+
+.panel--future p {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--text-3);
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 18px 24px;
+}
+
+/* ——— segni ——— */
+
+.chart {
+  width: 100%;
+  min-height: 60px;
+}
+
+.chart svg {
+  overflow: visible;
+  font-family: var(--font);
+}
+
+.chart__axis {
+  stroke: var(--line-2);
+  stroke-width: 1;
+}
+
+.chart__grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.chart__target {
+  stroke: var(--disk);
+  stroke-opacity: 0.55;
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+.chart__target-label {
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--text);
+}
+
+.chart__tick {
+  font-size: 11px;
+  fill: var(--text-2);
+}
+
+.chart__tick--today {
+  fill: var(--text);
+  font-weight: 700;
+}
+
+.chart__empty {
+  font-size: 14px;
+  color: var(--text-3);
+}
+
+.lollipop__stem {
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.chart__mark--off .lollipop__stem {
+  stroke: rgba(185, 199, 238, 0.45);
+}
+
+.chart__mark--off .lollipop__dot {
+  fill: var(--chalk);
+}
+
+.chart__mark--on .lollipop__stem {
+  stroke: color-mix(in srgb, var(--disk) 65%, transparent);
+}
+
+.chart__mark--on .lollipop__dot {
+  fill: var(--disk);
+}
+
+.lollipop__dot {
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+
+.lollipop--today .lollipop__dot {
+  fill: var(--bg);
+  stroke: var(--disk);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .lollipop:hover .lollipop__dot {
+    stroke: var(--text);
+  }
+}
+
+.line__path {
+  fill: none;
+  stroke: var(--chalk);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.line__dot {
+  fill: var(--chalk);
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+
+.line__end {
+  fill: var(--disk);
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+
+.column {
+  fill: var(--chalk);
+  fill-opacity: 0.75;
+}
+
+.bars {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bars__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px 46px;
+  align-items: center;
+  column-gap: 12px;
+  font-size: 14px;
+}
+
+.bars__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bars__track {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(185, 199, 238, 0.14);
+}
+
+.bars__fill {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--chalk);
+}
+
+.bars__row--on .bars__fill {
+  background: var(--disk);
+}
+
+.bars__row--on .bars__label {
+  font-weight: 700;
+}
+
+.bars__value {
+  text-align: right;
+  color: var(--text-rule);
+}
+
+.strips {
+  display: grid;
+  gap: 6px;
+}
+
+.strips__row {
+  display: grid;
+  grid-template-columns: 86px minmax(0, 1fr) 24px;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.strips__value {
+  text-align: right;
+  font-weight: 800;
+}
+
+.strips__dot {
+  stroke: var(--bg);
+  stroke-width: 2;
+}
+
+.strips__dot--arrampicata {
+  fill: var(--disk);
+}
+
+.strips__dot--corsa {
+  fill: var(--chalk);
+}
+
+.strips__dot--palestra {
+  fill: var(--maldive);
+}
+
+.energy-rows {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 4px;
+  padding: 0;
+  list-style: none;
+}
+
+.energy-rows li {
+  display: grid;
+  grid-template-columns: 44px 64px minmax(0, 1fr) 52px;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.energy-rows__name {
+  font-weight: 700;
+}
+
+.energy-rows__track {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(185, 199, 238, 0.14);
+}
+
+.energy-rows__track span {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+}
+
+.energy-rows__value {
+  text-align: right;
+  color: var(--text-rule);
+}
+
+.weight-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.weight-form .field {
+  flex: 1;
+  min-width: 0;
+}
+
+.datatable {
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+.datatable summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  color: var(--text-2);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.datatable table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.datatable th {
+  padding: 6px 8px 6px 0;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.datatable td {
+  padding: 6px 8px 6px 0;
+  border-top: 1px solid var(--line);
+}
+
+.datatable .num {
+  text-align: right;
+}
+
+@media (max-width: 599px) {
+  .stats__chalk {
+    width: 180%;
+    left: 10%;
+    opacity: 0.7;
+  }
+}
