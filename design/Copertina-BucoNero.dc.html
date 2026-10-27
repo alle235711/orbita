@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Orbita, copertina col buco nero</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800;900&amp;display=swap">
+<style>
+body{margin:0;background:#070A16}
+a{color:#EEF1FA}a:hover{color:#FFFFFF}
+::selection{background:rgba(255,217,122,0.35)}
+a:focus-visible,button:focus-visible{outline:2px solid #EEF1FA;outline-offset:4px}
+.ch{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 2.4s cubic-bezier(0.16,1,0.3,1) forwards}
+.fade{opacity:0;animation:fadein 0.9s ease-out forwards}
+.rise{animation:rise 1.4s cubic-bezier(0.16,1,0.3,1) both}
+.slam{animation:slam 0.9s cubic-bezier(0.16,1,0.3,1) both}
+.flow{animation:flow 18s linear infinite}
+.lvl{transition:opacity 0.8s ease}
+.stopc{transition:stop-color 0.7s ease}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fadein{to{opacity:1}}
+@keyframes rise{from{opacity:0;transform:scale(0.6) rotate(-6deg)}to{opacity:1;transform:none}}
+@keyframes slam{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+@keyframes flow{to{stroke-dashoffset:-560}}
+.cls{transition:background-color 0.25s ease,color 0.25s ease,border-color 0.25s ease,transform 0.25s cubic-bezier(0.34,1.4,0.64,1)}
+.cls:active{transform:scale(0.94)}
+.acc{transition:color 0.5s ease,background-color 0.5s ease,border-color 0.5s ease}
+@media (prefers-reduced-motion: reduce){.ch{animation:none;stroke-dashoffset:0}.fade{animation:none;opacity:1}.rise,.slam,.flow{animation:none}.lvl,.stopc,.cls,.acc{transition:none}}
+</style>
+</helmet>
+<div style="position: relative; width: 1180px; height: 820px; overflow: hidden; background: #070A16; color: #EEF1FA; font-family: 'Schibsted Grotesk', system-ui, sans-serif; font-variant-numeric: tabular-nums">
+
+  <svg aria-hidden="true" width="1180" height="820" viewBox="0 0 1180 820" style="position: absolute; inset: 0">
+    <defs>
+      <filter id="nebA" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.0042 0.0068" numOctaves="4" seed="11"></feTurbulence><feColorMatrix type="matrix" values="0 0 0 0 0.88  0 0 0 0 0.28  0 0 0 0 0.62  3.2 0 0 0 -1.5"></feColorMatrix></filter>
+      <filter id="nebB" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.0062 0.0038" numOctaves="4" seed="29"></feTurbulence><feColorMatrix type="matrix" values="0 0 0 0 0.22  0 0 0 0 0.70  0 0 0 0 0.80  3 0 0 0 -1.45"></feColorMatrix></filter>
+      <radialGradient id="nebMask" cx="860" cy="230" r="640" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFFFFF"></stop><stop offset="0.55" stop-color="#FFFFFF" stop-opacity="0.55"></stop><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"></stop></radialGradient>
+      <mask id="nebM"><rect width="1180" height="820" fill="url(#nebMask)"></rect></mask>
+    </defs>
+    <g mask="url(#nebM)" opacity="0.5">
+      <rect width="1180" height="820" filter="url(#nebA)"></rect>
+      <rect width="1180" height="820" filter="url(#nebB)"></rect>
+    </g>
+    <g fill="#EEF1FA"><circle cx="755" cy="15" r="0.7" opacity="0.4"></circle><circle cx="165" cy="61" r="1.2" opacity="0.79"></circle><circle cx="103" cy="253" r="0.5" opacity="0.31"></circle><circle cx="275" cy="361" r="1.0" opacity="0.37"></circle><circle cx="767" cy="327" r="0.6" opacity="0.52"></circle><circle cx="328" cy="522" r="1.5" opacity="0.73"></circle><circle cx="183" cy="574" r="0.7" opacity="0.31"></circle><circle cx="448" cy="215" r="0.7" opacity="0.61"></circle><circle cx="952" cy="438" r="1.0" opacity="0.32"></circle><circle cx="1088" cy="47" r="0.7" opacity="0.75"></circle><circle cx="730" cy="517" r="1.0" opacity="0.37"></circle><circle cx="82" cy="397" r="1.5" opacity="0.42"></circle><circle cx="94" cy="140" r="0.5" opacity="0.48"></circle><circle cx="535" cy="500" r="0.6" opacity="0.47"></circle><circle cx="247" cy="160" r="1.2" opacity="0.64"></circle><circle cx="719" cy="103" r="1.2" opacity="0.4"></circle><circle cx="545" cy="162" r="1.2" opacity="0.66"></circle><circle cx="259" cy="195" r="1.5" opacity="0.72"></circle><circle cx="270" cy="19" r="0.7" opacity="0.49"></circle><circle cx="78" cy="548" r="1.0" opacity="0.78"></circle><circle cx="371" cy="393" r="0.8" opacity="0.78"></circle><circle cx="759" cy="86" r="0.6" opacity="0.4"></circle><circle cx="662" cy="158" r="1.0" opacity="0.51"></circle><circle cx="689" cy="217" r="0.6" opacity="0.56"></circle><circle cx="107" cy="28" r="0.5" opacity="0.34"></circle><circle cx="189" cy="408" r="1.0" opacity="0.29"></circle><circle cx="450" cy="598" r="1.0" opacity="0.4"></circle><circle cx="653" cy="565" r="1.2" opacity="0.68"></circle><circle cx="804" cy="322" r="0.7" opacity="0.71"></circle><circle cx="401" cy="176" r="0.6" opacity="0.52"></circle><circle cx="1126" cy="526" r="0.7" opacity="0.83"></circle><circle cx="126" cy="375" r="1.5" opacity="0.63"></circle><circle cx="719" cy="92" r="1.5" opacity="0.35"></circle><circle cx="1125" cy="553" r="0.5" opacity="0.61"></circle><circle cx="577" cy="67" r="0.7" opacity="0.78"></circle><circle cx="68" cy="527" r="0.5" opacity="0.3"></circle><circle cx="573" cy="42" r="1.5" opacity="0.57"></circle><circle cx="148" cy="396" r="1.0" opacity="0.35"></circle><circle cx="623" cy="364" r="0.6" opacity="0.81"></circle><circle cx="891" cy="414" r="1.2" opacity="0.44"></circle><circle cx="1174" cy="390" r="0.8" opacity="0.79"></circle><circle cx="533" cy="149" r="0.5" opacity="0.45"></circle><circle cx="694" cy="138" r="0.6" opacity="0.25"></circle><circle cx="835" cy="35" r="0.5" opacity="0.79"></circle><circle cx="1014" cy="43" r="0.6" opacity="0.42"></circle><circle cx="573" cy="324" r="1.2" opacity="0.81"></circle><circle cx="674" cy="284" r="1.5" opacity="0.53"></circle><circle cx="480" cy="57" r="1.2" opacity="0.51"></circle><circle cx="500" cy="280" r="1.2" opacity="0.28"></circle><circle cx="771" cy="388" r="0.5" opacity="0.49"></circle><circle cx="400" cy="517" r="0.6" opacity="0.36"></circle><circle cx="633" cy="84" r="0.6" opacity="0.42"></circle><circle cx="295" cy="554" r="0.8" opacity="0.73"></circle><circle cx="1010" cy="59" r="1.2" opacity="0.85"></circle><circle cx="987" cy="581" r="1.5" opacity="0.76"></circle><circle cx="196" cy="291" r="0.6" opacity="0.77"></circle><circle cx="1065" cy="99" r="0.5" opacity="0.84"></circle><circle cx="313" cy="470" r="0.8" opacity="0.42"></circle><circle cx="822" cy="438" r="1.5" opacity="0.58"></circle><circle cx="350" cy="581" r="1.0" opacity="0.69"></circle><circle cx="72" cy="188" r="0.5" opacity="0.6"></circle><circle cx="593" cy="512" r="0.6" opacity="0.28"></circle><circle cx="599" cy="511" r="0.5" opacity="0.61"></circle><circle cx="797" cy="141" r="0.5" opacity="0.81"></circle><circle cx="672" cy="347" r="0.5" opacity="0.62"></circle><circle cx="495" cy="350" r="1.0" opacity="0.44"></circle><circle cx="308" cy="402" r="0.7" opacity="0.39"></circle><circle cx="467" cy="403" r="0.7" opacity="0.52"></circle><circle cx="1096" cy="561" r="0.5" opacity="0.52"></circle><circle cx="1178" cy="598" r="0.5" opacity="0.57"></circle><circle cx="597" cy="79" r="0.7" opacity="0.78"></circle><circle cx="186" cy="500" r="1.2" opacity="0.43"></circle><circle cx="1161" cy="484" r="1.0" opacity="0.25"></circle><circle cx="783" cy="563" r="0.6" opacity="0.41"></circle><circle cx="1050" cy="445" r="0.6" opacity="0.41"></circle><circle cx="714" cy="431" r="0.6" opacity="0.66"></circle><circle cx="296" cy="545" r="0.5" opacity="0.31"></circle><circle cx="500" cy="166" r="0.5" opacity="0.45"></circle><circle cx="154" cy="588" r="0.6" opacity="0.69"></circle><circle cx="651" cy="257" r="0.5" opacity="0.32"></circle><circle cx="1115" cy="415" r="0.6" opacity="0.58"></circle><circle cx="985" cy="350" r="0.6" opacity="0.51"></circle><circle cx="49" cy="219" r="1.5" opacity="0.83"></circle></g>
+  </svg>
+
+  <svg aria-hidden="true" width="1180" height="820" viewBox="0 0 1180 820" style="position: absolute; inset: 0">
+    <defs>
+      <radialGradient id="glow" cx="925" cy="205" r="300" gradientUnits="userSpaceOnUse"><stop class="stopc" offset="0" stop-color="{{accent}}" stop-opacity="0.85"></stop><stop class="stopc" offset="0.45" stop-color="{{accent}}" stop-opacity="0.32"></stop><stop class="stopc" offset="1" stop-color="{{accent}}" stop-opacity="0"></stop></radialGradient>
+      <linearGradient id="dop" x1="589" y1="205" x2="1261" y2="205" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.95"></stop><stop class="stopc" offset="0.22" stop-color="{{accent}}"></stop><stop class="stopc" offset="0.62" stop-color="{{accent}}" stop-opacity="0.6"></stop><stop class="stopc" offset="1" stop-color="{{accent}}" stop-opacity="0.2"></stop></linearGradient>
+      <linearGradient id="lens" x1="776" y1="205" x2="1074" y2="205" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.92"></stop><stop class="stopc" offset="0.35" stop-color="{{accent}}" stop-opacity="0.95"></stop><stop class="stopc" offset="1" stop-color="{{accent}}" stop-opacity="0.35"></stop></linearGradient>
+      <linearGradient id="jetUp" x1="925" y1="205" x2="925" y2="-330" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.95"></stop><stop class="stopc" offset="0.25" stop-color="{{accent}}" stop-opacity="0.8"></stop><stop class="stopc" offset="1" stop-color="{{accent}}" stop-opacity="0"></stop></linearGradient>
+      <linearGradient id="jetDn" x1="925" y1="205" x2="925" y2="740" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.95"></stop><stop class="stopc" offset="0.25" stop-color="{{accent}}" stop-opacity="0.8"></stop><stop class="stopc" offset="1" stop-color="{{accent}}" stop-opacity="0"></stop></linearGradient>
+      <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="28"></feGaussianBlur></filter>
+      <filter id="haze" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="3"></feGaussianBlur></filter>
+      <clipPath id="front"><rect x="500" y="205" width="850" height="320"></rect></clipPath>
+    </defs>
+    <g class="rise" style="transform-origin: 925px 205px">
+      <g transform="rotate(-9 925 205)">
+        <circle class="lvl" cx="925" cy="205" r="300" fill="url(#glow)" filter="url(#soft)" style="opacity: {{glowOp}}"></circle>
+        <g class="lvl" style="opacity: {{jetOp}}">
+          <polygon points="921,205 929,205 952,-330 898,-330" fill="url(#jetUp)" filter="url(#haze)"></polygon>
+          <polygon points="921,205 929,205 952,740 898,740" fill="url(#jetDn)" filter="url(#haze)"></polygon>
+          <polygon points="923,205 927,205 932,-330 918,-330" fill="#FFFFFF" opacity="0.55"></polygon>
+        </g>
+        <g class="lvl" style="opacity: {{diskOp}}">
+          <path d="M589,205 a336,51.5 0 1,0 672,0 a336,51.5 0 1,0 -672,0 Z M757,205 a168,25.8 0 1,0 336,0 a168,25.8 0 1,0 -336,0 Z" fill="url(#dop)" fill-rule="evenodd"></path>
+          <path d="M706.6,205 a218.4,33.6 0 1,0 436.8,0 a218.4,33.6 0 1,0 -436.8,0 Z M757,205 a168,25.8 0 1,0 336,0 a168,25.8 0 1,0 -336,0 Z" fill="#FFFFFF" fill-opacity="0.32" fill-rule="evenodd"></path>
+          <ellipse class="flow" cx="925" cy="205" rx="252" ry="38" fill="none" stroke="#FFFFFF" stroke-opacity="0.5" stroke-width="2" stroke-dasharray="3 31" stroke-linecap="round"></ellipse>
+          <path d="M776,205 A149,149 0 0,1 1074,205" fill="none" stroke="url(#lens)" stroke-width="40" stroke-linecap="round"></path>
+        </g>
+        <circle cx="925" cy="205" r="112" fill="#000000"></circle>
+        <circle class="lvl" cx="925" cy="205" r="116.5" fill="none" stroke="#FFFFFF" stroke-width="2" style="opacity: {{ringOp}}"></circle>
+        <g class="lvl" style="opacity: {{diskOp}}">
+          <path d="M799.6,205 A125.4,125.4 0 0,0 1050.4,205" fill="none" stroke="url(#lens)" stroke-width="7"></path>
+          <g clip-path="url(#front)">
+            <path d="M589,205 a336,51.5 0 1,0 672,0 a336,51.5 0 1,0 -672,0 Z M757,205 a168,25.8 0 1,0 336,0 a168,25.8 0 1,0 -336,0 Z" fill="url(#dop)" fill-rule="evenodd"></path>
+            <path d="M706.6,205 a218.4,33.6 0 1,0 436.8,0 a218.4,33.6 0 1,0 -436.8,0 Z M757,205 a168,25.8 0 1,0 336,0 a168,25.8 0 1,0 -336,0 Z" fill="#FFFFFF" fill-opacity="0.32" fill-rule="evenodd"></path>
+            <ellipse class="flow" cx="925" cy="205" rx="252" ry="38" fill="none" stroke="#FFFFFF" stroke-opacity="0.5" stroke-width="2" stroke-dasharray="3 31" stroke-linecap="round"></ellipse>
+          </g>
+        </g>
+      </g>
+    </g>
+
+    <g class="fade" style="animation-delay: 1.1s" opacity="0.8">
+      <path d="M1088.2,536.7 L1088.6,537.1 L1088.8,537.6 L1088.9,538.2 L1088.7,538.9 L1088.3,539.7 L1087.6,540.6 L1086.8,541.6 L1085.7,542.6 L1084.4,543.6 L1082.9,544.5 L1081.2,545.4 L1079.4,546.2 L1077.6,546.9 L1075.8,547.4 L1074.0,547.7 L1072.3,547.8 L1070.7,547.7 L1069.4,547.3 L1068.4,546.6 L1067.7,545.7 L1067.4,544.5 L1067.6,543.1 L1068.2,541.4 L1069.3,539.6 L1070.9,537.6 L1073.0,535.6 L1075.6,533.5 L1078.6,531.4 L1082.0,529.4 L1085.6,527.6 L1089.4,526.0 L1093.4,524.8 L1097.3,523.9 L1101.0,523.5 L1104.5,523.5 L1107.5,524.1 L1110.0,525.2 L1111.8,526.9 L1112.8,529.2 L1113.0,531.9 L1112.1,535.2 L1110.2,538.9 L1107.3,543.0 L1103.3,547.3 L1098.3,551.8 L1092.4,556.2 L1085.6,560.5 L1078.1,564.6 L1070.1,568.2 L1061.9,571.2 L1053.5,573.4 L1045.4,574.8 L1037.7,575.2 L1030.7,574.6 L1024.8,572.7 L1020.3,569.7 M1075.8,543.3 L1075.4,542.9 L1075.2,542.4 L1075.1,541.8 L1075.3,541.1 L1075.7,540.3 L1076.4,539.4 L1077.2,538.4 L1078.3,537.4 L1079.6,536.4 L1081.1,535.5 L1082.8,534.6 L1084.6,533.8 L1086.4,533.1 L1088.2,532.6 L1090.0,532.3 L1091.7,532.2 L1093.3,532.3 L1094.6,532.7 L1095.6,533.4 L1096.3,534.3 L1096.6,535.5 L1096.4,536.9 L1095.8,538.6 L1094.7,540.4 L1093.1,542.4 L1091.0,544.4 L1088.4,546.5 L1085.4,548.6 L1082.0,550.6 L1078.4,552.4 L1074.6,554.0 L1070.6,555.2 L1066.7,556.1 L1063.0,556.5 L1059.5,556.5 L1056.5,555.9 L1054.0,554.8 L1052.2,553.1 L1051.2,550.8 L1051.0,548.1 L1051.9,544.8 L1053.8,541.1 L1056.7,537.0 L1060.7,532.7 L1065.7,528.2 L1071.6,523.8 L1078.4,519.5 L1085.9,515.4 L1093.9,511.8 L1102.1,508.8 L1110.5,506.6 L1118.6,505.2 L1126.3,504.8 L1133.3,505.4 L1139.2,507.3 L1143.7,510.3" fill="none" stroke="#9FB6FF" stroke-opacity="0.28" stroke-width="9" stroke-linecap="round" filter="url(#haze)"></path>
+      <path d="M1088.2,536.7 L1088.6,537.1 L1088.8,537.6 L1088.9,538.2 L1088.7,538.9 L1088.3,539.7 L1087.6,540.6 L1086.8,541.6 L1085.7,542.6 L1084.4,543.6 L1082.9,544.5 L1081.2,545.4 L1079.4,546.2 L1077.6,546.9 L1075.8,547.4 L1074.0,547.7 L1072.3,547.8 L1070.7,547.7 L1069.4,547.3 L1068.4,546.6 L1067.7,545.7 L1067.4,544.5 L1067.6,543.1 L1068.2,541.4 L1069.3,539.6 L1070.9,537.6 L1073.0,535.6 L1075.6,533.5 L1078.6,531.4 L1082.0,529.4 L1085.6,527.6 L1089.4,526.0 L1093.4,524.8 L1097.3,523.9 L1101.0,523.5 L1104.5,523.5 L1107.5,524.1 L1110.0,525.2 L1111.8,526.9 L1112.8,529.2 L1113.0,531.9 L1112.1,535.2 L1110.2,538.9 L1107.3,543.0 L1103.3,547.3 L1098.3,551.8 L1092.4,556.2 L1085.6,560.5 L1078.1,564.6 L1070.1,568.2 L1061.9,571.2 L1053.5,573.4 L1045.4,574.8 L1037.7,575.2 L1030.7,574.6 L1024.8,572.7 L1020.3,569.7 M1075.8,543.3 L1075.4,542.9 L1075.2,542.4 L1075.1,541.8 L1075.3,541.1 L1075.7,540.3 L1076.4,539.4 L1077.2,538.4 L1078.3,537.4 L1079.6,536.4 L1081.1,535.5 L1082.8,534.6 L1084.6,533.8 L1086.4,533.1 L1088.2,532.6 L1090.0,532.3 L1091.7,532.2 L1093.3,532.3 L1094.6,532.7 L1095.6,533.4 L1096.3,534.3 L1096.6,535.5 L1096.4,536.9 L1095.8,538.6 L1094.7,540.4 L1093.1,542.4 L1091.0,544.4 L1088.4,546.5 L1085.4,548.6 L1082.0,550.6 L1078.4,552.4 L1074.6,554.0 L1070.6,555.2 L1066.7,556.1 L1063.0,556.5 L1059.5,556.5 L1056.5,555.9 L1054.0,554.8 L1052.2,553.1 L1051.2,550.8 L1051.0,548.1 L1051.9,544.8 L1053.8,541.1 L1056.7,537.0 L1060.7,532.7 L1065.7,528.2 L1071.6,523.8 L1078.4,519.5 L1085.9,515.4 L1093.9,511.8 L1102.1,508.8 L1110.5,506.6 L1118.6,505.2 L1126.3,504.8 L1133.3,505.4 L1139.2,507.3 L1143.7,510.3" fill="none" stroke="#DCE4FF" stroke-opacity="0.6" stroke-width="1.4" stroke-linecap="round"></path>
+      <ellipse cx="1082" cy="540" rx="11" ry="6" transform="rotate(-28 1082 540)" fill="#FFE7B0" opacity="0.85" filter="url(#haze)"></ellipse>
+      <g fill="#FF7FB8" opacity="0.8"><circle cx="1068.3" cy="547.4" r="1.6"></circle><circle cx="1075.1" cy="533.9" r="1.3"></circle><circle cx="1105.0" cy="521.8" r="1.6"></circle><circle cx="1101.4" cy="548.7" r="1.4"></circle><circle cx="1052.5" cy="572.4" r="1.5"></circle><circle cx="1096.6" cy="532.6" r="1.2"></circle><circle cx="1089.7" cy="546.5" r="1.4"></circle><circle cx="1060.1" cy="555.1" r="1.6"></circle><circle cx="1061.2" cy="534.2" r="1.3"></circle><circle cx="1110.6" cy="507.5" r="1.5"></circle></g>
+    </g>
+
+    <ellipse cx="700" cy="320" rx="500" ry="200" transform="rotate(-12 700 320)" fill="none" stroke="#B9C7EE" stroke-opacity="0.16" stroke-width="1"></ellipse>
+    <path d="M248,479 L255,485 L264,491 L273,496 L283,501 L293,506 L304,510 L315,515 L327,519 L340,522 L353,526 L367,529 L381,531 L396,534 L411,536 L427,538 L443,539 L459,540 L476,541 L493,541 L510,542 L528,541 L546,541 L564,540 L582,539 L601,537 L620,535 L638,533 L657,531 L676,528 L695,525 L714,521 L733,517 L752,513 L771,509 L790,504 L809,499 L827,494 L845,489 L863,483 L881,477 L899,471 L916,465 L933,458 L949,451 L966,444 L981,437 L997,430 L1012,422 L1026,414 L1040,407 L1054,399 L1066,391 L1079,382 L1091,374 L1102,366 L1112,357 L1122,349 L1132,340 L1141,332 L1149,323" fill="none" stroke="#EEF1FA" stroke-opacity="0.35" stroke-width="1.5" stroke-dasharray="2 7" stroke-linecap="round"></path>
+    <path class="ch" pathLength="1" d="M248,479 L254,484 L262,489 L269,494 L277,499 L286,503 L295,507 L305,511 L315,515 L325,518 L336,521 L347,524 L359,527 L371,530 L384,532 L396,534 L410,536 L423,537 L437,539 L451,540 L465,541 L480,541 L495,541 L510,542 L525,541 L541,541 L557,540 L573,539 L589,538 L605,537 L621,535 L637,533 L654,531 L670,529 L687,526 L703,523 L720,520 L736,517 L753,513 L769,509 L786,505 L802,501 L818,497 L834,492 L850,488 L865,483" stroke="{{accent}}" stroke-width="3" style="animation-delay: 0.5s"></path>
+  </svg>
+
+  <div style="position: absolute; inset: 0; mix-blend-mode: difference; pointer-events: none">
+    <p aria-hidden="true" class="slam" style="position: absolute; left: 34px; bottom: 236px; margin: 0; font-size: 210px; font-weight: 900; letter-spacing: -0.08em; line-height: 0.8; color: transparent; -webkit-text-stroke: 1.5px #EEF1FA; opacity: 0.55; animation-delay: 0.35s">27</p>
+    <svg aria-hidden="true" width="1180" height="820" viewBox="0 0 1180 820" style="position: absolute; inset: 0">
+      <g font-family="Schibsted Grotesk, sans-serif" fill="#EEF1FA">
+        <g class="fade" style="animation-delay: 1.2s"><circle cx="298" cy="508" r="6"></circle><text x="306" y="492" font-size="13"><tspan font-weight="800">9:00</tspan> Astrofisica Stellare</text></g>
+        <g class="fade" style="animation-delay: 1.3s"><circle cx="449" cy="540" r="6"></circle><text x="457" y="524" font-size="13"><tspan font-weight="800">11:00</tspan> Topologia Algebrica</text></g>
+        <g class="fade" style="animation-delay: 1.4s"><circle cx="798" cy="502" r="6"></circle><text x="740" y="532" font-size="13"><tspan font-weight="800">14:30</tspan> Ripetizioni</text></g>
+        <g class="fade" style="animation-delay: 1.6s"><circle cx="865" cy="483" r="9"></circle><circle cx="865" cy="483" r="18" fill="none" stroke="#EEF1FA" stroke-opacity="0.5"></circle><text x="878" y="470" font-size="14" font-weight="800">adesso</text></g>
+        <g class="fade" style="animation-delay: 1.5s"><circle cx="987" cy="434" r="6"></circle><text x="996" y="462" font-size="13"><tspan font-weight="800">16:30</tspan> Esercizi</text></g>
+        <g class="fade" style="animation-delay: 1.55s"><circle cx="1125" cy="346" r="6"></circle><text x="1118" y="378" font-size="13" text-anchor="end"><tspan font-weight="800">18:30</tspan> Arrampicata</text></g>
+      </g>
+    </svg>
+    <h1 class="slam" style="position: absolute; left: 36px; top: 76px; margin: 0; white-space: nowrap; font-size: 104px; font-weight: 900; letter-spacing: -0.055em; line-height: 0.86; color: #EEF1FA">{{headline1}}<br>{{headline2}}</h1>
+  </div>
+
+  <nav aria-label="Sezioni" style="position: absolute; left: 40px; top: 0; height: 52px; display: flex; align-items: center; gap: 24px">
+    <span style="font-size: 18px; font-weight: 900; letter-spacing: -0.03em; margin-right: 14px">Orbita</span>
+    <a href="Copertina-BucoNero.dc.html" aria-current="page" class="acc" style="display: flex; align-items: center; height: 52px; box-sizing: border-box; border-bottom: 3px solid {{accent}}; text-decoration: none; font-size: 14px; font-weight: 700">Oggi</a>
+    <a href="Agenda.dc.html" style="display: flex; align-items: center; height: 52px; text-decoration: none; font-size: 14px; font-weight: 500; color: #AEB8D2">Agenda</a>
+    <a href="Briefing.dc.html" style="display: flex; align-items: center; height: 52px; text-decoration: none; font-size: 14px; font-weight: 500; color: #AEB8D2">Briefing</a>
+    <a href="Lavagna-Statistiche.dc.html" style="display: flex; align-items: center; height: 52px; text-decoration: none; font-size: 14px; font-weight: 500; color: #AEB8D2">Statistiche</a>
+    <a href="Rivista-Ripasso.dc.html" style="display: flex; align-items: center; height: 52px; text-decoration: none; font-size: 14px; font-weight: 500; color: #AEB8D2">Ripasso</a>
+  </nav>
+
+  <p style="position: absolute; left: 40px; top: 284px; width: 540px; margin: 0; font-size: 17px; line-height: 1.45; color: #C9D1E6">{{tierRule}}</p>
+
+  <section aria-labelledby="bh-q" style="position: absolute; left: 40px; top: 346px">
+    <h2 id="bh-q" style="margin: 0 0 10px; font-size: 15px; font-weight: 800">Quanto mangia il tuo buco nero oggi?</h2>
+    <div role="radiogroup" aria-labelledby="bh-q" style="display: flex; gap: 8px">
+      <sc-for list="{{levels}}" as="l" hint-placeholder-count="5">
+        <button type="button" role="radio" class="cls" onClick="{{l.pick}}" aria-checked="{{l.checked}}" aria-label="{{l.aria}}" style="width: 104px; height: 78px; border-radius: 14px; border: 2px solid {{l.border}}; background: {{l.bg}}; color: {{l.fg}}; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; font-family: 'Schibsted Grotesk', sans-serif">
+          <svg width="44" height="16" viewBox="0 0 44 16" aria-hidden="true"><ellipse cx="22" cy="8" rx="20" ry="4.5" fill="none" stroke="{{l.glyph}}" stroke-width="{{l.glyphW}}"></ellipse><circle cx="22" cy="8" r="5.5" fill="#000000" stroke="{{l.glyph}}" stroke-width="1"></circle></svg>
+          <span style="font-size: 15px; font-weight: 900; line-height: 1">{{l.name}}</span>
+          <span style="font-size: 11px; font-weight: 600; opacity: 0.85">{{l.word}}</span>
+        </button>
+      </sc-for>
+    </div>
+  </section>
+
+  <section aria-label="Il piano di oggi" style="position: absolute; left: 40px; right: 40px; top: 590px; border-top: 2px solid #EEF1FA; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 26px">
+    <sc-for list="{{plan}}" as="p" hint-placeholder-count="4">
+      <article style="padding-top: 12px; display: grid; grid-template-columns: auto 1fr; column-gap: 12px; align-items: start">
+        <span class="acc" style="font-size: 54px; font-weight: 900; letter-spacing: -0.05em; line-height: 0.85; color: {{accent}}">{{p.n}}</span>
+        <span>
+          <span style="display: block; font-size: 13px; font-weight: 800; color: #C9D1E6">{{p.dur}}</span>
+          <span style="display: block; font-size: 17px; font-weight: 800; letter-spacing: -0.015em; line-height: 1.15; margin-top: 2px">{{p.title}}</span>
+          <span style="display: block; font-size: 13px; line-height: 1.35; color: #AEB8D2; margin-top: 4px">{{p.detail}}</span>
+        </span>
+      </article>
+    </sc-for>
+  </section>
+
+  <svg width="1100" height="64" viewBox="40 736 1100 64" role="img" aria-label="Da oggi alla laurea: Struttura della Materia il 13 novembre, Calcolo per l'Astronomia il 17 novembre, tirocinio alle Maldive dal 14 dicembre al 24 gennaio, tre esami a febbraio, laurea a luglio" style="position: absolute; left: 40px; top: 736px">
+    <line x1="40" y1="772" x2="1140" y2="772" stroke="#B9C7EE" stroke-opacity="0.4" stroke-width="1.2"></line>
+    <g stroke="#B9C7EE" stroke-opacity="0.4" stroke-width="1.2"><line x1="60" y1="768" x2="60" y2="776"></line><line x1="179" y1="768" x2="179" y2="776"></line><line x1="302" y1="768" x2="302" y2="776"></line><line x1="425" y1="768" x2="425" y2="776"></line><line x1="536" y1="768" x2="536" y2="776"></line><line x1="659" y1="768" x2="659" y2="776"></line><line x1="779" y1="768" x2="779" y2="776"></line><line x1="902" y1="768" x2="902" y2="776"></line><line x1="1021" y1="768" x2="1021" y2="776"></line></g>
+    <g font-family="Schibsted Grotesk, sans-serif" font-size="11" fill="#AEB8D2"><text x="60" y="792">nov</text><text x="179" y="792">dic</text><text x="302" y="792">gen</text><text x="425" y="792">feb</text><text x="536" y="792">mar</text><text x="659" y="792">apr</text><text x="779" y="792">mag</text><text x="902" y="792">giu</text><text x="1021" y="792">lug</text></g>
+    <rect x="231" y="769" width="162" height="6" rx="3" fill="#7FD8C4"></rect>
+    <text x="235" y="760" font-family="Schibsted Grotesk, sans-serif" font-size="12" font-weight="700" fill="#7FD8C4">Maldive</text>
+    <rect x="429" y="769" width="52" height="6" rx="3" fill="#EEF1FA"></rect>
+    <text x="430" y="760" font-family="Schibsted Grotesk, sans-serif" font-size="12" font-weight="700" fill="#EEF1FA">3 esami</text>
+    <circle cx="108" cy="772" r="5" fill="{{accent}}"></circle>
+    <text x="40" y="760" font-family="Schibsted Grotesk, sans-serif" font-size="12" font-weight="800" fill="{{accent}}">Struttura tra 17 giorni</text>
+    <circle cx="123" cy="772" r="3.5" fill="#EEF1FA"></circle>
+    <circle cx="1076" cy="772" r="6" fill="none" stroke="#EEF1FA" stroke-width="2"></circle>
+    <text x="1086" y="760" font-family="Schibsted Grotesk, sans-serif" font-size="12" font-weight="800" fill="#EEF1FA">Laurea</text>
+  </svg>
+
+  <svg aria-hidden="true" width="1180" height="820" style="position: absolute; inset: 0; pointer-events: none; mix-blend-mode: overlay; opacity: 0.2">
+    <filter id="grana"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"></feTurbulence><feColorMatrix type="saturate" values="0"></feColorMatrix></filter>
+    <rect width="1180" height="820" filter="url(#grana)"></rect>
+  </svg>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1180,"height":820}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { energy: 3 };
+  }
+  renderVals() {
+    const e = this.state.energy;
+    const states = [
+      null,
+      { name: "Sgr A*", word: "a riposo", color: "#E2604A", disk: 0.32, glow: 0.22, ring: 0.45, jet: 0 },
+      { name: "LINER", word: "fiacco", color: "#FF9757", disk: 0.55, glow: 0.34, ring: 0.6, jet: 0 },
+      { name: "Seyfert", word: "regolare", color: "#FFCF6E", disk: 0.82, glow: 0.48, ring: 0.8, jet: 0 },
+      { name: "Quasar", word: "carico", color: "#EAF0FF", disk: 1, glow: 0.66, ring: 0.95, jet: 0.35 },
+      { name: "Blazar", word: "al massimo", color: "#8DB2FF", disk: 1, glow: 0.85, ring: 1, jet: 1 }
+    ];
+    const s = states[e];
+    const levels = [1, 2, 3, 4, 5].map((n) => {
+      const t = states[n];
+      const on = n === e;
+      return {
+        name: t.name,
+        word: t.word,
+        checked: on ? "true" : "false",
+        aria: t.name + ", " + t.word,
+        border: on ? t.color : "rgba(185,199,238,0.22)",
+        bg: on ? t.color : "rgba(7,10,22,0.55)",
+        fg: on ? "#070A16" : "#EEF1FA",
+        glyph: on ? "#070A16" : t.color,
+        glyphW: String(1 + n * 0.5),
+        pick: () => this.setState({ energy: n })
+      };
+    });
+    const tiers = {
+      low: {
+        h1: "Una giornata", h2: "per ricaricarsi",
+        rule: "Disco quasi spento: niente teoria nuova, blocchi da 45 minuti e tanto ripasso attivo.",
+        plan: [
+          { n: "1", dur: "45 min", title: "Ripasso attivo di Struttura", detail: "Spiega a voce le regole di selezione." },
+          { n: "2", dur: "30 min", title: "Ripasso a 10 dita", detail: "Le schede scadute di Astrofisica Stellare." },
+          { n: "3", dur: "30 min", title: "Camminata", detail: "Recupero attivo, la corsa aspetta." },
+          { n: "4", dur: "30 min", title: "Lettura", detail: "Un capitolo, senza telefono." }
+        ]
+      },
+      mid: {
+        h1: "Una giornata", h2: "da esercizi",
+        rule: "Accrescimento regolare: l'esame più vicino va per primo, in blocchi da 90 minuti.",
+        plan: [
+          { n: "1", dur: "2 × 90 min", title: "Scritto di Struttura della Materia", detail: "Due esercizi d'esame dagli appelli passati." },
+          { n: "2", dur: "60 min", title: "Fortran per Calcolo", detail: "Un esercizio completo fino all'output." },
+          { n: "3", dur: "20 min", title: "Ripasso a 10 dita", detail: "Escissione e Mayer-Vietoris." },
+          { n: "4", dur: "18:30", title: "Arrampicata", detail: "La seconda delle tre di questa settimana." }
+        ]
+      },
+      high: {
+        h1: "Una giornata", h2: "da teoria nuova",
+        rule: "Regime da quasar: la teoria più difficile nelle prime ore, quando la testa regge.",
+        plan: [
+          { n: "1", dur: "2 × 90 min", title: "Dualità di Poincaré", detail: "Ricostruisci la dimostrazione senza appunti." },
+          { n: "2", dur: "90 min", title: "Scritto di Struttura della Materia", detail: "17 giorni all'esame." },
+          { n: "3", dur: "45 min", title: "Lean 4", detail: "Esercizi del capitolo in corso." },
+          { n: "4", dur: "40 min", title: "Corsa", detail: "Nessuna corsa ancora questa settimana." }
+        ]
+      }
+    };
+    const t = e <= 2 ? tiers.low : (e === 3 ? tiers.mid : tiers.high);
+    return {
+      levels: levels,
+      accent: s.color,
+      diskOp: String(s.disk),
+      glowOp: String(s.glow),
+      ringOp: String(s.ring),
+      jetOp: String(s.jet),
+      headline1: t.h1,
+      headline2: t.h2,
+      tierRule: t.rule,
+      plan: t.plan
+    };
+  }
+}
+</script>
+</body>
+</html>

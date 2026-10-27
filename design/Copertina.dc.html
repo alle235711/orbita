@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Orbita, copertina di oggi</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800;900&amp;display=swap">
+<style>
+body{margin:0;background:#0B1020}
+a{color:#EEF1FA}a:hover{color:#FFFFFF}
+::selection{background:rgba(255,217,122,0.35)}
+a:focus-visible,button:focus-visible{outline:2px solid #EEF1FA;outline-offset:4px}
+.ch{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 2.4s cubic-bezier(0.16,1,0.3,1) forwards}
+.fade{opacity:0;animation:fadein 0.9s ease-out forwards}
+.rise{animation:rise 1.2s cubic-bezier(0.16,1,0.3,1) both}
+.slam{animation:slam 0.9s cubic-bezier(0.16,1,0.3,1) both}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fadein{to{opacity:1}}
+@keyframes rise{from{opacity:0;transform:scale(0.55)}to{opacity:1;transform:none}}
+@keyframes slam{from{opacity:0;transform:translateY(28px);letter-spacing:0}to{opacity:1;transform:none}}
+.star{transition:left 0.75s cubic-bezier(0.34,1.4,0.64,1),top 0.75s cubic-bezier(0.34,1.4,0.64,1),width 0.75s cubic-bezier(0.34,1.4,0.64,1),height 0.75s cubic-bezier(0.34,1.4,0.64,1),background-color 0.5s ease,box-shadow 0.5s ease}
+.cls{transition:background-color 0.25s ease,color 0.25s ease,border-color 0.25s ease,transform 0.25s cubic-bezier(0.34,1.4,0.64,1)}
+.cls:active{transform:scale(0.94)}
+.acc{transition:color 0.4s ease,background-color 0.4s ease,border-color 0.4s ease}
+@media (prefers-reduced-motion: reduce){.ch{animation:none;stroke-dashoffset:0}.fade{animation:none;opacity:1}.rise,.slam{animation:none}.star,.cls,.acc{transition:none}}
+</style>
+</helmet>
+<div style="position: relative; width: 1180px; height: 820px; overflow: hidden; background: #0B1020; color: #EEF1FA; font-family: 'Schibsted Grotesk', system-ui, sans-serif; font-variant-numeric: tabular-nums">
+
+  <div aria-hidden="true" class="rise" style="position: absolute; inset: 0; transform-origin: 1000px 150px">
+    <div class="star" style="position: absolute; left: {{starLeft}}; top: {{starTop}}; width: {{starSize}}; height: {{starSize}}; border-radius: 50%; background-color: {{accent}}; box-shadow: 0 0 120px 30px {{glow}}, 0 0 320px 90px {{glowFar}}">
+      <div style="position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 38% 62%, rgba(255,255,255,0.85), rgba(255,255,255,0) 55%)"></div>
+    </div>
+  </div>
+
+  <svg aria-hidden="true" width="1180" height="820" viewBox="0 0 1180 820" style="position: absolute; inset: 0">
+    <ellipse cx="700" cy="320" rx="500" ry="200" transform="rotate(-12 700 320)" fill="none" stroke="#B9C7EE" stroke-opacity="0.16" stroke-width="1"></ellipse>
+    <path d="M248,479 L255,485 L264,491 L273,496 L283,501 L293,506 L304,510 L315,515 L327,519 L340,522 L353,526 L367,529 L381,531 L396,534 L411,536 L427,538 L443,539 L459,540 L476,541 L493,541 L510,542 L528,541 L546,541 L564,540 L582,539 L601,537 L620,535 L638,533 L657,531 L676,528 L695,525 L714,521 L733,517 L752,513 L771,509 L790,504 L809,499 L827,494 L845,489 L863,483 L881,477 L899,471 L916,465 L933,458 L949,451 L966,444 L981,437 L997,430 L1012,422 L1026,414 L1040,407 L1054,399 L1066,391 L1079,382 L1091,374 L1102,366 L1112,357 L1122,349 L1132,340 L1141,332 L1149,323" fill="none" stroke="#EEF1FA" stroke-opacity="0.35" stroke-width="1.5" stroke-dasharray="2 7" stroke-linecap="round"></path>
+    <path class="ch" pathLength="1" d="M248,479 L254,484 L262,489 L269,494 L277,499 L286,503 L295,507 L305,511 L315,515 L325,518 L336,521 L347,524 L359,527 L371,530 L384,532 L396,534 L410,536 L423,537 L437,539 L451,540 L465,541 L480,541 L495,541 L510,542 L525,541 L541,541 L557,540 L573,539 L589,538 L605,537 L621,535 L637,533 L654,531 L670,529 L687,526 L703,523 L720,520 L736,517 L753,513 L769,509 L786,505 L802,501 L818,497 L834,492 L850,488 L865,483" stroke="{{accent}}" stroke-width="3" style="animation-delay: 0.5s"></path>
+  </svg>
+
+  <div style="position: absolute; inset: 0; mix-blend-mode: difference; pointer-events: none">
+    <p aria-hidden="true" class="slam" style="position: absolute; right: 26px; top: 30px; margin: 0; font-size: 300px; font-weight: 900; letter-spacing: -0.08em; line-height: 0.82; color: transparent; -webkit-text-stroke: 2px #EEF1FA; animation-delay: 0.25s">27</p>
+    <svg aria-hidden="true" width="1180" height="820" viewBox="0 0 1180 820" style="position: absolute; inset: 0">
+      <g font-family="Schibsted Grotesk, sans-serif" fill="#EEF1FA">
+        <g class="fade" style="animation-delay: 1.2s"><circle cx="298" cy="508" r="6"></circle><text x="306" y="492" font-size="13"><tspan font-weight="800">9:00</tspan> Astrofisica Stellare</text></g>
+        <g class="fade" style="animation-delay: 1.3s"><circle cx="449" cy="540" r="6"></circle><text x="457" y="524" font-size="13"><tspan font-weight="800">11:00</tspan> Topologia Algebrica</text></g>
+        <g class="fade" style="animation-delay: 1.4s"><circle cx="798" cy="502" r="6"></circle><text x="740" y="532" font-size="13"><tspan font-weight="800">14:30</tspan> Ripetizioni</text></g>
+        <g class="fade" style="animation-delay: 1.6s"><circle cx="865" cy="483" r="9"></circle><circle cx="865" cy="483" r="18" fill="none" stroke="#EEF1FA" stroke-opacity="0.5"></circle><text x="878" y="470" font-size="14" font-weight="800">adesso</text></g>
+        <g class="fade" style="animation-delay: 1.5s"><circle cx="987" cy="434" r="6"></circle><text x="996" y="462" font-size="13"><tspan font-weight="800">16:30</tspan> Esercizi</text></g>
+        <g class="fade" style="animation-delay: 1.55s"><circle cx="1125" cy="346" r="6"></circle><text x="1118" y="378" font-size="13" text-anchor="end"><tspan font-weight="800">18:30</tspan> Arrampicata</text></g>
+      </g>
+    </svg>
+    <h1 class="slam" style="position: absolute; left: 36px; top: 76px; margin: 0; white-space: nowrap; font-size: 104px; font-weight: 900; letter-spacing: -0.055em; line-height: 0.86; color: #EEF1FA">{{headline1}}<br>{{headline2}}</h1>
+  </div>
+
+  <nav aria-label="Sezioni" style="position: absolute; left: 40px; top: 0; height: 52px; display: flex; align-items: center; gap: 24px">
+    <span style="font-size: 18px; font-weight: 900; letter-spacing: -0.03em; margin-right: 14px">Orbita</span>
+    <a href="Copertina.dc.html" aria-current="page" class="acc" style="display: flex; align-items: center; height: 52px; box-sizing: border-box; border-bottom: 3px solid {{accent}}; text-decoration: none; font-size: 14px; font-weight: 700">Oggi</a>
+    <a href="Agenda.dc.html" style="display: flex; align-items: center; height: 52px; text-decoration: none; font-size: 14px; font-weight: 500; color: #AEB8D2">Agenda</a>
+    <a href="Briefing.dc.html" style="display: flex; align-items: center; height: 52px; text-decoration: none; font-size: 14px; font-weight: 500; color: #AEB8D2">Briefing</a>
+    <a href="Lavagna-Statistiche.dc.html" style="display: flex; align-items: center; height: 52px; text-decoration: none; font-size: 14px; font-weight: 500; color: #AEB8D2">Statistiche</a>
+    <a href="Rivista-Ripasso.dc.html" style="display: flex; align-items: center; height: 52px; text-decoration: none; font-size: 14px; font-weight: 500; color: #AEB8D2">Ripasso</a>
+  </nav>
+
+  <p style="position: absolute; left: 40px; top: 286px; width: 560px; margin: 0; font-size: 17px; line-height: 1.45; color: #C9D1E6">{{tierRule}}</p>
+
+  <section aria-labelledby="c-stella" style="position: absolute; left: 40px; top: 352px; display: flex; align-items: center; gap: 18px">
+    <h2 id="c-stella" style="margin: 0; width: 92px; font-size: 15px; font-weight: 800; line-height: 1.15">Che stella sei oggi?</h2>
+    <div role="radiogroup" aria-labelledby="c-stella" style="display: flex; gap: 8px">
+      <sc-for list="{{levels}}" as="l" hint-placeholder-count="5">
+        <button type="button" role="radio" class="cls" onClick="{{l.pick}}" aria-checked="{{l.checked}}" aria-label="{{l.aria}}" style="width: 66px; height: 74px; border-radius: 14px; border: 2px solid {{l.border}}; background: {{l.bg}}; color: {{l.fg}}; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-family: 'Schibsted Grotesk', sans-serif">
+          <span style="font-size: 32px; font-weight: 900; line-height: 1">{{l.cls}}</span>
+          <span style="font-size: 11px; font-weight: 600; opacity: 0.85">{{l.word}}</span>
+        </button>
+      </sc-for>
+    </div>
+  </section>
+
+  <section aria-label="Il piano di oggi" style="position: absolute; left: 40px; right: 40px; top: 590px; border-top: 2px solid #EEF1FA; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 26px">
+    <sc-for list="{{plan}}" as="p" hint-placeholder-count="4">
+      <article style="padding-top: 12px; display: grid; grid-template-columns: auto 1fr; column-gap: 12px; align-items: start">
+        <span class="acc" style="font-size: 54px; font-weight: 900; letter-spacing: -0.05em; line-height: 0.85; color: {{accent}}">{{p.n}}</span>
+        <span>
+          <span style="display: block; font-size: 13px; font-weight: 800; color: #C9D1E6">{{p.dur}}</span>
+          <span style="display: block; font-size: 17px; font-weight: 800; letter-spacing: -0.015em; line-height: 1.15; margin-top: 2px">{{p.title}}</span>
+          <span style="display: block; font-size: 13px; line-height: 1.35; color: #AEB8D2; margin-top: 4px">{{p.detail}}</span>
+        </span>
+      </article>
+    </sc-for>
+  </section>
+
+  <svg width="1100" height="64" viewBox="40 736 1100 64" role="img" aria-label="Da oggi alla laurea: Struttura della Materia il 13 novembre, Calcolo per l'Astronomia il 17 novembre, tirocinio alle Maldive dal 14 dicembre al 24 gennaio, tre esami a febbraio, laurea a luglio" style="position: absolute; left: 40px; top: 736px">
+    <line x1="40" y1="772" x2="1140" y2="772" stroke="#B9C7EE" stroke-opacity="0.4" stroke-width="1.2"></line>
+    <g stroke="#B9C7EE" stroke-opacity="0.4" stroke-width="1.2"><line x1="60" y1="768" x2="60" y2="776"></line><line x1="179" y1="768" x2="179" y2="776"></line><line x1="302" y1="768" x2="302" y2="776"></line><line x1="425" y1="768" x2="425" y2="776"></line><line x1="536" y1="768" x2="536" y2="776"></line><line x1="659" y1="768" x2="659" y2="776"></line><line x1="779" y1="768" x2="779" y2="776"></line><line x1="902" y1="768" x2="902" y2="776"></line><line x1="1021" y1="768" x2="1021" y2="776"></line></g>
+    <g font-family="Schibsted Grotesk, sans-serif" font-size="11" fill="#AEB8D2"><text x="60" y="792">nov</text><text x="179" y="792">dic</text><text x="302" y="792">gen</text><text x="425" y="792">feb</text><text x="536" y="792">mar</text><text x="659" y="792">apr</text><text x="779" y="792">mag</text><text x="902" y="792">giu</text><text x="1021" y="792">lug</text></g>
+    <rect x="231" y="769" width="162" height="6" rx="3" fill="#7FD8C4"></rect>
+    <text x="235" y="760" font-family="Schibsted Grotesk, sans-serif" font-size="12" font-weight="700" fill="#7FD8C4">Maldive</text>
+    <rect x="429" y="769" width="52" height="6" rx="3" fill="#EEF1FA"></rect>
+    <text x="430" y="760" font-family="Schibsted Grotesk, sans-serif" font-size="12" font-weight="700" fill="#EEF1FA">3 esami</text>
+    <circle cx="108" cy="772" r="5" fill="{{accent}}"></circle>
+    <text x="40" y="760" font-family="Schibsted Grotesk, sans-serif" font-size="12" font-weight="800" fill="{{accent}}">Struttura tra 17 giorni</text>
+    <circle cx="123" cy="772" r="3.5" fill="#EEF1FA"></circle>
+    <circle cx="1076" cy="772" r="6" fill="none" stroke="#EEF1FA" stroke-width="2"></circle>
+    <text x="1086" y="760" font-family="Schibsted Grotesk, sans-serif" font-size="12" font-weight="800" fill="#EEF1FA">Laurea</text>
+  </svg>
+
+  <svg aria-hidden="true" width="1180" height="820" style="position: absolute; inset: 0; pointer-events: none; mix-blend-mode: overlay; opacity: 0.22">
+    <filter id="grana"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"></feTurbulence><feColorMatrix type="saturate" values="0"></feColorMatrix></filter>
+    <rect width="1180" height="820" filter="url(#grana)"></rect>
+  </svg>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1180,"height":820}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { energy: 3 };
+  }
+  renderVals() {
+    const e = this.state.energy;
+    const stars = [
+      null,
+      { cls: "M", word: "a terra", color: "#FF7A59", glow: "rgba(255,122,89,0.45)", far: "rgba(255,122,89,0.16)", size: 300 },
+      { cls: "K", word: "stanco", color: "#FFA95E", glow: "rgba(255,169,94,0.45)", far: "rgba(255,169,94,0.16)", size: 350 },
+      { cls: "G", word: "normale", color: "#FFD97A", glow: "rgba(255,217,122,0.45)", far: "rgba(255,217,122,0.16)", size: 410 },
+      { cls: "F", word: "carico", color: "#E9EEFF", glow: "rgba(233,238,255,0.42)", far: "rgba(233,238,255,0.15)", size: 480 },
+      { cls: "B", word: "al massimo", color: "#8FB0FF", glow: "rgba(143,176,255,0.5)", far: "rgba(143,176,255,0.18)", size: 560 }
+    ];
+    const s = stars[e];
+    const cx = 1000, cy = 150;
+    const levels = [1, 2, 3, 4, 5].map((n) => {
+      const t = stars[n];
+      const on = n === e;
+      return {
+        cls: t.cls,
+        word: t.word,
+        checked: on ? "true" : "false",
+        aria: "Classe " + t.cls + ", " + t.word,
+        border: on ? t.color : "rgba(185,199,238,0.22)",
+        bg: on ? t.color : "transparent",
+        fg: on ? "#0B1020" : t.color,
+        pick: () => this.setState({ energy: n })
+      };
+    });
+    const tiers = {
+      low: {
+        h1: "Una giornata", h2: "per consolidare",
+        rule: "Stella fredda: niente teoria nuova, blocchi brevi da 45 minuti e tanto ripasso attivo.",
+        plan: [
+          { n: "1", dur: "45 min", title: "Ripasso attivo di Struttura", detail: "Spiega a voce le regole di selezione." },
+          { n: "2", dur: "30 min", title: "Ripasso a 10 dita", detail: "Cinque schede di Astrofisica Stellare." },
+          { n: "3", dur: "30 min", title: "Camminata", detail: "Recupero attivo, la corsa aspetta." },
+          { n: "4", dur: "30 min", title: "Lettura", detail: "Un capitolo, senza telefono." }
+        ]
+      },
+      mid: {
+        h1: "Una giornata", h2: "da esercizi",
+        rule: "Stella di tipo solare: l'esame più vicino va per primo, in blocchi da 90 minuti.",
+        plan: [
+          { n: "1", dur: "2 × 90 min", title: "Scritto di Struttura della Materia", detail: "Due esercizi d'esame dagli appelli passati." },
+          { n: "2", dur: "60 min", title: "Fortran per Calcolo", detail: "Un esercizio completo fino all'output." },
+          { n: "3", dur: "20 min", title: "Ripasso a 10 dita", detail: "Escissione e Mayer-Vietoris." },
+          { n: "4", dur: "18:30", title: "Arrampicata", detail: "La seconda delle tre di questa settimana." }
+        ]
+      },
+      high: {
+        h1: "Una giornata", h2: "da teoria nuova",
+        rule: "Stella calda: la teoria più difficile nelle prime ore, quando la testa regge.",
+        plan: [
+          { n: "1", dur: "2 × 90 min", title: "Dualità di Poincaré", detail: "Ricostruisci la dimostrazione senza appunti." },
+          { n: "2", dur: "90 min", title: "Scritto di Struttura della Materia", detail: "17 giorni all'esame." },
+          { n: "3", dur: "45 min", title: "Lean 4", detail: "Esercizi del capitolo in corso." },
+          { n: "4", dur: "40 min", title: "Corsa", detail: "Nessuna corsa ancora questa settimana." }
+        ]
+      }
+    };
+    const t = e <= 2 ? tiers.low : (e === 3 ? tiers.mid : tiers.high);
+    return {
+      levels: levels,
+      accent: s.color,
+      glow: s.glow,
+      glowFar: s.far,
+      starSize: s.size + "px",
+      starLeft: (cx - s.size / 2) + "px",
+      starTop: (cy - s.size / 2) + "px",
+      headline1: t.h1,
+      headline2: t.h2,
+      tierRule: t.rule,
+      plan: t.plan
+    };
+  }
+}
+</script>
+</body>
+</html>

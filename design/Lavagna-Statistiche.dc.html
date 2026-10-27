@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Orbita, statistiche</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Hanken+Grotesk:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#0E1424}
+a{color:#EEF1FA}a:hover{color:#FFFFFF}
+::selection{background:rgba(255,217,122,0.35)}
+button:focus-visible,a:focus-visible{outline:2px solid #FFD97A;outline-offset:3px}
+.ch{fill:none;stroke:#B9C7EE;stroke-opacity:0.24;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 2.6s cubic-bezier(0.16,1,0.3,1) forwards}
+.chf{fill:none;stroke:#B9C7EE;stroke-opacity:0;stroke-width:1.2;stroke-dasharray:3 5;animation:fadeS 1s ease-out 1.5s forwards}
+.cht{fill:#B9C7EE;fill-opacity:0;font-family:'Instrument Serif',serif;font-style:italic;animation:ink 1.2s ease-out forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes ink{to{fill-opacity:0.38}}
+@keyframes fadeS{to{stroke-opacity:0.3}}
+.grow{transform-origin:bottom;animation:grow 0.9s cubic-bezier(0.16,1,0.3,1) both}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@media (prefers-reduced-motion: reduce){.ch{animation:none;stroke-dashoffset:0}.chf{animation:none;stroke-opacity:0.3}.cht{animation:none;fill-opacity:0.38}.grow{animation:none}}
+</style>
+</helmet>
+<div style="position: relative; width: 1180px; height: 820px; overflow: hidden; background: #0E1424; color: #EEF1FA; font-family: 'Hanken Grotesk', system-ui, sans-serif; font-variant-numeric: tabular-nums">
+
+  <svg aria-hidden="true" width="1180" height="820" viewBox="0 0 1180 820" style="position: absolute; inset: 0">
+    <path class="chf" d="M640,92 L643,89 L646,86 L649,84 L652,81 L655,78 L658,76 L661,73 L664,71 L667,68 L670,66 L673,64 L676,62 L679,61 L682,59 L685,58 L688,57 L691,56 L694,55 L697,54 L700,54 L703,54 L706,54 L709,54 L712,55 L715,55 L718,56 L721,57 L724,58 L727,60 L730,62 L733,63 L736,65 L739,67 L742,70 L745,72 L748,74 L751,77 L754,80 L757,82 L760,85 L763,88 L766,91 L769,93 L772,96 L775,99 L778,102 L781,104 L784,107 L787,110 L790,112 L793,114 L796,117 L799,119 L802,121 L805,122 L808,124 L811,126 L814,127 L817,128 L820,129 L823,129 L826,130 L829,130 L832,130 L835,130 L838,130 L841,129 L844,128 L847,127 L850,126 L853,125 L856,123 L859,122 L862,120 L865,118 L868,116 L871,113 L874,111 L877,108 L880,106 L883,103 L886,100 L889,98 L892,95 L895,92 L898,89 L901,86 L904,84 L907,81 L910,78 L913,76 L916,73 L919,71 L922,68 L925,66 L928,64 L931,62 L934,61 L937,59 L940,58 L943,57 L946,56 L949,55 L952,54 L955,54 L958,54 L961,54 L964,54 L967,55 L970,55 L973,56 L976,57 L979,58 L982,60 L985,62 L988,63 L991,65 L994,67 L997,70 L1000,72 L1003,74 L1006,77 L1009,80 L1012,82 L1015,85 L1018,88 L1021,91 L1024,93 L1027,96 L1030,99 L1033,102 L1036,104 L1039,107 L1042,110 L1045,112 L1048,114 L1051,117 L1054,119 L1057,121 L1060,122 L1063,124 L1066,126 L1069,127 L1072,128 L1075,129 L1078,129 L1081,130 L1084,130 L1087,130 L1090,130 L1093,130 L1096,129 L1099,128 L1102,127 L1105,126 L1108,125 L1111,123 L1114,122 L1117,120 L1120,118 L1123,116 L1126,113 L1129,111 L1132,108 L1135,106 L1138,103 L1141,100 L1144,98 L1147,95 L1150,92"></path>
+    <path class="ch" pathLength="1" style="animation-delay: 0.2s" d="M640,92 L643,76 L646,63 L649,57 L652,57 L655,60 L658,64 L661,65 L664,64 L667,62 L670,60 L673,60 L676,61 L679,63 L682,64 L685,63 L688,62 L691,61 L694,60 L697,61 L700,63 L703,64 L706,63 L709,62 L712,61 L715,60 L718,61 L721,63 L724,64 L727,63 L730,62 L733,60 L736,60 L739,61 L742,63 L745,65 L748,65 L751,62 L754,58 L757,57 L760,60 L763,69 L766,84 L769,100 L772,115 L775,124 L778,127 L781,126 L784,122 L787,119 L790,119 L793,121 L796,123 L799,124 L802,124 L805,122 L808,121 L811,120 L814,121 L817,123 L820,124 L823,123 L826,122 L829,121 L832,120 L835,121 L838,123 L841,124 L844,123 L847,122 L850,121 L853,120 L856,121 L859,123 L862,124 L865,124 L868,122 L871,120 L874,119 L877,120 L880,124 L883,127 L886,127 L889,121 L892,108 L895,92 L898,76 L901,63 L904,57 L907,57 L910,60 L913,64 L916,65 L919,64 L922,62 L925,60 L928,60 L931,61 L934,63 L937,64 L940,63 L943,62 L946,61 L949,60 L952,61 L955,63 L958,64 L961,63 L964,62 L967,61 L970,60 L973,61 L976,63 L979,64 L982,63 L985,62 L988,60 L991,60 L994,61 L997,63 L1000,65 L1003,65 L1006,62 L1009,58 L1012,57 L1015,60 L1018,69 L1021,84 L1024,100 L1027,115 L1030,124 L1033,127 L1036,126 L1039,122 L1042,119 L1045,119 L1048,121 L1051,123 L1054,124 L1057,124 L1060,122 L1063,121 L1066,120 L1069,121 L1072,123 L1075,124 L1078,123 L1081,122 L1084,121 L1087,120 L1090,121 L1093,123 L1096,124 L1099,123 L1102,122 L1105,121 L1108,120 L1111,121 L1114,123 L1117,124 L1120,124 L1123,122 L1126,120 L1129,119 L1132,120 L1135,124 L1138,127 L1141,127 L1144,121 L1147,108 L1150,92"></path>
+    <line class="ch" pathLength="1" x1="636" y1="92" x2="1158" y2="92" style="animation-delay: 0s"></line>
+    <text class="cht" x="760" y="160" font-size="20" style="animation-delay: 1.3s">f(x) = 4⁄π · Σ sin((2k+1)x) ⁄ (2k+1)</text>
+    <text class="cht" x="636" y="48" font-size="15" style="animation-delay: 1.5s">Gibbs</text>
+    <path class="ch" pathLength="1" d="M664,50 Q658,54 648,57" style="animation-delay: 1.2s"></path>
+
+    <path class="ch" pathLength="1" style="animation-delay: 0.4s" d="M1175,430 L1173,439 L1169,448 L1163,457 L1156,464 L1147,471 L1138,476 L1128,481 L1117,484 L1105,487 L1094,488 L1082,488 L1071,487 L1061,484 L1051,481 L1042,477 L1034,472 L1027,466 L1021,460 L1017,454 L1014,447 L1013,440 L1012,433 L1014,426 L1016,420 L1019,414 L1024,408 L1030,403 L1036,399 L1043,395 L1051,392 L1059,390 L1067,389 L1075,389 L1083,390 L1090,391 L1098,393 L1104,395 L1110,399 L1115,402 L1120,407 L1123,411 L1126,416 L1127,421 L1128,426 L1128,431 L1126,435 L1124,440 L1121,444 L1117,448 L1113,451 L1108,454 L1103,456 L1098,457 L1092,459 L1086,459 L1081,459 L1075,458 L1070,457 L1065,455 L1060,453 L1056,451 L1053,448 L1050,445 L1048,441 L1047,438 L1046,435 L1046,431 L1047,428 L1048,424 L1050,421 L1052,419 L1055,416 L1058,414 L1062,412 L1066,411 L1070,410 L1074,410 L1078,409 L1082,410 L1086,410 L1089,412 L1093,413 L1095,415 L1098,416 L1100,419 L1102,421 L1103,423 L1104,426 L1104,428 L1104,431 L1103,433 L1102,435 L1100,437 L1099,439 L1096,441 L1094,442 L1091,443 L1089,444 L1086,444 L1083,445 L1080,444 L1077,444 L1075,443 L1072,443 L1070,441 L1068,440 L1066,439 L1065,437 L1064,436 L1063,434 L1063,432 L1063,430 L1063,429 L1064,427 L1065,426 L1066,424 L1068,423 L1069,422 L1071,421 L1073,420 L1075,420 L1077,420 L1079,420 L1081,420 L1083,420 L1085,421 L1086,422 L1088,422 L1089,423 L1090,424 L1091,426 L1092,427 L1092,428 L1092,429 L1092,430 L1091,432 L1091,433 L1090,434 L1089,435 L1088,435 L1087,436 L1085,437 L1084,437 L1083,437 L1081,437 L1080,437 L1078,437 L1077,437 L1076,436"></path>
+    <path class="chf" d="M960,350 l8.3,-5.2 M960,384 l6.2,-6.5 M960,418 l2.7,-7.7 M960,452 l-1.5,-7.8 M960,486 l-5.0,-7.1 M1000,350 l9.6,-3.9 M1000,384 l7.8,-5.6 M1000,418 l3.4,-7.5 M1000,452 l-2.8,-7.7 M1000,486 l-6.8,-6.2 M1040,350 l10.7,-1.8 M1040,384 l9.9,-3.4 M1040,418 l5.3,-6.9 M1040,452 l-5.7,-6.8 M1040,486 l-9.2,-4.4 M1080,350 l10.9,0.9 M1080,384 l10.9,0.9 M1120,350 l9.9,3.5 M1120,384 l8.6,4.9 M1120,452 l-7.6,5.7 M1120,486 l-10.3,2.8 M1160,350 l8.2,5.3 M1160,384 l5.9,6.7 M1160,418 l1.1,7.9 M1160,452 l-5.0,7.0 M1160,486 l-8.5,5.0"></path>
+    <circle cx="1076" cy="436" r="3" fill="#B9C7EE" fill-opacity="0.4"></circle>
+    <text class="cht" x="880" y="534" font-size="19" style="animation-delay: 1.6s">ẋ = −x⁄10 − y ,   ẏ = x − y⁄10</text>
+    <text class="cht" x="932" y="322" font-size="16" style="animation-delay: 1.7s">fuoco stabile</text>
+
+    <path class="ch" pathLength="1" d="M28,768 C70,766 92,742 104,706 C112,682 116,650 120,650 C124,650 128,682 136,706 C148,742 170,766 212,768" style="animation-delay: 0.6s"></path>
+    <line class="ch" pathLength="1" x1="20" y1="770" x2="220" y2="770" style="animation-delay: 0.3s"></line>
+    <line class="chf" x1="120" y1="650" x2="120" y2="770"></line>
+    <text class="cht" x="36" y="632" font-size="17" style="animation-delay: 1.4s">e^(−x²⁄2) ⁄ √(2π)</text>
+    <text class="cht" x="114" y="792" font-size="15" style="animation-delay: 1.5s">μ</text>
+  </svg>
+
+  <nav aria-label="Sezioni" style="position: absolute; left: 0; top: 0; bottom: 0; width: 236px; box-sizing: border-box; padding: 28px 18px; border-right: 1px solid rgba(185,199,238,0.12); display: flex; flex-direction: column">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 0 10px">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="14" r="4.5" fill="#FFD97A"></circle><ellipse cx="14" cy="14" rx="12.5" ry="5" fill="none" stroke="#B9C7EE" stroke-opacity="0.6" stroke-width="1.2" transform="rotate(-28 14 14)"></ellipse></svg>
+      <span style="font-family: 'Instrument Serif', serif; font-size: 32px; letter-spacing: -0.01em; line-height: 1">Orbita</span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 2px; margin-top: 30px">
+      <a href="Lavagna-Oggi.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 12px; text-decoration: none; font-size: 16px; font-weight: 500; color: #C3CCE4">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>Oggi</a>
+      <a href="Agenda.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 12px; text-decoration: none; font-size: 16px; font-weight: 500; color: #C3CCE4">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>Agenda</a>
+      <a href="Briefing.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 12px; text-decoration: none; font-size: 16px; font-weight: 500; color: #C3CCE4">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"></path><path d="M9 11h6M9 15h6"></path></svg>Briefing</a>
+      <a href="Lavagna-Statistiche.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 12px; background: rgba(185,199,238,0.10); text-decoration: none; font-size: 16px; font-weight: 600; color: #FFD97A">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M5 20V11M11 20V4M17 20v-7M2 20h20"></path></svg>Statistiche</a>
+      <a href="Lavagna-Dattilografia.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 12px; text-decoration: none; font-size: 16px; font-weight: 500; color: #C3CCE4">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"></rect><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"></path></svg>Dattilografia</a>
+    </div>
+    <div role="group" aria-label="Periodo" style="display: flex; flex-direction: column; gap: 2px; margin: 34px 0 0">
+      <h2 style="margin: 0 12px 6px; font-size: 14px; font-weight: 600; color: #9DA9C6">Periodo</h2>
+      <button type="button" aria-pressed="false" style="min-height: 40px; text-align: left; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; color: #C3CCE4; font: 500 15px 'Hanken Grotesk', sans-serif; cursor: pointer">7 giorni</button>
+      <button type="button" aria-pressed="true" style="min-height: 40px; text-align: left; padding: 0 12px; border: 0; border-radius: 10px; background: rgba(185,199,238,0.10); color: #EEF1FA; font: 600 15px 'Hanken Grotesk', sans-serif; cursor: pointer">14 giorni</button>
+      <button type="button" aria-pressed="false" style="min-height: 40px; text-align: left; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; color: #C3CCE4; font: 500 15px 'Hanken Grotesk', sans-serif; cursor: pointer">Da settembre</button>
+    </div>
+  </nav>
+
+  <main style="position: absolute; left: 236px; top: 0; right: 0; bottom: 0">
+    <header style="position: absolute; left: 34px; top: 30px">
+      <h1 style="margin: 0; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 66px; letter-spacing: -0.025em; line-height: 0.95">Statistiche</h1>
+      <p style="margin: 10px 0 0; font-size: 16px; color: #9DA9C6">Dal 14 al 27 ottobre</p>
+    </header>
+
+    <dl style="position: absolute; left: 34px; right: 34px; top: 184px; margin: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px">
+      <div><dt style="font-size: 13px; color: #9DA9C6">Ultimi 7 giorni</dt><dd style="margin: 2px 0 0; font-family: 'Instrument Serif', serif; font-size: 50px; letter-spacing: -0.03em; line-height: 1">47<span style="font-size: 24px; color: #9DA9C6"> h su 56</span></dd></div>
+      <div><dt style="font-size: 13px; color: #9DA9C6">Media al giorno</dt><dd style="margin: 2px 0 0; font-family: 'Instrument Serif', serif; font-size: 50px; letter-spacing: -0.03em; line-height: 1">6,8<span style="font-size: 24px; color: #9DA9C6"> h</span></dd></div>
+      <div><dt style="font-size: 13px; color: #9DA9C6">Arrampicate a ottobre</dt><dd style="margin: 2px 0 0; font-family: 'Instrument Serif', serif; font-size: 50px; letter-spacing: -0.03em; line-height: 1; color: #7FD8C4">9<span style="font-size: 24px; color: #9DA9C6"> su 12</span></dd></div>
+      <div><dt style="font-size: 13px; color: #9DA9C6">Velocità di scrittura</dt><dd style="margin: 2px 0 0; font-family: 'Instrument Serif', serif; font-size: 50px; letter-spacing: -0.03em; line-height: 1">34<span style="font-size: 24px; color: #9DA9C6"> parole/min</span></dd></div>
+    </dl>
+
+    <section aria-labelledby="s-giorni" style="position: absolute; left: 34px; top: 290px; width: 530px; height: 270px; box-sizing: border-box; padding: 18px 22px; border-radius: 22px; background: rgba(19,27,46,0.76); backdrop-filter: blur(4px); border: 1px solid rgba(185,199,238,0.13)">
+      <div style="display: flex; justify-content: space-between; align-items: baseline">
+        <h2 id="s-giorni" style="margin: 0; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 26px">Ore al giorno</h2>
+        <span style="font-size: 13px; color: #9DA9C6">studio e lavoro insieme</span>
+      </div>
+      <div role="img" aria-label="Ore al giorno dal 14 al 27 ottobre; sopra le 8 ore in 4 giorni su 14; oggi 5 ore e 20 finora" style="position: relative; height: 170px; margin-top: 14px">
+        <div aria-hidden="true" style="position: absolute; left: 0; right: 0; bottom: 136px; border-top: 1px dashed rgba(255,217,122,0.55)"></div>
+        <span aria-hidden="true" style="position: absolute; right: 0; bottom: 140px; font-family: 'Instrument Serif', serif; font-style: italic; font-size: 16px; color: #FFD97A">8 h</span>
+        <div style="position: absolute; inset: 0; display: flex; align-items: flex-end">
+          <div style="flex: 1; display: flex; justify-content: center; align-items: flex-end; height: 100%"><div class="grow" style="position: relative; width: 2px; height: 128px; background: rgba(185,199,238,0.45); animation-delay: 0.05s"><span style="position: absolute; top: -5px; left: -4px; width: 10px; height: 10px; border-radius: 50%; background: #B9C7EE"></span></div></div>
+          <div style="flex: 1; display: flex; justify-content: center; align-items: flex-end; height: 100%"><div class="grow" style="position: relative; width: 2px; height: 139px; background: rgba(255,217,122,0.6); animation-delay: 0.1s"><span style="position: absolute; top: -5px; left: -4px; width: 10px; height: 10px; border-radius: 50%; background: #FFD97A"></span></div></div>
+          <div style="flex: 1; display: flex; justify-content: center; align-items: flex-end; height: 100%"><div class="grow" style="position: relative; width: 2px; height: 102px; background: rgba(185,199,238,0.45); animation-delay: 0.15s"><span style="position: absolute; top: -5px; left: -4px; width: 10px; height: 10px; border-radius: 50%; background: #B9C7EE"></span></div></div>
+          <div style="flex: 1; display: flex; justify-content: center; align-items: flex-end; height: 100%"><div class="grow" style="position: relative; width: 2px; height: 94px; background: rgba(185,199,238,0.45); animation-delay: 0.2s"><span style="position: absolute; top: -5px; left: -4px; width: 10px; height: 10px; border-radius: 50%; background: #B9C7EE"></span></div></div>
+          <div style="flex: 1; display: flex; justify-content: center; align-items: flex-end; height: 100%"><div class="grow" style="position: relative; width: 2px; height: 51px; background: rgba(185,199,238,0.45); animation-delay: 0.25s"><span style="position: absolute; top: -5px; left: -4px; width: 10px; height: 10px; border-radius: 50%; background: #B9C7EE"></span></div></div>
+          <div style="flex: 1; display: flex; justify-content: center; align-items: flex-end; height: 100%"><div class="grow" style="position: relative; width: 2px; height: 153px; background: rgba(255,217,122,0.6); animation-delay: 0.3s"><span style="position: absolute; top: -5px; left: -4px; width: 10px; height: 10px; border-radius: 50%; background: #FFD97A"></span></div></div>
+          <div style="flex: 1; display: flex; justify-content: center; align-items: flex-end; height: 100%"><div class="grow" style="position: relative; width: 2px; height: 145px; background: rgba(255,217,122,0.6); animation-delay: 0.35s"><span style="position: absolute; top: -5px; left: -4px; width: 10px; height: 10px; border-radius: 50%; background: #FFD97A"></span></div></div>
+          <div style="flex: 1; display: flex; justify-content: center; align-items: flex-end; height: 100%"><div class="grow" style="position: relative; width: 2px; height: 128px; background: rgba(185,199,238,0.45); animation-delay: 0.4s"><span style="position: absolute; top: -5px; left: -4px; width: 10px; height: 10px; border-radius: 50%; background: #B9C7EE"></span></div></div>
+          <div style="flex: 1; display: flex; justify-content: center; align-items: flex-end; height: 100%"><div class="grow" style="position: relative; width: 2px; height: 119px; background: rgba(185,199,238,0.45); animation-delay: 0.45s"><span style="position: absolute; top: -5px; left: -4px; width: 10px; height: 10px; border-radius: 50%; background: #B9C7EE"></span></div></div>
+          <div style="flex: 1; display: flex; justify-content: center; align-items: flex-end; height: 100%"><div class="grow" style="position: relative; width: 2px; height: 145px; background: rgba(255,217,122,0.6); animation-delay: 0.5s"><span style="position: absolute; top: -5px; left: -4px; width: 10px; height: 10px; border-radius: 50%; background: #FFD97A"></span></div></div>
+          <div style="flex: 1; display: flex; justify-content: center; align-items: flex-end; height: 100%"><div class="grow" style="position: relative; width: 2px; height: 85px; background: rgba(185,199,238,0.45); animation-delay: 0.55s"><span style="position: absolute; top: -5px; left: -4px; width: 10px; height: 10px; border-radius: 50%; background: #B9C7EE"></span></div></div>
+          <div style="flex: 1; display: flex; justify-content: center; align-items: flex-end; height: 100%"><div class="grow" style="position: relative; width: 2px; height: 111px; background: rgba(185,199,238,0.45); animation-delay: 0.6s"><span style="position: absolute; top: -5px; left: -4px; width: 10px; height: 10px; border-radius: 50%; background: #B9C7EE"></span></div></div>
+          <div style="flex: 1; display: flex; justify-content: center; align-items: flex-end; height: 100%"><div class="grow" style="position: relative; width: 2px; height: 122px; background: rgba(185,199,238,0.45); animation-delay: 0.65s"><span style="position: absolute; top: -5px; left: -4px; width: 10px; height: 10px; border-radius: 50%; background: #B9C7EE"></span></div></div>
+          <div style="flex: 1; display: flex; justify-content: center; align-items: flex-end; height: 100%"><div class="grow" style="position: relative; width: 2px; height: 90px; background: rgba(255,217,122,0.35); animation-delay: 0.7s"><span style="position: absolute; top: -6px; left: -5px; width: 8px; height: 8px; border-radius: 50%; border: 2px solid #FFD97A; background: #0E1424"></span></div></div>
+        </div>
+      </div>
+      <div aria-hidden="true" style="display: flex; margin-top: 8px; font-size: 11px; color: #9DA9C6"><span style="flex: 1; text-align: center">14</span><span style="flex: 1"></span><span style="flex: 1"></span><span style="flex: 1; text-align: center">17</span><span style="flex: 1"></span><span style="flex: 1"></span><span style="flex: 1; text-align: center">20</span><span style="flex: 1"></span><span style="flex: 1"></span><span style="flex: 1; text-align: center">23</span><span style="flex: 1"></span><span style="flex: 1"></span><span style="flex: 1"></span><span style="flex: 1; text-align: center; color: #FFD97A">oggi</span></div>
+    </section>
+
+    <section aria-labelledby="s-materie" style="position: absolute; left: 34px; top: 580px; width: 390px; height: 218px; box-sizing: border-box; padding: 16px 22px; border-radius: 22px; background: rgba(19,27,46,0.76); backdrop-filter: blur(4px); border: 1px solid rgba(185,199,238,0.13)">
+      <h2 id="s-materie" style="margin: 0; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 24px">Dove sono andate le ore</h2>
+      <div style="display: grid; grid-template-columns: 1fr 96px 34px; align-items: center; column-gap: 10px; row-gap: 5px; margin-top: 10px; font-size: 13px">
+        <span>Ripetizioni</span><span style="height: 4px; border-radius: 2px; background: rgba(185,199,238,0.14)"><span class="grow" style="display: block; width: 100%; height: 100%; border-radius: 2px; background: #B9C7EE; transform-origin: left; animation-name: none"></span></span><span style="text-align: right">10 h</span>
+        <span>Calcolo per l'Astronomia</span><span style="height: 4px; border-radius: 2px; background: rgba(185,199,238,0.14)"><span style="display: block; width: 90%; height: 100%; border-radius: 2px; background: #FFD97A"></span></span><span style="text-align: right">9 h</span>
+        <span>Topologia Algebrica</span><span style="height: 4px; border-radius: 2px; background: rgba(185,199,238,0.14)"><span style="display: block; width: 80%; height: 100%; border-radius: 2px; background: #FFD97A"></span></span><span style="text-align: right">8 h</span>
+        <span style="color: #FF9B7E">Struttura della Materia</span><span style="height: 4px; border-radius: 2px; background: rgba(185,199,238,0.14)"><span style="display: block; width: 60%; height: 100%; border-radius: 2px; background: #FF7A59"></span></span><span style="text-align: right; color: #FF9B7E">6 h</span>
+        <span>Anelli e Campi</span><span style="height: 4px; border-radius: 2px; background: rgba(185,199,238,0.14)"><span style="display: block; width: 60%; height: 100%; border-radius: 2px; background: #FFD97A"></span></span><span style="text-align: right">6 h</span>
+        <span>Astrofisica Stellare</span><span style="height: 4px; border-radius: 2px; background: rgba(185,199,238,0.14)"><span style="display: block; width: 50%; height: 100%; border-radius: 2px; background: #FFD97A"></span></span><span style="text-align: right">5 h</span>
+        <span>Lean 4</span><span style="height: 4px; border-radius: 2px; background: rgba(185,199,238,0.14)"><span style="display: block; width: 30%; height: 100%; border-radius: 2px; background: #FFD97A"></span></span><span style="text-align: right">3 h</span>
+      </div>
+    </section>
+
+    <section aria-labelledby="s-energia" style="position: absolute; left: 444px; top: 580px; right: 34px; height: 104px; box-sizing: border-box; padding: 16px 22px; border-radius: 22px; background: rgba(19,27,46,0.76); backdrop-filter: blur(4px); border: 1px solid rgba(185,199,238,0.13)">
+      <h2 id="s-energia" style="margin: 0; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 22px">Energia e ore</h2>
+      <p style="margin: 6px 0 0; font-size: 14px; line-height: 1.5; color: #C3CCE4">Da stella di classe F o B fai in media <strong style="color: #EEF1FA">7,8 h</strong>, da M o K solo <strong style="color: #EEF1FA">4,1 h</strong>.</p>
+    </section>
+
+    <section aria-labelledby="s-salute" style="position: absolute; left: 444px; top: 700px; right: 34px; height: 98px; box-sizing: border-box; padding: 16px 22px; border-radius: 22px; background: rgba(19,27,46,0.5); border: 1px dashed rgba(185,199,238,0.25)">
+      <h2 id="s-salute" style="margin: 0; font-family: 'Instrument Serif', serif; font-weight: 400; font-size: 22px">Dati dell'orologio</h2>
+      <p style="margin: 6px 0 0; font-size: 14px; line-height: 1.5; color: #9DA9C6">Passi, sonno e battito arrivano qui nella seconda fase, dal Redmi Watch.</p>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1180,"height":820}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

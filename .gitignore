@@ -1,0 +1,23 @@
+# dipendenze e build
+node_modules/
+dist/
+dev-dist/
+*.tsbuildinfo
+
+# test
+test-results/
+playwright-report/
+blob-report/
+coverage/
+
+# materiali personali che restano solo in locale
+SPEC.md
+PROMPT.md
+orbita-pacchetto/
+*.zip
+
+# editor e sistema
+.DS_Store
+*.local
+.vscode/*
+!.vscode/extensions.json
