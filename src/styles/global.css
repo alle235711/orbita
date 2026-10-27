@@ -105,8 +105,7 @@ textarea::placeholder {
    testo, in Schibsted Grotesk rendono tabulari anche punto e virgola. */
 .tnum,
 input,
-time,
-svg text {
+time {
   font-variant-numeric: tabular-nums;
 }
 
@@ -219,6 +218,46 @@ svg text {
 textarea.field {
   padding: 10px 14px;
   line-height: 1.5;
+}
+
+/* Chip come nel mockup del ripasso: pieni nel colore del disco se scelti. */
+.chip {
+  min-height: var(--tap);
+  padding: 0 16px;
+  border-radius: 22px;
+  border: 1.5px solid rgba(185, 199, 238, 0.25);
+  background: transparent;
+  color: #d3d9ea;
+  font-size: 14px;
+  font-weight: 600;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 160ms var(--ease-ui);
+}
+
+.chip:active {
+  transform: scale(0.97);
+}
+
+.chip[aria-checked='true'],
+.chip[aria-pressed='true'] {
+  border-color: var(--chip-on, var(--disk));
+  background: var(--chip-on, var(--disk));
+  color: var(--bg);
+}
+
+/* Contenuto che cambia (fascia d'energia, piano): si riaccende sfumando. */
+.swap-in {
+  animation: swap-in 0.32s var(--ease-out) both;
+}
+
+@keyframes swap-in {
+  from {
+    opacity: 0;
+    filter: blur(5px);
+  }
 }
 
 /* Movimento ridotto: niente spostamenti, gli stati finali restano. */

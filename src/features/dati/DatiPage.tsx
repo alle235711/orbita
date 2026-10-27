@@ -238,7 +238,7 @@ export default function DatiPage() {
 }
 
 function CourseRow({ course, cards }: { course: Course; cards: number }) {
-  const meta = [course.code, course.degree, cards ? `${cards} schede` : null].filter(Boolean).join(' · ')
+  const meta = [course.code, course.degree, cards ? `${cards} schede` : null].filter(Boolean).join(', ')
   return (
     <li className="course">
       <div className="course__name">

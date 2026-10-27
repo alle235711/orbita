@@ -1,0 +1,434 @@
+/* Oggi: la copertina col buco nero (design/Copertina-BucoNero.dc.html).
+   Da 860 px in su le misure seguono il mockup a 1180×820, scalate da --u
+   (1px a 1180 px di larghezza); sotto, gli elementi si impilano. */
+
+.page.oggi {
+  padding: 0;
+}
+
+.cover {
+  --sky-w: 760px;
+  position: relative;
+  /* Isolata per le fusioni "difference" e "overlay": serve uno sfondo opaco
+     sotto, altrimenti la grana si fonde col trasparente e schiarisce. */
+  isolation: isolate;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding: calc(var(--nav-h) + env(safe-area-inset-top)) max(var(--gutter), env(safe-area-inset-right))
+    calc(24px + env(safe-area-inset-bottom)) max(var(--gutter), env(safe-area-inset-left));
+  overflow: hidden;
+}
+
+/* ——— buco nero ——— */
+
+.cover__bh {
+  z-index: 1;
+  /* sul telefono: piccolo, in alto a destra, dietro il titolo */
+  --bhu: calc(0.28px + 0.0512vw);
+  width: calc(780 * var(--bhu));
+  right: calc(23vw - 375 * var(--bhu));
+  top: calc(env(safe-area-inset-top) + 116px - 345 * var(--bhu));
+}
+
+.cover--wide .cover__bh {
+  --bhu: var(--u);
+  right: calc(-120 * var(--u));
+  top: calc(-140 * var(--u));
+}
+
+/* ——— titolo, in fusione "difference" sul buco nero ——— */
+
+.cover__title {
+  position: relative;
+  z-index: 3;
+  margin-top: 22px;
+  font-size: clamp(2.5rem, 11.4vw, 5.25rem);
+  font-weight: 900;
+  letter-spacing: -0.055em;
+  line-height: 0.86;
+  color: var(--text);
+  mix-blend-mode: difference;
+  text-wrap: balance;
+}
+
+.cover__title-text {
+  display: block;
+}
+
+.cover--wide .cover__title {
+  margin: calc(24 * var(--u)) 0 0 calc(-4 * var(--u));
+  font-size: calc(104 * var(--u));
+  white-space: nowrap;
+}
+
+.cover__rule {
+  position: relative;
+  z-index: 4;
+  max-width: 36ch;
+  margin-top: 18px;
+  font-size: 1rem;
+  line-height: 1.45;
+  color: var(--text-rule);
+}
+
+.cover--wide .cover__rule {
+  max-width: none;
+  width: calc(540 * var(--u));
+  margin-top: calc(29 * var(--u));
+  font-size: max(15px, calc(17 * var(--u)));
+}
+
+.cover__energy {
+  position: relative;
+  z-index: 4;
+  margin-top: 22px;
+}
+
+.cover--wide .cover__energy {
+  margin-top: calc(13 * var(--u));
+  --energy-w: max(66px, calc(104 * var(--u)));
+  --energy-h: max(58px, calc(78 * var(--u)));
+}
+
+.cover__energy h2 {
+  margin-bottom: 10px;
+  font-size: 15px;
+  font-weight: 800;
+  word-spacing: var(--ws-heavy);
+}
+
+.cover__spacer {
+  flex: none;
+  height: 8px;
+}
+
+.cover--wide .cover__spacer {
+  flex: 1;
+  min-height: 0;
+}
+
+/* ——— orbita del giorno ——— */
+
+.cover__lower {
+  position: relative;
+}
+
+.cover__orbit {
+  position: relative;
+  margin: 0 calc(-1 * max(var(--gutter), env(safe-area-inset-left)));
+}
+
+.orbit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.cover--wide .cover__orbit {
+  margin: 0 calc(-40 * var(--u));
+}
+
+.cover--wide .orbit {
+  top: auto;
+  bottom: calc(-10 * var(--u));
+}
+
+.orbit--arcs {
+  z-index: 2;
+}
+
+.orbit--planets {
+  z-index: 3;
+  mix-blend-mode: difference;
+  font-family: var(--font);
+}
+
+.orbit__done {
+  stroke: var(--disk);
+}
+
+.orbit__done--draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: orbit-draw 2.4s var(--ease-out) 0.5s forwards;
+}
+
+@keyframes orbit-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.orbit__fade,
+.cover__fade {
+  opacity: 0;
+  animation: orbit-fade 0.9s ease-out forwards;
+}
+
+.cover__fade {
+  animation-delay: 1.1s;
+}
+
+@keyframes orbit-fade {
+  to {
+    opacity: 1;
+  }
+}
+
+/* il giorno del mese, in contorno, sotto l'inizio dell'arco */
+.cover__day {
+  position: absolute;
+  z-index: 3;
+  left: max(var(--gutter), env(safe-area-inset-left));
+  top: -6px;
+  font-size: 150px;
+  font-weight: 900;
+  letter-spacing: -0.08em;
+  line-height: 0.8;
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--text);
+  opacity: 0.55;
+  mix-blend-mode: difference;
+  pointer-events: none;
+  user-select: none;
+}
+
+.cover--wide .cover__day {
+  top: auto;
+  left: calc(34 * var(--u));
+  bottom: calc(6 * var(--u));
+  font-size: calc(210 * var(--u));
+}
+
+.cover--intro .cover__day,
+.cover--intro .cover__title {
+  animation: cover-slam 0.9s var(--ease-out) both;
+}
+
+.cover--intro .cover__day {
+  animation-delay: 0.35s;
+}
+
+@keyframes cover-slam {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+}
+
+.cover--intro .cover__day {
+  animation-name: cover-slam-dim;
+}
+
+@keyframes cover-slam-dim {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 0.55;
+  }
+}
+
+.cover__galaxy {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: 6px;
+  width: 92px;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.cover--wide .cover__galaxy {
+  right: calc(-5 * var(--u));
+  bottom: calc(13 * var(--u));
+  width: calc(140 * var(--u));
+}
+
+.cover--intro .cover__galaxy {
+  animation-name: orbit-fade-dim;
+}
+
+@keyframes orbit-fade-dim {
+  to {
+    opacity: 0.8;
+  }
+}
+
+/* ——— sommario del piano ——— */
+
+.plan {
+  position: relative;
+  z-index: 4;
+  border-top: 2px solid var(--text);
+}
+
+.plan--empty {
+  min-height: 110px;
+}
+
+.plan__list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 600px) {
+  .plan__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 26px;
+  }
+}
+
+.cover--wide .plan__list {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: calc(26 * var(--u));
+}
+
+.plan__item + .plan__item {
+  border-top: 1px solid var(--line);
+}
+
+@media (min-width: 600px) {
+  .plan__item + .plan__item {
+    border-top: 0;
+  }
+}
+
+.plan__button {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 12px;
+  align-items: start;
+  width: 100%;
+  min-height: var(--tap);
+  padding: 12px 0 14px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  transition: transform 160ms var(--ease-ui);
+}
+
+.plan__button:active {
+  transform: scale(0.98);
+}
+
+.plan__n {
+  min-width: 0.62em;
+  font-size: 44px;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  line-height: 0.85;
+  color: var(--disk);
+  font-variant-numeric: tabular-nums;
+}
+
+.cover--wide .plan__n {
+  font-size: calc(54 * var(--u));
+}
+
+.plan__body {
+  display: grid;
+  min-width: 0;
+}
+
+.plan__dur {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-rule);
+}
+
+.plan__button[aria-pressed='true'] .plan__dur {
+  color: var(--disk);
+}
+
+.plan__title {
+  margin-top: 2px;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  word-spacing: var(--ws-heavy);
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+.plan__detail {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--text-2);
+}
+
+/* Mentre il timer va, la voce lo dice e si ferma con un tocco. */
+.plan__cta {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--disk);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .plan__button:hover .plan__title {
+    text-decoration: underline;
+    text-decoration-color: var(--disk);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.18em;
+  }
+}
+
+/* ——— righello ——— */
+
+.cover .ruler {
+  position: relative;
+  z-index: 4;
+  margin-top: 28px;
+}
+
+.cover--wide .ruler {
+  margin-top: calc(30 * var(--u));
+}
+
+/* ——— pulsante Registra in barra ——— */
+
+.log-button {
+  position: relative;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1.5px solid var(--disk);
+  border-radius: 18px;
+  background: rgba(7, 10, 22, 0.55);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.log-button::before {
+  content: '';
+  position: absolute;
+  inset: -4px 0;
+}
+
+@media (max-width: 599px) {
+  .log-button {
+    width: var(--tap);
+    min-height: var(--tap);
+    padding: 0;
+    border-radius: 50%;
+  }
+
+  .log-button__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+}

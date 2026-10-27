@@ -5,6 +5,7 @@ import { DEFAULT_ENERGY } from '../lib/energy'
 import { applyDisk } from './disk'
 import { Nav } from './Nav'
 import { useRoute, type RouteId } from './router'
+import { Toasts } from './Toasts'
 import { UpdateToast } from './UpdateToast'
 import { useToday } from './useToday'
 
@@ -69,6 +70,7 @@ export function App() {
       <Suspense fallback={null}>
         <Current />
       </Suspense>
+      <Toasts />
       <UpdateToast />
     </MotionConfig>
   )

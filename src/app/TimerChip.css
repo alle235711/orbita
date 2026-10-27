@@ -1,0 +1,53 @@
+.timer-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  max-width: 320px;
+  padding: 0 12px;
+  border-radius: 18px;
+  border: 1.5px solid var(--disk);
+  background: rgba(7, 10, 22, 0.7);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  /* il bersaglio resta di 44 px anche se il bordo visibile è più basso */
+  position: relative;
+}
+
+.timer-chip::before {
+  content: '';
+  position: absolute;
+  inset: -4px 0;
+}
+
+.timer-chip__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--disk);
+  flex: none;
+}
+
+.timer-chip__title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timer-chip__time {
+  flex: none;
+  color: var(--text-rule);
+}
+
+.timer-chip__stop {
+  flex: none;
+  color: var(--disk);
+}
+
+@media (max-width: 599px) {
+  .timer-chip__title {
+    display: none;
+  }
+}

@@ -1,0 +1,66 @@
+/* Il contenitore ha le proporzioni del viewBox 780×900; il centro del buco
+   nero cade al 51,9% in orizzontale e al 38,3% in verticale. */
+.bh {
+  position: absolute;
+  aspect-ratio: 780 / 900;
+  pointer-events: none;
+  transform-origin: 51.9% 38.3%;
+}
+
+.bh__layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.bh__layer--disk {
+  will-change: transform;
+}
+
+.bh__lvl {
+  transition: opacity 0.8s ease;
+}
+
+/* Le striature del disco scorrono: l'unica animazione continua dell'app. */
+.bh__flow {
+  animation: bh-flow 18s linear infinite;
+}
+
+@keyframes bh-flow {
+  to {
+    stroke-dashoffset: -560;
+  }
+}
+
+.bh--rise {
+  animation: bh-rise 1.4s var(--ease-out) both;
+}
+
+@keyframes bh-rise {
+  from {
+    opacity: 0;
+    transform: scale(0.6) rotate(-6deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bh__flow {
+    animation: none;
+  }
+
+  .bh--rise {
+    animation: bh-fade 0.4s ease both;
+  }
+
+  @keyframes bh-fade {
+    from {
+      opacity: 0;
+    }
+  }
+}

@@ -1,5 +1,6 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef } from 'react'
 import { href, type RouteId } from './router'
+import { TimerChip } from './TimerChip'
 import './Nav.css'
 
 export const NAV_ITEMS: { id: RouteId; label: string }[] = [
@@ -18,10 +19,9 @@ const PARENT: Partial<Record<RouteId, RouteId>> = { regole: 'briefing' }
 interface NavProps {
   current: RouteId
   bordered: boolean
-  actions?: ReactNode
 }
 
-export function Nav({ current, bordered, actions }: NavProps) {
+export function Nav({ current, bordered }: NavProps) {
   const active = PARENT[current] ?? current
   const listRef = useRef<HTMLUListElement>(null)
 
@@ -51,7 +51,10 @@ export function Nav({ current, bordered, actions }: NavProps) {
           ))}
         </ul>
       </nav>
-      {actions ? <div className="topbar__actions">{actions}</div> : null}
+      <div className="topbar__actions">
+        <TimerChip />
+        <div id="topbar-slot" className="topbar__actions" />
+      </div>
     </header>
   )
 }

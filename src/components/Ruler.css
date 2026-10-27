@@ -1,0 +1,56 @@
+.ruler {
+  width: 100%;
+  min-height: 64px;
+}
+
+.ruler svg {
+  overflow: visible;
+}
+
+.ruler text {
+  font-family: var(--font);
+  font-size: 12px;
+}
+
+.ruler__months text {
+  font-size: 11px;
+  fill: var(--text-2);
+}
+
+.ruler__period rect {
+  fill: var(--maldive);
+}
+
+.ruler__period text {
+  font-weight: 700;
+  fill: var(--maldive);
+}
+
+.ruler__group rect {
+  fill: var(--text);
+}
+
+.ruler__group text {
+  font-weight: 700;
+  fill: var(--text);
+}
+
+.ruler__next circle {
+  fill: var(--disk);
+}
+
+.ruler__next text {
+  font-weight: 800;
+  fill: var(--disk);
+}
+
+.ruler__laurea circle {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 2;
+}
+
+.ruler__laurea text {
+  font-weight: 800;
+  fill: var(--text);
+}

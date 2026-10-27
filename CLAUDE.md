@@ -55,5 +55,14 @@ Serve Node 24 (`nvm use`, c'è `.nvmrc`): Vite 8 e Vitest 5 non girano sul Node 
   - Ogni record ha `id`, `updatedAt`, `deletedAt` (cancellazione logica, usare `save`/`patch`/`remove` di `repo.ts`).
   - Chiavi naturali dove esistono: `days.id` è la data, `cardState.id` è l'id della scheda, `rules.id` la regola, `settings.id` il nome.
   - Seed e schede incluse hanno `updatedAt = 0`: qualsiasi modifica dell'utente vince nella fusione dei backup (last-write-wins).
-- `src/rules/`: motore di regole, funzioni pure (`defaults.ts` ha le 9 regole e le soglie)
+- `src/rules/`: motore di regole, funzioni pure (`defaults.ts` ha le 9 regole e le soglie); `plan.ts` compone il piano, `schedule.ts` mette i blocchi in agenda
+- `src/review/`: coda del ripasso, Leitner, motore di battitura
+- `src/art/`: oggetti cosmici in SVG (buco nero, cielo, galassie); `public/art/` ha le immagini pre-renderizzate da `scripts/render-art.mjs`
+- `src/features/oggi/`: la copertina; `orbit.ts` è la geometria dell'orbita del mockup (ellisse 700,320 di semiassi 500×200 ruotata di −12°, 8:00 a 162,1°, 19:00 a 28,8°)
+- `e2e/demo-data.js`: backup dimostrativo per screenshot e prove (si importa dalla pagina Dati, mai in automatico)
+
+## Note di implementazione
+- Le fusioni `mix-blend-mode` (titolo, pianeti, grana) stanno dentro `.cover`, isolata e con sfondo opaco: senza sfondo opaco la grana in overlay schiarisce.
+- Niente `font-variant-numeric: tabular-nums` globale: in Schibsted Grotesk rende tabulari anche punto, virgola e due punti. Usare la classe `.tnum` dove servono cifre allineate.
+- Per i contenuti che cambiano con l'energia si usa l'entrata CSS `.swap-in` legata alla `key`, non `AnimatePresence`: con StrictMode la modalità "wait" può restare a metà.
 - `src/features/<sezione>/`: una cartella per schermata
