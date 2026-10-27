@@ -55,7 +55,7 @@ export default function OggiPage() {
     }
     const sx = width / 1180
     const mapping: Mapping = { sx, sy: Math.min(1, sx * 2.3), y0: 300 }
-    return { mapping, height: 285 * mapping.sy, font: 12 }
+    return { mapping, height: 305 * mapping.sy, font: 12 }
   }, [width, wide, u])
 
   const suggestions = useMemo(() => {

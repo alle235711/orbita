@@ -59,7 +59,33 @@ const grain = `
   <rect width="128" height="128" filter="url(#g)"/>
 </svg>`
 
+/** Icona dell'app: il buco nero del giorno, semplificato. `k` lo rimpicciolisce per la zona sicura delle icone maskable. */
+const icon = (size, k = 1) => `
+<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="glow" cx="256" cy="256" r="230" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFCF6E" stop-opacity="0.55"/><stop offset="0.5" stop-color="#FFCF6E" stop-opacity="0.16"/><stop offset="1" stop-color="#FFCF6E" stop-opacity="0"/></radialGradient>
+    <linearGradient id="dop" x1="40" y1="0" x2="472" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFFFFF"/><stop offset="0.25" stop-color="#FFCF6E"/><stop offset="0.7" stop-color="#FFCF6E" stop-opacity="0.65"/><stop offset="1" stop-color="#FFCF6E" stop-opacity="0.3"/></linearGradient>
+    <linearGradient id="lens" x1="150" y1="0" x2="362" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFFFFF"/><stop offset="0.4" stop-color="#FFCF6E"/><stop offset="1" stop-color="#FFCF6E" stop-opacity="0.5"/></linearGradient>
+    <clipPath id="front"><rect x="0" y="256" width="512" height="256"/></clipPath>
+  </defs>
+  <rect width="512" height="512" fill="#070A16"/>
+  <g transform="translate(256 256) scale(${k}) translate(-256 -256) rotate(-12 256 256)">
+    <circle cx="256" cy="256" r="230" fill="url(#glow)"/>
+    <path d="M40,256 a216,52 0 1,0 432,0 a216,52 0 1,0 -432,0 Z M148,256 a108,26 0 1,0 216,0 a108,26 0 1,0 -216,0 Z" fill="url(#dop)" fill-rule="evenodd"/>
+    <path d="M160,256 A96,96 0 0,1 352,256" fill="none" stroke="url(#lens)" stroke-width="30" stroke-linecap="round"/>
+    <circle cx="256" cy="256" r="76" fill="#000"/>
+    <circle cx="256" cy="256" r="80" fill="none" stroke="#FFFFFF" stroke-width="3.5" opacity="0.9"/>
+    <g clip-path="url(#front)">
+      <path d="M40,256 a216,52 0 1,0 432,0 a216,52 0 1,0 -432,0 Z M148,256 a108,26 0 1,0 216,0 a108,26 0 1,0 -216,0 Z" fill="url(#dop)" fill-rule="evenodd"/>
+    </g>
+  </g>
+</svg>`
+
 const jobs = [
+  { name: 'icons/icon-192.png', svg: icon(192), width: 192, height: 192, scale: 1, type: 'image/png' },
+  { name: 'icons/icon-512.png', svg: icon(512), width: 512, height: 512, scale: 1, type: 'image/png' },
+  { name: 'icons/icon-maskable-512.png', svg: icon(512, 0.74), width: 512, height: 512, scale: 1, type: 'image/png' },
+  { name: 'icons/apple-touch-icon.png', svg: icon(180, 0.86), width: 180, height: 180, scale: 1, type: 'image/png' },
   { name: 'art/nebula-oggi.webp', svg: nebulaCover, width: 1180, height: 820, scale: 1.5, type: 'image/webp', quality: 0.8 },
   { name: 'art/nebula-briefing.webp', svg: nebulaEmission, width: 1180, height: 820, scale: 1.5, type: 'image/webp', quality: 0.8 },
   { name: 'art/grain.webp', svg: grain, width: 128, height: 128, scale: 1, type: 'image/webp', quality: 0.7, transparent: true },

@@ -39,8 +39,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'prompt',
       injectRegister: false,
-      includeAssets: ['favicon.svg'],
+      // i file di public/ li prende già il glob qui sotto
+      includeManifestIcons: false,
       manifest: {
+        id: './',
         name: 'Orbita',
         short_name: 'Orbita',
         description: 'Le giornate fino alla laurea: studio, lavoro, sport e ripasso, anche offline.',
@@ -49,9 +51,15 @@ export default defineConfig({
         start_url: './',
         scope: './',
         display: 'standalone',
+        orientation: 'any',
         background_color: '#070A16',
         theme_color: '#070A16',
-        icons: [{ src: 'favicon.svg', sizes: 'any', type: 'image/svg+xml' }],
+        categories: ['productivity', 'education'],
+        icons: [
+          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: 'icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ],
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,webp,woff2,json}'],

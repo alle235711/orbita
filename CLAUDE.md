@@ -44,8 +44,12 @@ Serve Node 24 (`nvm use`, c'è `.nvmrc`): Vite 8 e Vitest 5 non girano sul Node 
 - `npm test`: test Vitest della logica pura (`src/**/*.test.ts`)
 - `npm run build`: controllo dei tipi (`tsc -b`) e build in `dist/`; con `BASE_PATH=/orbita/` per GitHub Pages
 - `npm run preview`: serve la build, service worker compreso
-- `npm run test:e2e`: Playwright (screenshot e controlli su Chromium e WebKit)
-- `npm run gen:art`: rigenera le immagini pre-renderizzate in `public/art/`
+- `npm run test:e2e`: Playwright sulla build di produzione (porta 4173): screenshot di ogni schermata a 1180×820, 390×844 e 1280×800 in `docs/screenshots/` e prova offline col service worker. `WEBKIT=1` aggiunge WebKit, che su Ubuntu richiede `sudo npx playwright install-deps webkit`.
+- `npm run gen:art`: rigenera le immagini pre-renderizzate in `public/art/` e le icone in `public/icons/`
+
+## Pubblicazione
+- GitHub Pages con `.github/workflows/deploy.yml`: a ogni push su `main` (o a mano con `gh workflow run deploy.yml`) test, build con `BASE_PATH=/orbita/` e deploy su https://alle235711.github.io/orbita/.
+- Il service worker usa `registerType: 'prompt'`: una nuova versione compare come avviso "Aggiorna", non ricarica da sola.
 
 ## Struttura
 - `src/app/`: guscio (router a hash, navigazione, avviso di aggiornamento)
