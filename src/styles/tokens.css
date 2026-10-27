@@ -64,6 +64,9 @@
   --fs-h2: 1.0625rem;
   --fs-body: 1rem;
   --fs-small: 0.8125rem;
+  /* Schibsted Grotesk ha spazi stretti nei pesi 800–900: nei titoli piccoli
+     un filo di spaziatura tra le parole li tiene leggibili. */
+  --ws-heavy: 0.06em;
 
   /* misure */
   --gutter: clamp(16px, 3.4vw, 40px);

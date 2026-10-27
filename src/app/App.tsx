@@ -1,8 +1,12 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, type ComponentType, type LazyExoticComponent } from 'react'
 import { MotionConfig } from 'motion/react'
+import { useDay } from '../db/hooks'
+import { DEFAULT_ENERGY } from '../lib/energy'
+import { applyDisk } from './disk'
 import { Nav } from './Nav'
 import { useRoute, type RouteId } from './router'
 import { UpdateToast } from './UpdateToast'
+import { useToday } from './useToday'
 
 const PAGES: Record<RouteId, LazyExoticComponent<ComponentType>> = {
   oggi: lazy(() => import('../features/oggi/OggiPage')),
@@ -33,6 +37,10 @@ export function App() {
   const route = useRoute()
   const Current = PAGES[route.id]
   const first = useRef(true)
+  const today = useDay(useToday())
+
+  // Il colore del disco segue l'energia scelta oggi, in tutta l'app.
+  useEffect(() => applyDisk(today?.energy ?? DEFAULT_ENERGY), [today?.energy])
 
   useLayoutEffect(() => {
     document.documentElement.dataset.surface = SLATE.includes(route.id) ? 'slate' : 'space'

@@ -51,4 +51,9 @@ Serve Node 24 (`nvm use`, c'è `.nvmrc`): Vite 8 e Vitest 5 non girano sul Node 
 - `src/app/`: guscio (router a hash, navigazione, avviso di aggiornamento)
 - `src/styles/`: token (`--disk` è il colore del disco del giorno) e stili globali
 - `src/lib/`: utilità pure (energia, date)
+- `src/db/`: Dexie (`schema.ts` con i tipi, `db.ts` con gli indici), seed della SPEC §6, schede, backup
+  - Ogni record ha `id`, `updatedAt`, `deletedAt` (cancellazione logica, usare `save`/`patch`/`remove` di `repo.ts`).
+  - Chiavi naturali dove esistono: `days.id` è la data, `cardState.id` è l'id della scheda, `rules.id` la regola, `settings.id` il nome.
+  - Seed e schede incluse hanno `updatedAt = 0`: qualsiasi modifica dell'utente vince nella fusione dei backup (last-write-wins).
+- `src/rules/`: motore di regole, funzioni pure (`defaults.ts` ha le 9 regole e le soglie)
 - `src/features/<sezione>/`: una cartella per schermata
