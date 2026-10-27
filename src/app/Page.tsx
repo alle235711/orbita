@@ -4,7 +4,7 @@ import './Page.css'
 interface PageProps {
   className?: string
   labelledBy?: string
-  children: ReactNode
+  children?: ReactNode
 }
 
 /** Contenitore di ogni schermata: lascia spazio alla barra in alto. */

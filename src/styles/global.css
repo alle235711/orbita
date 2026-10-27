@@ -257,6 +257,51 @@ textarea.field {
   color: var(--bg);
 }
 
+/* Casella di spunta con etichetta */
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--tap);
+  font-size: var(--fs-small);
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.check input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--disk);
+}
+
+/* Azione secondaria in forma di testo, con bersaglio da 44 px */
+.link-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-rule);
+  font-size: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--line-3);
+  text-underline-offset: 0.25em;
+}
+
+.link-button[aria-pressed='true'] {
+  color: var(--cue);
+  text-decoration-color: currentColor;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .link-button:hover {
+    color: var(--text);
+    text-decoration-color: currentColor;
+  }
+}
+
 /* Controllo segmentato (vista, difficoltà) */
 .segmented {
   display: inline-flex;

@@ -1,0 +1,101 @@
+.kbd {
+  position: relative;
+  width: 100%;
+  max-width: 840px;
+}
+
+.kbd__board {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transform-origin: top left;
+}
+
+.kbd__row {
+  display: flex;
+  gap: 6px;
+}
+
+.kbd__key {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  height: 46px;
+  flex: none;
+  border-radius: 9px;
+  border: 1px solid rgba(185, 199, 238, 0.16);
+  border-bottom: 3px solid var(--finger);
+  background: rgba(185, 199, 238, 0.05);
+  color: var(--text);
+  font-family: var(--font);
+  /* niente animazioni sui tasti: si muovono centinaia di volte al minuto */
+}
+
+.kbd__up {
+  font-size: 10px;
+  line-height: 1;
+  opacity: 0.6;
+  min-height: 10px;
+}
+
+.kbd__label {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.kbd__bump {
+  position: absolute;
+  bottom: 5px;
+  width: 10px;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+.kbd__key--next {
+  background: var(--cue);
+  color: var(--bg-slate);
+  box-shadow:
+    0 0 0 3px rgba(255, 217, 122, 0.25),
+    0 8px 24px rgba(255, 217, 122, 0.3);
+}
+
+.kbd__key--shift {
+  background: var(--cue-soft);
+}
+
+.kbd__key--error {
+  background: rgba(255, 122, 89, calc(0.12 + var(--heat) * 0.5));
+  border-color: rgba(255, 122, 89, calc(0.2 + var(--heat) * 0.5));
+}
+
+.kbd-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+  color: #c3cce4;
+}
+
+.kbd-legend li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kbd-legend span {
+  width: 16px;
+  height: 3px;
+  border-radius: 2px;
+}

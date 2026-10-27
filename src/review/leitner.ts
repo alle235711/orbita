@@ -1,0 +1,62 @@
+// Scatole di Leitner (SPEC §3.5): cinque scatole con intervalli di 1, 2, 4,
+// 8 e 16 giorni. La scatola decide la modalità; una revisione riuscita fa
+// salire di una scatola, un errore riporta alla prima.
+
+import type { CardState, LeitnerBox, ReviewMode } from '../db/schema'
+import { addDays, type ISODate } from '../lib/dates'
+
+export const INTERVALS: Record<LeitnerBox, number> = { 1: 1, 2: 2, 3: 4, 4: 8, 5: 16 }
+
+/** Precisione minima in Copia e Completa, somiglianza suggerita nelle modalità a memoria. */
+export const MIN_ACCURACY = 0.97
+export const MIN_SIMILARITY = 0.85
+
+export const MODE_LABEL: Record<ReviewMode, string> = {
+  copia: 'Copia',
+  completa: 'Completa',
+  nome: 'Indovina il nome',
+  memoria: 'A memoria',
+}
+
+export function modeForBox(box: LeitnerBox | undefined): ReviewMode {
+  switch (box ?? 1) {
+    case 1:
+      return 'copia'
+    case 2:
+      return 'completa'
+    case 3:
+      return 'nome'
+    default:
+      return 'memoria'
+  }
+}
+
+/** Esito suggerito: in Copia e Completa decide la precisione, a memoria la somiglianza (poi decidi tu). */
+export function suggestedOutcome(mode: ReviewMode, score: number): boolean {
+  return mode === 'copia' || mode === 'completa' ? score >= MIN_ACCURACY : score >= MIN_SIMILARITY
+}
+
+export interface ReviewOutcome {
+  state: CardState
+  boxAfter: LeitnerBox
+  /** La scheda non era ancora scaduta: la revisione conta per le statistiche, non per la scatola. */
+  early: boolean
+  changed: boolean
+}
+
+export function applyReview(current: CardState | undefined, cardId: string, ok: boolean, today: ISODate): ReviewOutcome {
+  if (current && !current.deletedAt && current.due > today) {
+    return { state: current, boxAfter: current.box, early: true, changed: false }
+  }
+  const from: LeitnerBox = current && !current.deletedAt ? current.box : 1
+  const box: LeitnerBox = ok ? (Math.min(5, from + 1) as LeitnerBox) : 1
+  const state: CardState = {
+    id: cardId,
+    box,
+    due: addDays(today, INTERVALS[box]),
+    firstReviewed: current?.firstReviewed ?? today,
+    lastReviewed: today,
+    updatedAt: Date.now(),
+  }
+  return { state, boxAfter: box, early: false, changed: true }
+}

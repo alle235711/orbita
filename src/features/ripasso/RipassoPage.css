@@ -1,0 +1,320 @@
+/* Ripasso a 10 dita (design/Rivista-Ripasso.dc.html): lavagna #0E1424,
+   testo da battere in JetBrains Mono, giallo fisso per carattere corrente e
+   tasto successivo, colore del disco per chip e pulsanti. */
+
+.ripasso {
+  --chip-on: var(--disk);
+}
+
+.ripasso__chalk {
+  position: absolute;
+  top: calc(var(--nav-h) + env(safe-area-inset-top) + 8px);
+  right: max(10px, calc(50% - 640px + 10px));
+  width: clamp(260px, 30vw, 380px);
+  z-index: 0;
+}
+
+.ripasso__subjects {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 8px;
+  padding-top: 20px;
+  max-width: 880px;
+}
+
+.ripasso__subjects .chip {
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 20px;
+}
+
+/* il bersaglio dei chip resta di 44 px */
+.ripasso__subjects .chip {
+  position: relative;
+}
+
+.ripasso__subjects .chip::before {
+  content: '';
+  position: absolute;
+  inset: -2px 0;
+}
+
+.ripasso__section .field {
+  min-height: 40px;
+  max-width: 15rem;
+  font-size: 14px;
+  color: var(--text-rule);
+}
+
+.ripasso__head {
+  position: relative;
+  z-index: 1;
+  max-width: 860px;
+  margin-top: 22px;
+}
+
+.ripasso__head--done {
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+}
+
+.ripasso__title {
+  font-size: var(--fs-h1);
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  text-wrap: balance;
+  word-spacing: 0.04em;
+}
+
+.ripasso__lead {
+  margin-top: 10px;
+  font-size: 15px;
+  color: var(--text-2);
+}
+
+.ripasso__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 18px;
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+/* righe basse a vista, bersagli comunque da 44 px */
+.ripasso__meta .link-button {
+  position: relative;
+  min-height: 28px;
+}
+
+.ripasso__meta .link-button::before {
+  content: '';
+  position: absolute;
+  inset: -8px -4px;
+}
+
+/* ——— esercizio ——— */
+
+.exercise {
+  position: relative;
+  z-index: 1;
+  max-width: 860px;
+  margin-top: 18px;
+  padding: 18px 22px 16px;
+  border-radius: var(--radius-xl);
+  background: var(--panel);
+  border: 1px solid rgba(185, 199, 238, 0.14);
+}
+
+.exercise__text {
+  min-height: 100px;
+  font-family: var(--font-mono);
+  font-size: clamp(16px, 1.1rem + 0.4vw, 20px);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-variant-ligatures: none;
+}
+
+.exercise__text--plain {
+  color: var(--text);
+  margin-bottom: 14px;
+}
+
+.c {
+  border-radius: 3px;
+}
+
+.c--ok {
+  color: var(--text);
+}
+
+.c--wrong {
+  color: var(--error-text);
+  background: var(--error-bg);
+}
+
+.c--current {
+  color: var(--bg-slate);
+  background: var(--cue);
+  box-shadow: 0 0 0 2px var(--cue);
+}
+
+.c--pending {
+  color: var(--text-dim);
+}
+
+.c--hidden.c--pending {
+  color: var(--text-3);
+}
+
+.exercise__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.exercise__row--stack {
+  align-items: flex-end;
+}
+
+.exercise__input {
+  flex: 1 1 16rem;
+  min-width: 0;
+  background: var(--bg-slate);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  caret-color: var(--cue);
+}
+
+.exercise__area {
+  flex-basis: 100%;
+  min-height: 9rem;
+  resize: vertical;
+}
+
+.exercise__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.exercise__stats strong {
+  font-size: 16px;
+  color: var(--text);
+}
+
+.exercise__hint {
+  margin-left: auto;
+  color: var(--cue);
+}
+
+.exercise__hint--ok {
+  color: var(--ok);
+}
+
+.exercise__hint--ko {
+  color: var(--error-text);
+}
+
+.exercise__keyboard {
+  position: relative;
+  z-index: 1;
+  width: min(840px, 100%);
+  margin: 16px auto 0;
+}
+
+.exercise__note {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+/* ——— confronto a memoria ——— */
+
+.compare {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.compare__score {
+  font-size: 15px;
+  color: var(--text-2);
+}
+
+.compare__score strong {
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.compare__words {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+.w {
+  border-radius: 3px;
+}
+
+.w--ok {
+  color: var(--text);
+}
+
+.w--sub {
+  color: var(--cue);
+}
+
+.w--sub s {
+  color: var(--error-text);
+  text-decoration-thickness: 1.5px;
+}
+
+.w--miss {
+  color: var(--error-text);
+  text-decoration: underline dashed;
+  text-underline-offset: 0.25em;
+}
+
+.w--extra {
+  color: var(--text-3);
+  text-decoration: line-through;
+}
+
+.compare__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.compare__decide {
+  margin-top: 14px;
+}
+
+.compare__question {
+  flex: 1 1 100%;
+  font-size: 14px;
+  color: var(--text-rule);
+}
+
+@media (max-width: 899px) {
+  .ripasso__chalk {
+    opacity: 0.55;
+    width: 240px;
+    right: -30px;
+  }
+}
+
+@media (max-width: 599px) {
+  .ripasso__chalk {
+    display: none;
+  }
+
+  .exercise {
+    padding: 14px 14px 12px;
+    margin-left: calc(-1 * var(--gutter) + 8px);
+    margin-right: calc(-1 * var(--gutter) + 8px);
+  }
+
+  .exercise__hint {
+    margin-left: 0;
+    flex-basis: 100%;
+  }
+}
