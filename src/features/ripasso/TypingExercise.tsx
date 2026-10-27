@@ -4,7 +4,7 @@ import { formatDecimal } from '../../lib/dates'
 import { strokeFor, strokeHint } from '../../review/keyboard'
 import { MIN_ACCURACY } from '../../review/leitner'
 import { inRanges, keyRanges } from '../../review/mask'
-import { applyValue, charStates, startTyping, typingStats, type TypingState } from '../../review/typing'
+import { applyValue, charStates, startTyping, typingStats } from '../../review/typing'
 import type { ReviewMode } from '../../db/schema'
 
 export interface TypingDone {
@@ -12,6 +12,9 @@ export interface TypingDone {
   accuracy: number
   wrongChars: number
   activeMs: number
+  chars: number
+  keyErrors: Record<string, number>
+  keyHits: Record<string, number>
 }
 
 interface TypingExerciseProps {
@@ -25,13 +28,11 @@ interface TypingExerciseProps {
   showKeyboard: boolean
   /** Etichetta del campo per i lettori di schermo. */
   inputLabel: string
-  /** Nome della lezione o della scheda, per le statistiche per tasto (Dattilografia). */
-  onKeyStats?: (state: TypingState) => void
   nextLabel?: string
 }
 
 /** Copia e Completa: il testo si colora mentre scrivi, la tastiera suggerisce il tasto. */
-export function TypingExercise({ text, mode, hiddenKey, outcome, onDone, onNext, showKeyboard, inputLabel, onKeyStats, nextLabel = 'Scheda successiva' }: TypingExerciseProps) {
+export function TypingExercise({ text, mode, hiddenKey, outcome, onDone, onNext, showKeyboard, inputLabel, nextLabel = 'Scheda successiva' }: TypingExerciseProps) {
   const [state, setState] = useState(() => startTyping(text))
   const [now, setNow] = useState(() => Date.now())
   const finished = useRef(false)
@@ -61,14 +62,16 @@ export function TypingExercise({ text, mode, hiddenKey, outcome, onDone, onNext,
     if (!stats.done || finished.current) return
     finished.current = true
     const final = typingStats(state)
-    onKeyStats?.(state)
     onDone({
       wpm: final.wpm,
       accuracy: final.accuracy,
       wrongChars: state.wrongAt.length,
       activeMs: (state.lastAt ?? 0) - (state.startedAt ?? 0),
+      chars: state.target.length,
+      keyErrors: state.keyErrors,
+      keyHits: state.keyHits,
     })
-  }, [stats.done, state, onDone, onKeyStats])
+  }, [stats.done, state, onDone])
 
   const hint = stats.done
     ? outcome ?? 'Scheda completata'

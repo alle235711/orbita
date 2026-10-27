@@ -1,0 +1,201 @@
+/* Dattilografia: sulla lavagna come il Ripasso, stessa tastiera. */
+
+.datti__head {
+  max-width: 860px;
+  padding-bottom: 8px;
+}
+
+.datti h2 {
+  font-size: var(--fs-h2);
+  font-weight: 800;
+  word-spacing: var(--ws-heavy);
+}
+
+.datti__grid {
+  display: grid;
+  gap: 28px 40px;
+  margin-top: 22px;
+}
+
+@media (min-width: 1000px) {
+  .datti__grid {
+    grid-template-columns: 250px minmax(0, 1fr);
+  }
+
+  .datti__grid--stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ——— percorso ——— */
+
+.datti__path {
+  padding-top: 14px;
+  border-top: 2px solid var(--text);
+}
+
+.path {
+  display: grid;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.datti__grid--stats .path {
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  column-gap: 26px;
+}
+
+.path__button {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  align-items: start;
+  width: 100%;
+  min-height: var(--tap);
+  padding: 9px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+}
+
+button.path__button:active {
+  transform: scale(0.99);
+}
+
+.path__n {
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+  color: var(--text-3);
+}
+
+.path__step--passed .path__n {
+  color: var(--ok);
+}
+
+.path__button[aria-current='step'] .path__n {
+  color: var(--disk);
+}
+
+.path__body {
+  display: grid;
+  gap: 2px;
+}
+
+.path__title {
+  font-size: 15px;
+  font-weight: 800;
+  word-spacing: var(--ws-heavy);
+}
+
+.path__button[aria-current='step'] .path__title {
+  text-decoration: underline;
+  text-decoration-color: var(--disk);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+
+.path__meta {
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  button.path__button:hover .path__title {
+    color: #fff;
+  }
+}
+
+/* ——— esercizio ——— */
+
+.datti__practice {
+  min-width: 0;
+}
+
+.datti__lesson {
+  padding-top: 14px;
+  border-top: 2px solid var(--text);
+}
+
+.datti__lesson p {
+  margin-top: 4px;
+  color: var(--text-2);
+  font-size: 14px;
+}
+
+.datti__practice .exercise {
+  margin-top: 14px;
+}
+
+.datti__practice .exercise__keyboard {
+  margin-left: 0;
+}
+
+/* ——— errori e prove ——— */
+
+.datti__errors,
+.datti__runs {
+  margin-top: 40px;
+  padding-top: 14px;
+  border-top: 2px solid var(--text);
+  max-width: 1100px;
+}
+
+.datti__errors-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.datti__worst {
+  margin-top: 8px;
+  color: var(--text-rule);
+  font-size: 15px;
+}
+
+.datti__key {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.7em;
+  padding: 0 0.3em;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 122, 89, 0.5);
+  background: rgba(255, 122, 89, 0.18);
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+
+.datti__heat {
+  width: min(840px, 100%);
+  margin-top: 18px;
+}
+
+.runs {
+  width: 100%;
+  max-width: 640px;
+  margin-top: 10px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.runs th {
+  padding: 8px 12px 8px 0;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.runs td {
+  padding: 10px 12px 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.runs .num {
+  text-align: right;
+}

@@ -1,10 +1,10 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Page } from '../../app/Page'
 import { navigate, useRoute } from '../../app/router'
+import { useActivityClock } from '../../app/useActivityClock'
 import { useToday } from '../../app/useToday'
 import { SubjectChalk } from '../../art/Chalk'
-import { logSession } from '../../db/actions'
 import { db } from '../../db/db'
 import { useCourses, useSetting } from '../../db/hooks'
 import { alive } from '../../db/repo'
@@ -23,27 +23,6 @@ const INSTRUCTIONS: Record<ReviewMode, string> = {
   completa: 'La parte nascosta va scritta a memoria, insieme a tutto il resto.',
   nome: 'Leggi l’enunciato e scrivi il nome della scheda.',
   memoria: 'Scrivi l’enunciato a memoria, poi confrontalo con il testo.',
-}
-
-/** Il tempo passato sulle schede diventa una sessione di ripasso quando esci o cambi materia. */
-function useReviewClock(courseId: string | undefined, today: string) {
-  const ms = useRef(0)
-  const flush = useCallback(() => {
-    const minutes = Math.round(ms.current / 60_000)
-    if (ms.current >= 30_000 && courseId) void logSession({ date: today, type: 'ripasso', minutes: Math.max(1, minutes), courseId })
-    ms.current = 0
-  }, [courseId, today])
-  useEffect(() => {
-    const onHide = () => document.visibilityState === 'hidden' && flush()
-    document.addEventListener('visibilitychange', onHide)
-    return () => {
-      document.removeEventListener('visibilitychange', onHide)
-      flush()
-    }
-  }, [flush])
-  return (active: number) => {
-    ms.current += Math.max(0, Math.min(active, 20 * 60_000))
-  }
 }
 
 export default function RipassoPage() {
@@ -87,7 +66,7 @@ export default function RipassoPage() {
   const subjectId = route.query.get('materia') ?? subjects[0]?.id
   const subject = subjects.find((s) => s.id === subjectId) ?? subjects[0]
   const section = route.query.get('sezione') ?? ''
-  const review = useReviewClock(subject?.id, today)
+  const review = useActivityClock('ripasso', today, subject?.id)
 
   const queue = useMemo(() => {
     if (!data || !subject) return null
