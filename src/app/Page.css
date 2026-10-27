@@ -1,0 +1,25 @@
+.page {
+  position: relative;
+  min-height: 100dvh;
+  padding: calc(var(--nav-h) + env(safe-area-inset-top)) max(var(--gutter), env(safe-area-inset-right))
+    calc(32px + env(safe-area-inset-bottom)) max(var(--gutter), env(safe-area-inset-left));
+  overflow-x: clip;
+}
+
+.page:focus {
+  outline: none;
+}
+
+.page__title {
+  margin-top: 28px;
+  font-size: var(--fs-h1);
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.page__lead {
+  margin-top: 10px;
+  max-width: 62ch;
+  color: var(--text-2);
+}

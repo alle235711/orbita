@@ -1,0 +1,130 @@
+/* Barra delle sezioni, come nella Copertina: marchio, voci a sinistra,
+   sottolineatura di 3 px nel colore del disco sulla voce attiva. */
+
+.topbar {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: calc(var(--nav-h) + env(safe-area-inset-top));
+  padding: env(safe-area-inset-top) max(var(--gutter), env(safe-area-inset-right)) 0
+    max(var(--gutter), env(safe-area-inset-left));
+}
+
+.topbar--bordered::after {
+  content: '';
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: 0;
+  border-bottom: 1px solid var(--line);
+  pointer-events: none;
+}
+
+.topbar__nav {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  flex: 1;
+  height: 100%;
+}
+
+.topbar__mark {
+  flex: none;
+  margin-right: 38px;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  text-decoration: none;
+}
+
+.topbar__list {
+  display: flex;
+  align-items: stretch;
+  gap: 24px;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.topbar__list::-webkit-scrollbar {
+  display: none;
+}
+
+.topbar__list > li {
+  display: flex;
+  flex: none;
+}
+
+.topbar__link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  min-height: var(--tap);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-2);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.topbar__link::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 3px;
+  background: var(--disk);
+  opacity: 0;
+}
+
+.topbar__link[aria-current='page'] {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.topbar__link[aria-current='page']::after {
+  opacity: 1;
+}
+
+.topbar__link:focus-visible {
+  outline-offset: -2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .topbar__link:hover {
+    color: var(--text);
+  }
+}
+
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+
+@media (max-width: 599px) {
+  .topbar {
+    gap: 10px;
+  }
+
+  .topbar__mark {
+    display: none;
+  }
+
+  .topbar__list {
+    gap: 20px;
+    /* sfuma l'ultima voce per suggerire che la barra scorre */
+    mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+    padding-right: 28px;
+  }
+}

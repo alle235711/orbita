@@ -1,6 +1,8 @@
 # CLAUDE.md
 
-Orbita (nome provvisorio). Stato: solo setup, ancora nessun codice dell'app.
+Orbita (nome provvisorio). Stato: fase 1 in corso sul branch `feat/fase-1`.
+
+La specifica completa è `SPEC.md` nella radice: resta solo in locale (è in `.gitignore`), come `PROMPT.md`. Mockup in `design/`, schede di ripasso in `content/schede-2026-27.json`.
 
 ## Decisioni di progetto
 Queste sono decisioni già prese: non ridiscuterle e non aggirarle senza che l'utente lo chieda.
@@ -36,4 +38,17 @@ Queste sono decisioni già prese: non ridiscuterle e non aggirarle senza che l'u
 - **Hook di Impeccable: non attivarli.** Quindi non usare `/impeccable hooks on`, non lasciare che `/impeccable doctor` ripari l'hook e non eseguire `npx impeccable install`/`update`.
 
 ## Comandi
-Ancora nessuno: verranno aggiunti qui quando ci sarà lo scaffold Vite.
+Serve Node 24 (`nvm use`, c'è `.nvmrc`): Vite 8 e Vitest 5 non girano sul Node 18 di sistema.
+
+- `npm run dev`: server di sviluppo su http://localhost:5173
+- `npm test`: test Vitest della logica pura (`src/**/*.test.ts`)
+- `npm run build`: controllo dei tipi (`tsc -b`) e build in `dist/`; con `BASE_PATH=/orbita/` per GitHub Pages
+- `npm run preview`: serve la build, service worker compreso
+- `npm run test:e2e`: Playwright (screenshot e controlli su Chromium e WebKit)
+- `npm run gen:art`: rigenera le immagini pre-renderizzate in `public/art/`
+
+## Struttura
+- `src/app/`: guscio (router a hash, navigazione, avviso di aggiornamento)
+- `src/styles/`: token (`--disk` è il colore del disco del giorno) e stili globali
+- `src/lib/`: utilità pure (energia, date)
+- `src/features/<sezione>/`: una cartella per schermata

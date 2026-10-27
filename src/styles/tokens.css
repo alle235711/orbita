@@ -1,0 +1,101 @@
+/* Token di design (SPEC §2, mockup Copertina-BucoNero e Rivista-Ripasso). */
+
+/* Il colore del disco è registrato per poterlo animare: cambia con l'energia
+   del giorno e colora accenti, sottolineature, numeri del piano e orbita. */
+@property --disk {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ffcf6e;
+}
+
+:root {
+  --disk: #ffcf6e;
+  --disk-1: #e2604a;
+  --disk-2: #ff9757;
+  --disk-3: #ffcf6e;
+  --disk-4: #eaf0ff;
+  --disk-5: #8db2ff;
+
+  /* superfici */
+  --bg: #070a16;
+  --bg-slate: #0e1424;
+  --panel: rgba(19, 27, 46, 0.82);
+  --panel-soft: rgba(19, 27, 46, 0.6);
+  --scrim: rgba(7, 10, 22, 0.72);
+
+  /* testo */
+  --text: #eef1fa;
+  --text-rule: #c9d1e6;
+  --text-2: #aeb8d2;
+  --text-3: #8c97b4;
+  --text-dim: #7e8aa8;
+
+  /* linee e gesso */
+  --chalk: #b9c7ee;
+  --line: rgba(185, 199, 238, 0.16);
+  --line-2: rgba(185, 199, 238, 0.22);
+  --line-3: rgba(185, 199, 238, 0.4);
+
+  /* colori funzionali */
+  --cue: #ffd97a;
+  --cue-soft: rgba(255, 217, 122, 0.24);
+  --error: #ff7a59;
+  --error-text: #ffb3a1;
+  --error-bg: rgba(255, 122, 89, 0.28);
+  --ok: #7fd8c4;
+  --maldive: #7fd8c4;
+
+  /* dita */
+  --finger-pinky: #ff7a59;
+  --finger-ring: #ffa95e;
+  --finger-middle: #ffd97a;
+  --finger-index: #8fb0ff;
+  --finger-thumb: #9da9c6;
+  --finger-none: rgba(185, 199, 238, 0.16);
+
+  /* caratteri */
+  --font: 'Schibsted Grotesk Variable', 'Schibsted Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+  --font-chalk: Georgia, 'Times New Roman', serif;
+
+  /* scala tipografica: tracking negativo che cresce con la dimensione */
+  --fs-display: clamp(3.25rem, 1.6rem + 6.6vw, 6.5rem);
+  --fs-h1: clamp(2rem, 1.3rem + 2.6vw, 2.875rem);
+  --fs-h2: 1.0625rem;
+  --fs-body: 1rem;
+  --fs-small: 0.8125rem;
+
+  /* misure */
+  --gutter: clamp(16px, 3.4vw, 40px);
+  --nav-h: 52px;
+  --tap: 44px;
+  --radius-s: 9px;
+  --radius-m: 10px;
+  --radius-l: 14px;
+  --radius-xl: 18px;
+  --radius-xxl: 22px;
+
+  /* movimento */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-ui: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+  transition: --disk 0.6s ease;
+}
+
+/* Le sezioni a gesso (Ripasso, Dattilografia) stanno sulla lavagna. */
+html[data-surface='space'] {
+  --page-bg: var(--bg);
+  --focus: var(--text);
+}
+
+html[data-surface='slate'] {
+  --page-bg: var(--bg-slate);
+  --focus: var(--cue);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    transition: none;
+  }
+}
