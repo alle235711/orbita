@@ -1,0 +1,226 @@
+/* Briefing: contenuti di design/Briefing.dc.html nello stile della
+   copertina, con la nebulosa a emissione dietro. */
+
+.briefing,
+.regole {
+  --sky-w: clamp(760px, 92vw, 1300px);
+}
+
+.briefing > :not(.sky),
+.regole > :not(.sky) {
+  position: relative;
+  z-index: 1;
+}
+
+.brief__head {
+  padding-top: 26px;
+}
+
+.brief__date {
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.brief__head .page__title {
+  margin-top: 6px;
+}
+
+.brief__priority {
+  max-width: 760px;
+  margin-top: 30px;
+  padding-top: 14px;
+  border-top: 2px solid var(--text);
+}
+
+.brief__priority h2 {
+  font-size: clamp(30px, 2.2rem + 1.6vw, 52px);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+.brief__priority > p {
+  margin-top: 12px;
+  max-width: 62ch;
+  font-size: 17px;
+  line-height: 1.45;
+  color: var(--text-rule);
+}
+
+.brief__plan {
+  display: grid;
+  gap: 4px;
+  margin: 16px 0 18px;
+  padding: 0;
+  list-style: none;
+  font-size: 15px;
+  color: var(--text-2);
+}
+
+.brief__plan li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.brief__plan strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.brief__plan-n {
+  min-width: 1ch;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--disk);
+  line-height: 1;
+}
+
+.brief__section {
+  margin-top: 40px;
+  padding-top: 14px;
+  border-top: 2px solid var(--text);
+  max-width: 1200px;
+}
+
+.brief__section h2 {
+  margin-bottom: 14px;
+  font-size: var(--fs-h2);
+  font-weight: 800;
+  word-spacing: var(--ws-heavy);
+}
+
+.brief__milestones {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: 0 26px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.brief__milestones li {
+  display: grid;
+  gap: 2px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.brief__when {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--disk);
+}
+
+.brief__milestones li + li .brief__when {
+  color: var(--text-2);
+}
+
+.brief__what {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* ——— la settimana ——— */
+
+.week-status {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11.25rem, 1fr));
+  gap: 22px 26px;
+  margin: 0;
+}
+
+.week-status > div {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+}
+
+.week-status dt {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-2);
+}
+
+.week-status dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-rule);
+}
+
+.week-status .week-status__value {
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: var(--text);
+}
+
+.week-status__value span {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--text-2);
+}
+
+/* ——— regole e domani ——— */
+
+.brief__columns {
+  display: grid;
+  gap: 0 48px;
+  max-width: 1200px;
+}
+
+@media (min-width: 900px) {
+  .brief__columns {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  }
+}
+
+.notes {
+  display: grid;
+  margin: 0 0 18px;
+  padding: 0;
+  list-style: none;
+}
+
+.note {
+  display: grid;
+  gap: 2px;
+  padding: 10px 0 10px 18px;
+  border-top: 1px solid var(--line);
+  position: relative;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+.note::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 17px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--line-3);
+}
+
+.note--avviso::before {
+  background: var(--disk);
+}
+
+.note strong {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+  word-spacing: var(--ws-heavy);
+}
+
+.brief__muted {
+  margin-bottom: 14px;
+  color: var(--text-2);
+  font-size: 15px;
+}
