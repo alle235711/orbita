@@ -10,7 +10,7 @@ import { useCourses, useSetting } from '../../db/hooks'
 import { alive } from '../../db/repo'
 import { saveReview, setNeedsFix } from '../../db/review-actions'
 import type { Card, ReviewMode } from '../../db/schema'
-import { formatDate, relativeDays, diffDays } from '../../lib/dates'
+import { formatDate, relativeDays, diffDays, withDate } from '../../lib/dates'
 import { MIN_ACCURACY, MODE_LABEL, modeForBox } from '../../review/leitner'
 import { courseRank, dailyQueue } from '../../review/queue'
 import { CardEditor } from './CardEditor'
@@ -262,7 +262,7 @@ function NextDue({ cards, states, today }: { cards: Card[]; states: Map<string, 
   const count = dues.filter((d) => d === first).length
   return (
     <p className="ripasso__meta">
-      Le prossime: {count} {count === 1 ? 'scheda' : 'schede'} il {formatDate(first)}.
+      Le prossime: {count} {count === 1 ? 'scheda' : 'schede'} {withDate('il', formatDate(first))}.
     </p>
   )
 }

@@ -2,7 +2,7 @@
 // dallo stesso contesto delle regole.
 
 import type { Session, TypingRun } from '../db/schema'
-import { addDays, diffDays, formatDate, isBetween, type ISODate } from '../lib/dates'
+import { addDays, diffDays, formatDate, isBetween, withDate, type ISODate } from '../lib/dates'
 import type { ThresholdSpec } from './defaults'
 import type { DayPlan, RuleContext } from './types'
 
@@ -78,7 +78,7 @@ export function priorityReason(plan: DayPlan, workedOnPriority7: number): string
     workedOnPriority7 > 0
       ? ` Negli ultimi 7 giorni ci hai dedicato ${(Math.round(workedOnPriority7 * 2) / 2).toLocaleString('it-IT')} h.`
       : ' Negli ultimi 7 giorni non ci hai ancora lavorato.'
-  return `È l’esame più vicino: ${when}, il ${formatDate(p.examDate)}.${hours}`
+  return `È l’esame più vicino: ${when}, ${withDate('il', formatDate(p.examDate))}.${hours}`
 }
 
 /** Una soglia valida: dentro i limiti e sul passo previsto. */

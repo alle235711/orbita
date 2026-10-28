@@ -10,7 +10,7 @@ import { useCourses } from '../../db/hooks'
 import { useDayPlan } from '../../db/plan-context'
 import { alive, patch, remove, save } from '../../db/repo'
 import type { CalendarEvent, EventType, Task } from '../../db/schema'
-import { addDays, capitalize, formatDate, formatLong, formatShort, isISODate, todayISO, toMinutes, weekDays, weekdayShort, type ISODate } from '../../lib/dates'
+import { addDays, capitalize, formatDate, formatLong, formatShort, isISODate, todayISO, toMinutes, weekDays, weekdayShort, withDate, type ISODate } from '../../lib/dates'
 import { scheduleDay, type SuggestedBlock } from '../../rules/schedule'
 import { AGENDA_END, AGENDA_START, eventsByDay, layoutDay, weekHours } from './agenda'
 import { EVENT_TYPES, EventSheet, type EventDraft } from './EventSheet'
@@ -88,7 +88,7 @@ export default function AgendaPage() {
         <p className="page__lead">
           {view === 'giorno'
             ? `${capitalize(formatLong(day))}${day === today ? ', oggi' : ''}`
-            : `Settimana dal ${formatShort(week[0]!)} al ${formatShort(week[6]!)}`}
+            : `Settimana ${withDate('dal', formatShort(week[0]!))} ${withDate('al', formatShort(week[6]!))}`}
         </p>
         <div className="agenda__tools">
           <div className="segmented" role="group" aria-label="Vista">
@@ -196,7 +196,7 @@ function DayTimeline({ day, events, suggestions, now, onEdit, onNew, onConfirm }
   return (
     <section className="timeline" aria-labelledby="h-giornata" style={{ ['--rows' as string]: hours.length }}>
       <h2 id="h-giornata" className="sr-only">
-        Impegni del {formatDate(day)}
+        Impegni {withDate('del', formatDate(day))}
       </h2>
       <div className="timeline__grid">
         {hours.map((h) => (
@@ -273,7 +273,7 @@ function TodoList({ day, today, tasks }: { day: ISODate; today: ISODate; tasks: 
 
   return (
     <section className="todo" aria-labelledby="h-todo">
-      <h2 id="h-todo">{isToday ? 'Da fare oggi' : `Da fare il ${formatDate(day)}`}</h2>
+      <h2 id="h-todo">{isToday ? 'Da fare oggi' : `Da fare ${withDate('il', formatDate(day))}`}</h2>
       <TaskItems tasks={dueList} day={day} empty="Niente in scadenza." />
       <h2>Senza data</h2>
       <TaskItems tasks={undated} day={day} empty="Nessuna attività senza data." />
@@ -283,7 +283,7 @@ function TodoList({ day, today, tasks }: { day: ISODate; today: ISODate; tasks: 
         </label>
         <input id="new-task" className="field" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Aggiungi un’attività" />
         <button type="button" className="chip" aria-pressed={dated} onClick={() => setDated((v) => !v)}>
-          {dated ? (isToday ? 'Per oggi' : `Per il ${formatShort(day)}`) : 'Senza data'}
+          {dated ? (isToday ? 'Per oggi' : `Per ${withDate('il', formatShort(day))}`) : 'Senza data'}
         </button>
         <button type="submit" className="btn">
           Aggiungi
@@ -308,7 +308,7 @@ function TaskItems({ tasks, day, empty }: { tasks: Task[]; day: ISODate; empty: 
               onChange={(e) => void patch(db.tasks, t.id, { done: e.target.checked, doneAt: e.target.checked ? Date.now() : undefined })}
             />
             <span>{t.title}</span>
-            {t.due && t.due < day && !t.done ? <span className="task__late">dal {formatShort(t.due)}</span> : null}
+            {t.due && t.due < day && !t.done ? <span className="task__late">{withDate('dal', formatShort(t.due))}</span> : null}
           </label>
           <button type="button" className="task__remove" onClick={() => void remove(db.tasks, t.id)} aria-label={`Elimina ${t.title}`}>
             <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">

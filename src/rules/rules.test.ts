@@ -283,6 +283,11 @@ describe('regola 9: tirocinio', () => {
   const deadlines = tirocinio('2027-03-15', '2027-04-24')
   const DURING = '2027-03-22' // lunedì
 
+  it('la nota elide l’articolo: "Fino all’11 aprile"', () => {
+    const plan = evaluate(ctx({ today: DURING, deadlines: tirocinio('2027-03-15', '2027-04-11') }))
+    expect(plan.notes[0]?.text).toMatch(/^Fino all’11 aprile:/)
+  })
+
   it('nel periodo: palestra e corsa al posto dell’arrampicata', () => {
     const plan = evaluate(ctx({ today: DURING, deadlines }))
     expect(plan.tirocinio).toBe(true)

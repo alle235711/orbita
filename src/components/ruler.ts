@@ -2,7 +2,7 @@
 // Scala lineare nei giorni; le etichette che si toccano salgono di una riga.
 
 import type { Course, Deadline } from '../db/schema'
-import { addDays, diffDays, formatDate, formatShort, isMonthOnly, monthShort, resolveDate, type ISODate } from '../lib/dates'
+import { addDays, diffDays, formatDate, formatShort, isMonthOnly, monthShort, resolveDate, withDate, type ISODate } from '../lib/dates'
 
 export interface RulerTick {
   x: number
@@ -129,10 +129,10 @@ export function layoutRuler(today: ISODate, courses: Course[], deadlines: Deadli
 function describe(today: ISODate, exams: Course[], deadlines: Deadline[]): string {
   // in ordine di data: il tirocinio può cadere prima o dopo gli esami
   const parts: { at: ISODate; text: string }[] = []
-  for (const c of exams.filter((c) => !isMonthOnly(c.examDate!))) parts.push({ at: c.examDate!, text: `${c.name} il ${formatDate(c.examDate!)}` })
+  for (const c of exams.filter((c) => !isMonthOnly(c.examDate!))) parts.push({ at: c.examDate!, text: `${c.name} ${withDate('il', formatDate(c.examDate!))}` })
   const tir = dated(deadlines).find((d) => d.id === 'tirocinio')
   if (tir?.endDate && diffDays(today, tir.endDate) >= 0) {
-    parts.push({ at: resolveDate(tir.date), text: `tirocinio alle Maldive dal ${formatDate(tir.date)} al ${formatDate(tir.endDate)}` })
+    parts.push({ at: resolveDate(tir.date), text: `tirocinio alle Maldive ${withDate('dal', formatDate(tir.date))} ${withDate('al', formatDate(tir.endDate))}` })
   }
   const months = new Map<string, number>()
   for (const c of exams.filter((c) => isMonthOnly(c.examDate!))) months.set(c.examDate!, (months.get(c.examDate!) ?? 0) + 1)
@@ -140,7 +140,7 @@ function describe(today: ISODate, exams: Course[], deadlines: Deadline[]): strin
   const laurea = dated(deadlines).find((d) => d.kind === 'laurea')
   if (laurea) {
     const at = isMonthOnly(laurea.date) ? lastDayOfMonth(laurea.date) : laurea.date
-    parts.push({ at, text: `laurea ${isMonthOnly(laurea.date) ? `a ${formatDate(laurea.date).split(' ')[0]}` : `il ${formatShort(laurea.date)}`}` })
+    parts.push({ at, text: `laurea ${isMonthOnly(laurea.date) ? `a ${formatDate(laurea.date).split(' ')[0]}` : withDate('il', formatShort(laurea.date))}` })
   }
   parts.sort((a, b) => a.at.localeCompare(b.at))
   return `Da oggi alla laurea: ${parts.map((p) => p.text).join(', ')}.`

@@ -44,6 +44,14 @@ describe('righello fino alla laurea', () => {
     )
   })
 
+  it('elide l’articolo davanti a 8 e 11 nella descrizione', () => {
+    const deadlines = SEED_DEADLINES.map((d) => (d.id === 'tirocinio' ? { ...d, date: '2027-03-11', endDate: '2027-04-08' } : d))
+    const courses = SEED_COURSES.map((c, i) => (i === 0 ? { ...c, examDate: '2026-11-08' } : c))
+    const r = layoutRuler('2026-10-27', courses, deadlines, 1100)
+    expect(r.description).toContain(`${courses[0]!.name} l’8 novembre`)
+    expect(r.description).toContain('dall’11 marzo all’8 aprile')
+  })
+
   it('senza le date del tirocinio non disegna il periodo', () => {
     const r = layout(1100, '2026-10-27', SEED_DEADLINES)
     expect(r.marks.some((m) => m.kind === 'period')).toBe(false)

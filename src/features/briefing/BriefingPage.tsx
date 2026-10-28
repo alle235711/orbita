@@ -9,7 +9,7 @@ import { db } from '../../db/db'
 import { useDayPlan } from '../../db/plan-context'
 import { alive } from '../../db/repo'
 import type { Deadline } from '../../db/schema'
-import { addDays, capitalize, diffDays, formatDate, formatLong, isBetween, isMonthOnly, relativeDays, resolveDate, toHHMM } from '../../lib/dates'
+import { addDays, capitalize, diffDays, formatDate, formatLong, isBetween, isMonthOnly, relativeDays, resolveDate, toHHMM, withDate } from '../../lib/dates'
 import { ENERGY } from '../../lib/energy'
 import { priorityReason, weekStatus } from '../../rules/briefing'
 import { itemDuration } from '../../rules/plan'
@@ -92,7 +92,7 @@ export default function BriefingPage() {
             <li key={m.id}>
               <span className="brief__when">
                 {m.end
-                  ? `dal ${formatDate(m.date)} al ${formatDate(m.end)}`
+                  ? `${withDate('dal', formatDate(m.date))} ${withDate('al', formatDate(m.end))}`
                   : isMonthOnly(m.date)
                     ? formatDate(m.date)
                     : `${formatDate(m.date)}, ${relativeDays(m.days)}`}

@@ -49,6 +49,9 @@ describe('briefing: priorità e soglie', () => {
       rules: seedRules(),
     })
     expect(priorityReason(plan, 6.5)).toBe('È l’esame più vicino: tra 16 giorni, il 13 novembre. Negli ultimi 7 giorni ci hai dedicato 6,5 h.')
+    const on11 = SEED_COURSES.map((c) => (c.examDate === '2026-11-13' ? { ...c, examDate: '2026-11-11' } : c))
+    const plan11 = evaluate({ today: TODAY, now: 420, energy: 3, courses: on11, deadlines: SEED_DEADLINES, events: [], sessions: [], workouts: [], cards: { due: {}, fresh: {} }, rules: seedRules() })
+    expect(priorityReason(plan11, 6.5)).toContain('tra 14 giorni, l’11 novembre.')
     expect(priorityReason(plan, 0)).toMatch(/non ci hai ancora lavorato/)
   })
 

@@ -4,7 +4,7 @@ import { Sheet } from '../../components/Sheet'
 import { db } from '../../db/db'
 import { remove, save } from '../../db/repo'
 import type { CalendarEvent, Course, EventType } from '../../db/schema'
-import { formatDate, toHHMM, toMinutes, toTimeInput, type ISODate } from '../../lib/dates'
+import { formatDate, toHHMM, toMinutes, toTimeInput, withDate, type ISODate } from '../../lib/dates'
 
 export const EVENT_TYPES: { id: EventType; label: string }[] = [
   { id: 'lezione', label: 'Lezione' },
@@ -63,7 +63,7 @@ export function EventSheet({ draft, courses, onClose }: EventSheetProps) {
       suggested: draft.suggested ?? false,
       confirmed: true,
     })
-    toast(editing ? 'Impegno aggiornato.' : `Impegno aggiunto il ${formatDate(date)}.`)
+    toast(editing ? 'Impegno aggiornato.' : `Impegno aggiunto ${withDate('il', formatDate(date))}.`)
     onClose()
   }
 

@@ -12,7 +12,7 @@ import { db } from '../../db/db'
 import { useCourses } from '../../db/hooks'
 import { useDayPlan } from '../../db/plan-context'
 import { alive } from '../../db/repo'
-import { formatDate, formatDecimal, formatShort, monthName } from '../../lib/dates'
+import { formatDate, formatDecimal, formatShort, monthName, withDate } from '../../lib/dates'
 import { ENERGY } from '../../lib/energy'
 import {
   averageFor,
@@ -104,7 +104,7 @@ export default function StatistichePage() {
             Statistiche
           </h1>
           <p className="page__lead">
-            {range.days.length === 1 ? `Il ${formatDate(range.from)}` : `Dal ${formatDate(range.from)} al ${formatDate(range.to)}`}
+            {range.days.length === 1 ? withDate('Il', formatDate(range.from)) : `${withDate('Dal', formatDate(range.from))} ${withDate('al', formatDate(range.to))}`}
           </p>
         </div>
         <div className="segmented" role="group" aria-label="Periodo">
@@ -210,7 +210,7 @@ export default function StatistichePage() {
           <div className="panel__head">
             <h2 id="h-peso">Peso</h2>
             <p>
-              {view.weight.last ? `${formatDecimal(view.weight.last.kg)} kg il ${formatShort(view.weight.last.date)}` : 'Nessuna pesata nel periodo'}
+              {view.weight.last ? `${formatDecimal(view.weight.last.kg)} kg ${withDate('il', formatShort(view.weight.last.date))}` : 'Nessuna pesata nel periodo'}
               {view.weight.perWeek !== undefined ? `, ${view.weight.perWeek <= 0 ? '' : '+'}${formatDecimal(view.weight.perWeek, 2)} kg a settimana` : ''}.
             </p>
           </div>

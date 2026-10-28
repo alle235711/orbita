@@ -134,6 +134,28 @@ export function formatShort(s: string): string {
   return isMonthOnly(s) ? monthShort(m!) : `${d} ${monthShort(m!)}`
 }
 
+/**
+ * Unisce articolo o preposizione articolata a una data già formattata, con
+ * l'elisione davanti a 8 e 11 (otto, undici): ('il', '8 novembre') → 'l’8 novembre',
+ * ('dal', '11 gen') → 'dall’11 gen'. Il resto resta con lo spazio: 'il 18 novembre',
+ * 'il 1 marzo', 'a febbraio 2027'.
+ */
+export function withDate(prep: string, date: string): string {
+  const stem = ELIDABLE.get(prep.toLowerCase())
+  if (stem === undefined || !/^(8|11)(?!\d)/.test(date)) return `${prep} ${date}`
+  const head = prep[0] === prep[0]!.toUpperCase() ? capitalize(stem) : stem
+  return `${head}’${date}`
+}
+
+const ELIDABLE = new Map([
+  ['il', 'l'],
+  ['dal', 'dall'],
+  ['al', 'all'],
+  ['del', 'dell'],
+  ['nel', 'nell'],
+  ['sul', 'sull'],
+])
+
 /** 'lunedì 26 ottobre' */
 export function formatLong(iso: ISODate): string {
   return `${weekdayName(iso)} ${formatDate(iso)}`

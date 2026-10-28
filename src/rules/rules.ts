@@ -2,7 +2,7 @@
 // contesto e le proprie soglie e dice se scatta, con il perché.
 
 import type { Course, RuleConfig, Session, Workout, WorkoutType } from '../db/schema'
-import { addDays, diffDays, formatDate, isBetween, resolveDate, weekday, weekStart, type ISODate } from '../lib/dates'
+import { addDays, diffDays, formatDate, isBetween, withDate, resolveDate, weekday, weekStart, type ISODate } from '../lib/dates'
 import { ENERGY, type Energy } from '../lib/energy'
 import { RULES, defaultThresholds } from './defaults'
 import type { BriefingNote, HoursStatus, PlanItem, Priority, ResolvedRule, RuleContext, Rules, SportStatus, Tier } from './types'
@@ -101,7 +101,7 @@ export function ruleTirocinio(ctx: RuleContext, rules: Rules): Profile {
     note: {
       ruleId: 'tirocinio',
       title: 'Periodo di tirocinio',
-      text: `Fino al ${formatDate(period.endDate)}: obiettivo di ${formatHours(r.t.hoursPerDay!)} al giorno, palestra e corsa al posto dell’arrampicata.`,
+      text: `Fino ${withDate('al', formatDate(period.endDate))}: obiettivo di ${formatHours(r.t.hoursPerDay!)} al giorno, palestra e corsa al posto dell’arrampicata.`,
       level: 'info',
     },
   }
