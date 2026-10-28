@@ -90,7 +90,8 @@ export type DeadlineKind = 'periodo' | 'laurea' | 'scadenza'
 export interface Deadline extends Syncable {
   title: string
   kind: DeadlineKind
-  date: string
+  /** 'YYYY-MM-DD' o 'YYYY-MM'; manca finché non la inserisci in Dati. */
+  date?: string
   endDate?: string
   notes?: string
 }

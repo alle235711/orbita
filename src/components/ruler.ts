@@ -35,8 +35,13 @@ const lastDayOfMonth = (ym: string) => {
 /** Primo nome del corso: "Struttura", "Calcolo", "Topologia". */
 export const shortName = (name: string) => name.split(/\s+/)[0] ?? name
 
+type Dated = Deadline & { date: string }
+
+/** Le scadenze con una data: il tirocinio resta senza finché non lo compili in Dati. */
+const dated = (deadlines: Deadline[]): Dated[] => deadlines.filter((d): d is Dated => !!d.date && !d.deletedAt)
+
 export function layoutRuler(today: ISODate, courses: Course[], deadlines: Deadline[], width: number): RulerLayout {
-  const laurea = deadlines.find((d) => d.kind === 'laurea' && !d.deletedAt)
+  const laurea = dated(deadlines).find((d) => d.kind === 'laurea')
   const end = laurea ? (isMonthOnly(laurea.date) ? lastDayOfMonth(laurea.date) : addDays(laurea.date, 14)) : addDays(today, 270)
   const total = Math.max(1, diffDays(today, end))
   const xOf = (date: ISODate) => (Math.min(total, Math.max(0, diffDays(today, date))) / total) * width
@@ -89,7 +94,7 @@ export function layoutRuler(today: ISODate, courses: Course[], deadlines: Deadli
     queue(mark.labelX, label, (row) => (mark.row = row))
   }
 
-  for (const d of deadlines.filter((d) => !d.deletedAt && d.kind === 'periodo' && d.endDate)) {
+  for (const d of dated(deadlines).filter((d) => d.kind === 'periodo' && d.endDate)) {
     if (diffDays(today, d.endDate!) < 0) continue
     const x = xOf(d.date)
     const x2 = xOf(d.endDate!)
@@ -122,17 +127,21 @@ export function layoutRuler(today: ISODate, courses: Course[], deadlines: Deadli
 }
 
 function describe(today: ISODate, exams: Course[], deadlines: Deadline[]): string {
-  const parts: string[] = []
-  const singles = exams.filter((c) => !isMonthOnly(c.examDate!))
-  for (const c of singles) parts.push(`${c.name} il ${formatDate(c.examDate!)}`)
-  const tir = deadlines.find((d) => d.id === 'tirocinio' && !d.deletedAt)
+  // in ordine di data: il tirocinio può cadere prima o dopo gli esami
+  const parts: { at: ISODate; text: string }[] = []
+  for (const c of exams.filter((c) => !isMonthOnly(c.examDate!))) parts.push({ at: c.examDate!, text: `${c.name} il ${formatDate(c.examDate!)}` })
+  const tir = dated(deadlines).find((d) => d.id === 'tirocinio')
   if (tir?.endDate && diffDays(today, tir.endDate) >= 0) {
-    parts.push(`tirocinio alle Maldive dal ${formatDate(tir.date)} al ${formatDate(tir.endDate)}`)
+    parts.push({ at: resolveDate(tir.date), text: `tirocinio alle Maldive dal ${formatDate(tir.date)} al ${formatDate(tir.endDate)}` })
   }
   const months = new Map<string, number>()
   for (const c of exams.filter((c) => isMonthOnly(c.examDate!))) months.set(c.examDate!, (months.get(c.examDate!) ?? 0) + 1)
-  for (const [m, n] of months) parts.push(`${n === 1 ? 'un esame' : `${n} esami`} a ${formatDate(m).split(' ')[0]}`)
-  const laurea = deadlines.find((d) => d.kind === 'laurea' && !d.deletedAt)
-  if (laurea) parts.push(`laurea ${isMonthOnly(laurea.date) ? `a ${formatDate(laurea.date).split(' ')[0]}` : `il ${formatShort(laurea.date)}`}`)
-  return `Da oggi alla laurea: ${parts.join(', ')}.`
+  for (const [m, n] of months) parts.push({ at: resolveDate(m), text: `${n === 1 ? 'un esame' : `${n} esami`} a ${formatDate(m).split(' ')[0]}` })
+  const laurea = dated(deadlines).find((d) => d.kind === 'laurea')
+  if (laurea) {
+    const at = isMonthOnly(laurea.date) ? lastDayOfMonth(laurea.date) : laurea.date
+    parts.push({ at, text: `laurea ${isMonthOnly(laurea.date) ? `a ${formatDate(laurea.date).split(' ')[0]}` : `il ${formatShort(laurea.date)}`}` })
+  }
+  parts.sort((a, b) => a.at.localeCompare(b.at))
+  return `Da oggi alla laurea: ${parts.map((p) => p.text).join(', ')}.`
 }

@@ -4,7 +4,7 @@ import { href } from '../../app/router'
 import { toast } from '../../app/toast'
 import { Sky } from '../../art/Sky'
 import { db } from '../../db/db'
-import { useRules } from '../../db/hooks'
+import { useDeadlines, useRules } from '../../db/hooks'
 import type { RuleConfig, RuleId } from '../../db/schema'
 import { clampThreshold } from '../../rules/briefing'
 import { RULES, defaultThresholds, type RuleDefinition, type ThresholdSpec } from '../../rules/defaults'
@@ -24,6 +24,8 @@ async function saveRule(id: RuleId, change: Partial<Pick<RuleConfig, 'enabled' |
 export default function RegolePage() {
   const saved = useRules()
   const byId = new Map(saved.map((r) => [r.id, r]))
+  const tirocinio = useDeadlines().find((d) => d.id === 'tirocinio')
+  const tirocinioDated = !!tirocinio?.date && !!tirocinio.endDate
   const [confirmReset, setConfirmReset] = useState(false)
 
   const reset = async () => {
@@ -54,7 +56,7 @@ export default function RegolePage() {
 
       <ol className="rules" role="list">
         {RULES.map((def) => (
-          <RuleRow key={def.id} def={def} config={byId.get(def.id)} />
+          <RuleRow key={def.id} def={def} config={byId.get(def.id)} tirocinioDated={tirocinioDated} />
         ))}
       </ol>
 
@@ -67,7 +69,7 @@ export default function RegolePage() {
   )
 }
 
-function RuleRow({ def, config }: { def: RuleDefinition; config?: RuleConfig }) {
+function RuleRow({ def, config, tirocinioDated }: { def: RuleDefinition; config?: RuleConfig; tirocinioDated: boolean }) {
   const enabled = config?.enabled ?? true
   const values = { ...defaultThresholds(def.id), ...config?.thresholds }
   return (
@@ -98,7 +100,8 @@ function RuleRow({ def, config }: { def: RuleDefinition; config?: RuleConfig }) 
         </div>
         {def.id === 'tirocinio' ? (
           <p className="rule__note">
-            Le date del tirocinio si cambiano in <a href={href('dati')}>Dati</a>.
+            {tirocinioDated ? 'Le date del tirocinio si cambiano in ' : 'Mancano le date del tirocinio: inseriscile in '}
+            <a href={href('dati')}>Dati</a>.
           </p>
         ) : null}
       </div>

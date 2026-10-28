@@ -25,7 +25,7 @@ describe('date', () => {
     expect(diffDays('2026-10-27', '2026-11-13')).toBe(17)
     expect(diffDays('2026-10-24', '2026-10-26')).toBe(2) // 25 ottobre: fine dell'ora legale
     expect(diffDays('2026-11-13', '2026-10-27')).toBe(-17)
-    expect(diffDays('2026-12-14', '2027-02')).toBe(49)
+    expect(diffDays('2026-12-10', '2027-02')).toBe(53)
   })
 
   it('somma i giorni', () => {
@@ -41,9 +41,9 @@ describe('date', () => {
   })
 
   it('controlla gli intervalli con estremi compresi', () => {
-    expect(isBetween('2026-12-14', '2026-12-14', '2027-01-24')).toBe(true)
-    expect(isBetween('2027-01-24', '2026-12-14', '2027-01-24')).toBe(true)
-    expect(isBetween('2027-01-25', '2026-12-14', '2027-01-24')).toBe(false)
+    expect(isBetween('2027-03-15', '2027-03-15', '2027-04-24')).toBe(true)
+    expect(isBetween('2027-04-24', '2027-03-15', '2027-04-24')).toBe(true)
+    expect(isBetween('2027-04-25', '2027-03-15', '2027-04-24')).toBe(false)
     expect(rangeDays('2026-10-30', '2026-11-02')).toEqual(['2026-10-30', '2026-10-31', '2026-11-01', '2026-11-02'])
   })
 
@@ -58,7 +58,7 @@ describe('date', () => {
     expect(formatDate('2026-11-13')).toBe('13 novembre')
     expect(formatDate('2027-02')).toBe('febbraio 2027')
     expect(formatShort('2027-07')).toBe('lug')
-    expect(formatShort('2026-12-14')).toBe('14 dic')
+    expect(formatShort('2026-12-10')).toBe('10 dic')
     expect(relativeDays(17)).toBe('tra 17 giorni')
     expect(relativeDays(1)).toBe('domani')
     expect(formatMinutes(45)).toBe('45 min')

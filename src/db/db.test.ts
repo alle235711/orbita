@@ -28,7 +28,10 @@ describe('seed', () => {
     expect((await db.courses.get('sdm'))?.examDate).toBe('2026-11-13')
     expect((await db.courses.get('calcolo'))?.examDate).toBe('2026-11-17')
     expect((await db.courses.get('topalg'))?.examDate).toBe('2027-02')
-    expect(await db.deadlines.get('tirocinio')).toMatchObject({ date: '2026-12-14', endDate: '2027-01-24' })
+    const tirocinio = await db.deadlines.get('tirocinio')
+    expect(tirocinio).toMatchObject({ kind: 'periodo' })
+    expect(tirocinio?.date).toBeUndefined() // le date si inseriscono in Dati
+    expect(tirocinio?.endDate).toBeUndefined()
     expect((await db.deadlines.get('laurea'))?.date).toBe('2027-07')
     expect(await db.rules.count()).toBe(9)
     expect(await getSetting(db, 'newCardsPerDay')).toBe(15)

@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest'
 import { SEED_COURSES, SEED_DEADLINES } from '../db/seed'
 import { layoutRuler, shortName } from './ruler'
 
-const layout = (width: number, today = '2026-10-27') => layoutRuler(today, SEED_COURSES, SEED_DEADLINES, width)
+// Date finte: nel seed il tirocinio non ne ha, si inseriscono in Dati.
+const DEADLINES = SEED_DEADLINES.map((d) => (d.id === 'tirocinio' ? { ...d, date: '2027-03-15', endDate: '2027-04-24' } : d))
+const layout = (width: number, today = '2026-10-27', deadlines = DEADLINES) => layoutRuler(today, SEED_COURSES, deadlines, width)
 
 describe('righello fino alla laurea', () => {
   it('ricalca le posizioni del mockup a 1100 px', () => {
@@ -15,7 +17,7 @@ describe('righello fino alla laurea', () => {
     expect(next.x).toBeCloseTo(68, -1)
     const period = r.marks.find((m) => m.kind === 'period')!
     expect(period).toMatchObject({ label: 'Maldive' })
-    expect(period.kind === 'period' && [period.x, period.x2]).toEqual([expect.closeTo(191, -1), expect.closeTo(353, -1)])
+    expect(period.kind === 'period' && [period.x, period.x2]).toEqual([expect.closeTo(552, -1), expect.closeTo(711, -1)])
     expect(r.marks.find((m) => m.kind === 'group')).toMatchObject({ label: '3 esami' })
     expect(r.marks.find((m) => m.kind === 'laurea')).toMatchObject({ anchor: 'start' })
     expect(r.marks.filter((m) => m.kind === 'exam')).toHaveLength(1) // Calcolo, il 17 novembre
@@ -38,7 +40,15 @@ describe('righello fino alla laurea', () => {
 
   it('descrive il percorso a parole', () => {
     expect(layout(1100).description).toBe(
-      'Da oggi alla laurea: Struttura della Materia il 13 novembre, Calcolo per l’Astronomia il 17 novembre, tirocinio alle Maldive dal 14 dicembre al 24 gennaio, 3 esami a febbraio, laurea a luglio.',
+      'Da oggi alla laurea: Struttura della Materia il 13 novembre, Calcolo per l’Astronomia il 17 novembre, 3 esami a febbraio, tirocinio alle Maldive dal 15 marzo al 24 aprile, laurea a luglio.',
+    )
+  })
+
+  it('senza le date del tirocinio non disegna il periodo', () => {
+    const r = layout(1100, '2026-10-27', SEED_DEADLINES)
+    expect(r.marks.some((m) => m.kind === 'period')).toBe(false)
+    expect(r.description).toBe(
+      'Da oggi alla laurea: Struttura della Materia il 13 novembre, Calcolo per l’Astronomia il 17 novembre, 3 esami a febbraio, laurea a luglio.',
     )
   })
 

@@ -90,7 +90,7 @@ export function ruleTirocinio(ctx: RuleContext, rules: Rules): Profile {
   }
   const r = rules.tirocinio
   const period = ctx.deadlines.find((d) => d.id === 'tirocinio' && !d.deletedAt)
-  if (!r.enabled || !period?.endDate || !isBetween(ctx.today, period.date, period.endDate)) return base
+  if (!r.enabled || !period?.date || !period.endDate || !isBetween(ctx.today, period.date, period.endDate)) return base
   return {
     tirocinio: true,
     hoursPerDay: r.t.hoursPerDay!,

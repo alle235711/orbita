@@ -141,18 +141,23 @@ export default function DatiPage() {
         <section className="dati__section" aria-labelledby="h-scadenze">
           <h2 id="h-scadenze">Scadenze</h2>
           {tirocinio ? (
-            <div className="dati__pair">
-              <DateField
-                label="Tirocinio alle Maldive, partenza"
-                value={tirocinio.date}
-                onChange={(v) => v && void patch(db.deadlines, tirocinio.id, { date: v })}
-              />
-              <DateField
-                label="Rientro"
-                value={tirocinio.endDate}
-                onChange={(v) => v && void patch(db.deadlines, tirocinio.id, { endDate: v })}
-              />
-            </div>
+            <>
+              <div className="dati__pair">
+                <DateField
+                  label="Tirocinio alle Maldive, partenza"
+                  value={tirocinio.date}
+                  onChange={(v) => void patch(db.deadlines, tirocinio.id, { date: v })}
+                />
+                <DateField
+                  label="Rientro"
+                  value={tirocinio.endDate}
+                  onChange={(v) => void patch(db.deadlines, tirocinio.id, { endDate: v })}
+                />
+              </div>
+              {!tirocinio.date || !tirocinio.endDate ? (
+                <p className="dati__hint">Finché mancano le due date, il piano non passa a palestra e corsa.</p>
+              ) : null}
+            </>
           ) : null}
           {laurea ? (
             <DateField

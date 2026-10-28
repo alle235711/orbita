@@ -277,38 +277,49 @@ describe('regola 8: schede scadute', () => {
 })
 
 describe('regola 9: tirocinio', () => {
-  it('dal 14 dicembre al 24 gennaio: palestra e corsa al posto dell’arrampicata', () => {
-    const plan = evaluate(ctx({ today: '2026-12-21' }))
+  // Date finte: nel seed il tirocinio non ne ha, si inseriscono in Dati.
+  const tirocinio = (date?: string, endDate?: string) =>
+    structuredClone(SEED_DEADLINES).map((d) => (d.id === 'tirocinio' ? { ...d, date, endDate } : d))
+  const deadlines = tirocinio('2027-03-15', '2027-04-24')
+  const DURING = '2027-03-22' // lunedì
+
+  it('nel periodo: palestra e corsa al posto dell’arrampicata', () => {
+    const plan = evaluate(ctx({ today: DURING, deadlines }))
     expect(plan.tirocinio).toBe(true)
     expect(plan.sport.main).toBe('palestra')
-    expect(titles(ctx({ today: '2026-12-21' }))).toContain('Palestra')
-    expect(titles(ctx({ today: '2026-12-21' }))).not.toContain('Arrampicata')
+    expect(titles(ctx({ today: DURING, deadlines }))).toContain('Palestra')
+    expect(titles(ctx({ today: DURING, deadlines }))).not.toContain('Arrampicata')
     expect(plan.notes[0]?.ruleId).toBe('tirocinio')
   })
 
   it('estremi compresi', () => {
-    expect(evaluate(ctx({ today: '2026-12-14' })).tirocinio).toBe(true)
-    expect(evaluate(ctx({ today: '2027-01-24' })).tirocinio).toBe(true)
-    expect(evaluate(ctx({ today: '2026-12-13' })).tirocinio).toBe(false)
-    expect(evaluate(ctx({ today: '2027-01-25' })).tirocinio).toBe(false)
+    expect(evaluate(ctx({ today: '2027-03-15', deadlines })).tirocinio).toBe(true)
+    expect(evaluate(ctx({ today: '2027-04-24', deadlines })).tirocinio).toBe(true)
+    expect(evaluate(ctx({ today: '2027-03-14', deadlines })).tirocinio).toBe(false)
+    expect(evaluate(ctx({ today: '2027-04-25', deadlines })).tirocinio).toBe(false)
   })
 
   it('ha un obiettivo orario e soglie sportive a parte', () => {
     const rules = withRule('tirocinio', { thresholds: { hoursPerDay: 6, gym: 2 } })
-    const plan = evaluate(ctx({ today: '2026-12-21', rules }))
+    const plan = evaluate(ctx({ today: DURING, deadlines, rules }))
     expect(plan.hours.target7).toBe(42)
     expect(plan.sport.mainTarget).toBe(2)
   })
 
   it('disattivata: valgono le regole di sempre', () => {
-    const plan = evaluate(ctx({ today: '2026-12-21', rules: withRule('tirocinio', { enabled: false }) }))
+    const plan = evaluate(ctx({ today: DURING, deadlines, rules: withRule('tirocinio', { enabled: false }) }))
     expect(plan.tirocinio).toBe(false)
     expect(plan.sport.main).toBe('arrampicata')
   })
 
   it('segue le date modificate', () => {
-    const deadlines = structuredClone(SEED_DEADLINES).map((d) => (d.id === 'tirocinio' ? { ...d, date: '2027-01-05' } : d))
-    expect(evaluate(ctx({ today: '2026-12-21', deadlines })).tirocinio).toBe(false)
+    expect(evaluate(ctx({ today: DURING, deadlines: tirocinio('2027-04-01', '2027-04-24') })).tirocinio).toBe(false)
+  })
+
+  it('senza date, o con una sola, non scatta', () => {
+    expect(evaluate(ctx({ today: DURING })).tirocinio).toBe(false)
+    expect(evaluate(ctx({ today: DURING, deadlines: tirocinio('2027-03-15') })).tirocinio).toBe(false)
+    expect(evaluate(ctx({ today: DURING, deadlines: tirocinio(undefined, '2027-04-24') })).tirocinio).toBe(false)
   })
 })
 

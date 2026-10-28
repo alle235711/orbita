@@ -8,6 +8,7 @@ import { Ruler } from '../../components/Ruler'
 import { db } from '../../db/db'
 import { useDayPlan } from '../../db/plan-context'
 import { alive } from '../../db/repo'
+import type { Deadline } from '../../db/schema'
 import { addDays, capitalize, diffDays, formatDate, formatLong, isBetween, isMonthOnly, relativeDays, resolveDate, toHHMM } from '../../lib/dates'
 import { ENERGY } from '../../lib/energy'
 import { priorityReason, weekStatus } from '../../rules/briefing'
@@ -33,7 +34,7 @@ export default function BriefingPage() {
     .filter((c) => c.examDate && diffDays(today, c.examDate) >= 0)
     .map((c): { id: string; title: string; date: string; days: number; end?: string } => ({ id: c.id, title: c.name, date: c.examDate!, days: diffDays(today, c.examDate!) }))
   const others = context.deadlines
-    .filter((d) => diffDays(today, d.endDate ?? d.date) >= 0)
+    .filter((d): d is Deadline & { date: string } => !!d.date && diffDays(today, d.endDate ?? d.date) >= 0)
     .map((d) => ({ id: d.id, title: d.kind === 'laurea' ? `${d.title}${d.notes ? `, ${d.notes.toLowerCase()}` : ''}` : d.title, date: d.date, days: diffDays(today, d.date), end: d.endDate }))
   const milestones = [...upcoming, ...others].sort((a, b) => resolveDate(a.date).localeCompare(resolveDate(b.date))).slice(0, 7)
 

@@ -71,14 +71,8 @@ export const SEED_COURSES: Course[] = [
 ]
 
 export const SEED_DEADLINES: Deadline[] = [
-  {
-    id: 'tirocinio',
-    title: 'Tirocinio alle Maldive',
-    kind: 'periodo',
-    date: '2026-12-14',
-    endDate: '2027-01-24',
-    updatedAt: 0,
-  },
+  // Le date del tirocinio si inseriscono nella pagina Dati.
+  { id: 'tirocinio', title: 'Tirocinio alle Maldive', kind: 'periodo', updatedAt: 0 },
   { id: 'laurea', title: 'Laurea', kind: 'laurea', date: '2027-07', notes: 'Obiettivo media ≥ 28', updatedAt: 0 },
 ]
 
