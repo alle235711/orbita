@@ -1,5 +1,6 @@
 import { DEFAULT_LANGUAGE, type LanguageSettings } from '../i18n/lang'
 import { DEFAULT_MODULES, DEFAULT_STUDY_BLOCK, type ModulesSettings, type StudyBlockSettings } from '../modules/types'
+import { DEFAULT_GRADUATION, type GraduationFormula } from '../libretto/grades'
 import type { OrbitaDB } from './db'
 import type { Profile } from './profile'
 
@@ -13,6 +14,14 @@ export interface ActiveTimer {
   startedAt: number
   /** Minuti del blocco di studio previsto (voci di studio del piano). */
   planned?: number
+}
+
+export interface PendingCapture {
+  resultId: string
+  courseId: string
+}
+export interface GraduationSettings {
+  formula: GraduationFormula
 }
 
 /** Le impostazioni conosciute, con il loro tipo e il valore predefinito. */
@@ -29,6 +38,10 @@ export interface SettingValues {
   modules: ModulesSettings
   /** Passare da normalizeStudyBlock. */
   studyBlock: StudyBlockSettings
+  /** Passare da normalizeGraduation. */
+  graduation: GraduationSettings
+  /** Voti appena presi in attesa dell'animazione di cattura. Passare da normalizePendingCaptures. */
+  pendingCaptures: PendingCapture[]
 }
 
 export const SETTING_DEFAULTS: SettingValues = {
@@ -40,6 +53,8 @@ export const SETTING_DEFAULTS: SettingValues = {
   profile: null,
   modules: DEFAULT_MODULES,
   studyBlock: DEFAULT_STUDY_BLOCK,
+  graduation: DEFAULT_GRADUATION,
+  pendingCaptures: [],
 }
 
 export async function getSetting<K extends keyof SettingValues>(db: OrbitaDB, key: K): Promise<SettingValues[K]> {

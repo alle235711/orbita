@@ -8,18 +8,19 @@ import { evaluate } from '../rules/plan'
 import type { DayPlan, RuleContext } from '../rules/types'
 import { db, type OrbitaDB } from './db'
 import { alive } from './repo'
-import type { CalendarEvent } from './schema'
+import type { CalendarEvent, ExamResult } from './schema'
+import { activeCourses } from '../libretto/grades'
 import { normalizeModules, normalizeStudyBlock } from '../modules/types'
 import { normalizeProfile } from './profile'
 import { getSetting } from './settings'
 
-export type LoadedContext = Omit<RuleContext, 'now'> & { eventsAll: CalendarEvent[] }
+export type LoadedContext = Omit<RuleContext, 'now'> & { eventsAll: CalendarEvent[]; results: ExamResult[] }
 
 /** Legge dal database tutto quello che serve alle regole per il giorno `today`. */
 export async function loadRuleContext(db: OrbitaDB, today: ISODate): Promise<LoadedContext> {
   const rules = await db.rules.toArray()
   const history = resolveGroups(rules).storico
-  const [day, courses, deadlines, events, sessions, workouts, cards, states, newPerDay, profile, modules, studyBlock] = await Promise.all([
+  const [day, courses, deadlines, events, sessions, workouts, cards, states, newPerDay, profile, modules, studyBlock, resultsRaw] = await Promise.all([
     db.days.get(today),
     db.courses.toArray(),
     db.deadlines.toArray(),
@@ -32,14 +33,20 @@ export async function loadRuleContext(db: OrbitaDB, today: ISODate): Promise<Loa
     getSetting(db, 'profile'),
     getSetting(db, 'modules'),
     getSetting(db, 'studyBlock'),
+    db.results.toArray(),
   ])
   const liveCourses = alive(courses)
-  const queue = dailyQueue({ today, cards: alive(cards), states: alive(states), courses: liveCourses, newPerDay })
+  const results = alive(resultsRaw)
+  // Un esame superato esce dal piano, dal righello e dalla coda; le sue schede restano.
+  const active = activeCourses(liveCourses, results)
+  const activeIds = new Set(active.map((c) => c.id))
+  const queue = dailyQueue({ today, cards: alive(cards).filter((c) => activeIds.has(c.courseId)), states: alive(states), courses: active, newPerDay })
   const eventsAll = alive(events)
   return {
     today,
     energy: day && !day.deletedAt ? day.energy : undefined,
-    courses: liveCourses,
+    courses: active,
+    results,
     deadlines: alive(deadlines),
     rules: alive(rules),
     events: eventsAll.filter((e) => e.date === today),

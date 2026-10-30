@@ -17,6 +17,7 @@ const PAGES: Record<RouteId, LazyExoticComponent<ComponentType>> = {
   oggi: lazy(() => import('../features/oggi/OggiPage')),
   agenda: lazy(() => import('../features/agenda/AgendaPage')),
   briefing: lazy(() => import('../features/briefing/BriefingPage')),
+  libretto: lazy(() => import('../features/libretto/LibrettoPage')),
   regole: lazy(() => import('../features/regole/RegolePage')),
   statistiche: lazy(() => import('../features/statistiche/StatistichePage')),
   ripasso: lazy(() => import('../features/ripasso/RipassoPage')),

@@ -6,7 +6,7 @@ import { useActivityClock } from '../../app/useActivityClock'
 import { useToday } from '../../app/useToday'
 import { SubjectChalk } from '../../art/Chalk'
 import { db } from '../../db/db'
-import { useCourses, useSetting, useTuning } from '../../db/hooks'
+import { useActiveCourses, useSetting, useTuning } from '../../db/hooks'
 import { alive } from '../../db/repo'
 import { saveReview, setNeedsFix } from '../../db/review-actions'
 import type { Card, ReviewMode } from '../../db/schema'
@@ -25,7 +25,7 @@ export default function RipassoPage() {
   const route = useRoute()
   const today = useToday()
   const tuning = useTuning()
-  const courses = useCourses()
+  const courses = useActiveCourses()
   const newPerDay = useSetting('newCardsPerDay') ?? 15
   // Scheda, modalità e scatola si fissano quando la scheda arriva: salvando
   // la revisione la scatola cambia, ma l'esercizio in corso no.

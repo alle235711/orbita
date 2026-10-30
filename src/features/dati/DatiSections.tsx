@@ -3,7 +3,8 @@ import { DateField } from '../../components/DateField'
 import { ModuleSwitches } from '../../components/ModuleSwitches'
 import { NumberField } from '../../components/NumberField'
 import { db } from '../../db/db'
-import { useCourses, useDeadlines, useModules, useProfile } from '../../db/hooks'
+import { useCourses, useDeadlines, useModules, useProfile, useResults } from '../../db/hooks'
+import { courseStatus } from '../../libretto/grades'
 import { normalizeProfile } from '../../db/profile'
 import { patch, remove, save } from '../../db/repo'
 import { importSampleDeck, listSampleDecks, loadSampleFile, type SampleDeck } from '../../db/sample-decks'
@@ -100,6 +101,8 @@ export function ExamsSection({ cardCounts }: { cardCounts: Map<string, number> |
   const { t } = useI18n()
   const td = t.dati
   const courses = useCourses()
+  const results = useResults()
+  const passed = new Set(courses.filter((c) => courseStatus(c.id, results).kind === 'superato').map((c) => c.id))
   const [adding, setAdding] = useState(false)
   const byExam = (a: Course, b: Course) =>
     (a.examDate ? resolveDate(a.examDate) : '9999').localeCompare(b.examDate ? resolveDate(b.examDate) : '9999') || a.name.localeCompare(b.name, 'it')
@@ -111,7 +114,7 @@ export function ExamsSection({ cardCounts }: { cardCounts: Map<string, number> |
       <p className="dati__hint">{td.coursesHint}</p>
       <ul className="courses" role="list">
         {first.map((c) => (
-          <CourseRow key={c.id} course={c} cards={cardCounts?.get(c.id) ?? 0} />
+          <CourseRow key={c.id} course={c} cards={cardCounts?.get(c.id) ?? 0} passed={passed.has(c.id)} />
         ))}
       </ul>
       {later.length ? (
@@ -119,7 +122,7 @@ export function ExamsSection({ cardCounts }: { cardCounts: Map<string, number> |
           <h3 className="dati__sub">{td.secondSemester}</h3>
           <ul className="courses" role="list">
             {later.map((c) => (
-              <CourseRow key={c.id} course={c} cards={cardCounts?.get(c.id) ?? 0} />
+              <CourseRow key={c.id} course={c} cards={cardCounts?.get(c.id) ?? 0} passed={passed.has(c.id)} />
             ))}
           </ul>
         </>
@@ -174,7 +177,7 @@ function NewExam({ onDone }: { onDone: () => void }) {
   )
 }
 
-function CourseRow({ course, cards }: { course: Course; cards: number }) {
+function CourseRow({ course, cards, passed }: { course: Course; cards: number; passed: boolean }) {
   const { t, f } = useI18n()
   const td = t.dati
   const te = t.profilo.exams
@@ -195,6 +198,7 @@ function CourseRow({ course, cards }: { course: Course; cards: number }) {
           }}
         />
         {meta ? <span className="course__meta">{meta}</span> : null}
+        {passed ? <span className="course__chip">{t.libretto.passedChip}</span> : null}
       </div>
       <DateField
         label={course.examDate ? td.exam({ date: course.examDate }, f) : td.examTbd}
@@ -238,7 +242,9 @@ export function PeriodsSection() {
   const periods = useDeadlines()
     .filter((d) => d.kind === 'periodo')
     .sort((a, b) => (a.date ?? '9999').localeCompare(b.date ?? '9999') || a.title.localeCompare(b.title, 'it'))
-  const add = () => void save<Deadline>(db.deadlines, { title: tp.untitled, kind: 'periodo' })
+  const add = () => {
+    void save<Deadline>(db.deadlines, { title: tp.untitled, kind: 'periodo' })
+  }
   return (
     <section className="dati__section" aria-labelledby="h-periodi">
       <h2 id="h-periodi">{tp.title}</h2>

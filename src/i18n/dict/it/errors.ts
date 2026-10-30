@@ -11,5 +11,18 @@ export const errors = {
   cardDuplicateId: (p: { id: string }) => `L’id ${p.id} compare due volte.`,
   invalidJson: (p: { name: string }) => `${p.name} non è un file JSON valido.`,
   courseMissing: () => 'Il corso non esiste più.',
+  backupResultRow: () => 'Un voto del backup non è valido.',
+  resultInvalid: (p: { field: string; code: string }) => {
+    const m: Record<string, string> = {
+      'course.required': 'Scegli un esame.',
+      'course.invalid': 'Questo esame non c’è più.',
+      'date.required': 'Inserisci la data.',
+      'date.invalid': 'Scrivi una data completa, con giorno, mese e anno.',
+      'grade.invalid': 'Il voto è un numero intero.',
+      'grade.range': 'Il voto va da 18 a 30.',
+      'grade.lodeNeeds30': 'La lode vale solo con 30.',
+    }
+    return m[`${p.field}.${p.code}`] ?? 'Controlla i dati inseriti.'
+  },
   generic: () => 'Qualcosa non ha funzionato.',
 }

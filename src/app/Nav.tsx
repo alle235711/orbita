@@ -11,6 +11,7 @@ export const NAV_ITEMS: { id: RouteId }[] = [
   { id: 'oggi' },
   { id: 'agenda' },
   { id: 'briefing' },
+  { id: 'libretto' },
   { id: 'statistiche' },
   { id: 'ripasso' },
   { id: 'dattilografia' },

@@ -175,3 +175,13 @@
 .dati__pair {
   padding-inline: 2px;
 }
+
+.course__chip {
+  justify-self: start;
+  padding: 2px 10px;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  color: var(--disk);
+}

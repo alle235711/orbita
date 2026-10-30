@@ -5,6 +5,7 @@ const items: Record<RouteId, string> = {
   oggi: 'Today',
   agenda: 'Agenda',
   briefing: 'Briefing',
+  libretto: 'Transcript',
   regole: 'Rules',
   statistiche: 'Stats',
   ripasso: 'Review',

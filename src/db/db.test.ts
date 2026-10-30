@@ -206,7 +206,8 @@ describe('aggiornamento di Dexie dalla versione 1 alla 2', () => {
     const upgraded = createDb(name)
     try {
       await upgraded.open()
-      expect(upgraded.verno).toBe(2)
+      expect(upgraded.verno).toBe(3)
+      expect(await upgraded.results.count()).toBe(0)
       const expected = migrateToV2(fixture)
       for (const t of V2_INPUT_TABLES) expect(sorted(await upgraded.table(t).toArray()), t).toEqual(sorted(expected[t]!))
       expect(await upgraded.table('rules').get('lean')).toBeUndefined()
@@ -233,9 +234,30 @@ describe('aggiornamento di Dexie dalla versione 1 alla 2', () => {
     }
   })
 
-  it('un database nuovo parte direttamente dalla versione 2, vuoto', async () => {
+  it('da v2 a v3 aggiunge solo la tabella dei risultati e lascia intatti i dati', async () => {
+    const name = `upgrade-${crypto.randomUUID()}`
+    const old = new Dexie(name)
+    old.version(1).stores(SCHEMA_V1)
+    old.version(2).stores(SCHEMA_V1)
+    await old.table('settings').bulkPut([{ id: 'newCardsPerDay', value: 7, updatedAt: 5 }])
+    old.close()
+    const upgraded = createDb(name)
+    try {
+      await upgraded.open()
+      expect(upgraded.verno).toBe(3)
+      expect(await getSetting(upgraded, 'newCardsPerDay')).toBe(7)
+      expect(upgraded.results.schema.idxByName.courseId).toBeDefined()
+      expect(upgraded.results.schema.idxByName.date).toBeDefined()
+      expect(upgraded.results.schema.idxByName.updatedAt).toBeDefined()
+    } finally {
+      await upgraded.delete()
+    }
+  })
+
+  it('un database nuovo parte direttamente dalla versione 3, vuoto', async () => {
     await db.open()
-    expect(db.verno).toBe(2)
+    expect(db.verno).toBe(3)
+    expect(await db.results.count()).toBe(0)
     expect(await db.rules.count()).toBe(0)
     expect(await db.settings.count()).toBe(0)
   })

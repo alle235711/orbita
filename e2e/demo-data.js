@@ -71,6 +71,37 @@ export function demoBackup(today, { deckIds = [] } = {}) {
     updatedAt: stamp,
   }))
 
+  // Esami già superati (nomi inventati) e i loro voti, con date nel passato: il Libretto ha di che mostrare.
+  const passed = [
+    ['Analisi Fittizia', 9, 70, { grade: 27 }],
+    ['Chimica Fittizia', 6, 55, { grade: 24 }],
+    ['Algebra Lineare Fittizia', 12, 40, { grade: 30, lode: true }],
+    ['Laboratorio Fittizio', 3, 30, {}],
+    ['Statistica Fittizia', 9, 20, { grade: 28 }],
+  ]
+  const passedCourses = passed.map(([name, cfu, ago], i) => ({
+    id: `demo-c-${COURSE_NAMES.length + i + 1}`,
+    name,
+    cfu,
+    examDate: shift(today, -ago),
+    difficulty: 2,
+    semester: 1,
+    sections: [],
+    updatedAt: stamp,
+  }))
+  const results = [
+    ...passed.map(([, , ago, extra], i) => ({
+      id: `demo-res-${i + 1}`,
+      courseId: passedCourses[i].id,
+      date: shift(today, -ago),
+      outcome: 'superato',
+      ...extra,
+      updatedAt: 1000 + i,
+    })),
+    { id: 'demo-res-6', courseId: courses[4].id, date: shift(today, -40), outcome: 'non-superato', updatedAt: 1010 },
+    { id: 'demo-res-7', courseId: courses[4].id, date: shift(today, -12), outcome: 'rifiutato', updatedAt: 1011 },
+  ]
+
   // un piccolo mazzo proprio per ogni corso, con gli id che cominciano per "demo-"
   courses.forEach((c, ci) => {
     for (let k = 0; k < 8; k++) {
@@ -228,6 +259,6 @@ export function demoBackup(today, { deckIds = [] } = {}) {
     app: 'orbita',
     format: 2,
     exportedAt: new Date().toISOString(),
-    tables: { days, sessions, workouts, weights, events, tasks, courses, deadlines, cards, cardState, cardReviews, typingRuns, settings },
+    tables: { days, sessions, workouts, weights, events, tasks, courses: [...courses, ...passedCourses], results, deadlines, cards, cardState, cardReviews, typingRuns, settings },
   }
 }

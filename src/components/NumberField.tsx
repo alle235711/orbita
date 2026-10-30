@@ -37,7 +37,8 @@ export function NumberField({ label, value, onCommit, min, max, step, placeholde
     if (!Number.isFinite(n)) return setText(value === undefined ? '' : String(value))
     if (strict) {
       setText(String(n))
-      if (n !== value) onCommit(n)
+      // Sempre: chi ascolta mostra l'errore e deve poterlo togliere anche se il valore salvato non cambia.
+      onCommit(n)
       return
     }
     const s = step ?? 1

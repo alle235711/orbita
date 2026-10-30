@@ -24,7 +24,7 @@ const ALLOWED_TEXT = new Set([
 ])
 
 /** Parole di codice TypeScript: se compaiono, il pezzo non è testo del JSX. */
-const CODE_WORD = /\b(interface|const|let|return|else|catch|export|function|import|Promise|Record|extends|async|await)\b/
+const CODE_WORD = /\b(try|interface|const|let|return|else|catch|export|function|import|Promise|Record|extends|async|await)\b/
 
 const LETTER = /[A-Za-zÀ-ÿ]/
 const ATTRS = ['aria-label', 'aria-description', 'aria-roledescription', 'placeholder', 'title', 'alt', 'label']

@@ -121,6 +121,20 @@ export interface Card extends Syncable {
   userEdited: boolean
 }
 
+export type ResultOutcome = 'superato' | 'rifiutato' | 'non-superato'
+
+/** Un tentativo a un esame. id = uuid. */
+export interface ExamResult extends Syncable {
+  courseId: string
+  /** Data completa 'YYYY-MM-DD' del tentativo (mai solo il mese). */
+  date: ISODate
+  outcome: ResultOutcome
+  /** Intero 18..30, solo con esito 'superato'. Assente su un superato = idoneità (CFU, nessun voto). */
+  grade?: number
+  /** Lode: ha senso solo con grade === 30. Assente = false. */
+  lode?: boolean
+}
+
 /** id = id della scheda. */
 export interface CardState extends Syncable {
   box: LeitnerBox
@@ -197,6 +211,7 @@ export interface Tables {
   typingRuns: TypingRun
   rules: RuleConfig
   settings: Setting
+  results: ExamResult
 }
 
 export type TableName = keyof Tables
@@ -216,4 +231,5 @@ export const TABLE_NAMES: TableName[] = [
   'typingRuns',
   'rules',
   'settings',
+  'results',
 ]

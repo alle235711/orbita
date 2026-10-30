@@ -1,0 +1,483 @@
+/* Libretto: nello stile della copertina. Il blocco in alto è isolato, con
+   sfondo opaco, perché le fusioni (difference, overlay) restano dentro di lui. */
+
+.libretto {
+  padding-top: 0;
+}
+
+/* ——— blocco in alto ——— */
+
+.lib__hero {
+  --sky-w: clamp(640px, 90vw, 1100px);
+  position: relative;
+  isolation: isolate;
+  background: var(--bg);
+  overflow: hidden;
+  margin: 0 calc(-1 * var(--gutter));
+  padding: calc(var(--nav-h) + env(safe-area-inset-top) + 20px) max(var(--gutter), env(safe-area-inset-right)) 28px
+    max(var(--gutter), env(safe-area-inset-left));
+}
+
+.lib__bh {
+  z-index: 1;
+  --bhu: calc(0.24px + 0.0462vw);
+  width: calc(780 * var(--bhu));
+  right: calc(14vw - 375 * var(--bhu) - 24px);
+  top: calc(env(safe-area-inset-top) + 130px - 345 * var(--bhu));
+}
+
+.lib__hero-in {
+  position: relative;
+  z-index: 3;
+  max-width: 1100px;
+}
+
+.lib__eyebrow {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+.lib__mean {
+  margin: 10px 0 0 -0.04em;
+  font-size: clamp(4rem, 21vw, 9rem);
+  font-weight: 900;
+  letter-spacing: -0.055em;
+  line-height: 0.86;
+  color: var(--text);
+  mix-blend-mode: difference;
+}
+
+.lib__caption {
+  margin-top: 12px;
+  max-width: 44ch;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--text-rule);
+}
+
+.lib__caption strong {
+  color: var(--text);
+  font-weight: 800;
+}
+
+.lib__note {
+  margin-top: 6px;
+  max-width: 52ch;
+  font-size: var(--fs-small);
+  line-height: 1.4;
+  color: var(--text-2);
+}
+
+/* ——— cifre di contorno ——— */
+
+.lib__stats {
+  display: grid;
+  gap: 0;
+  margin: 28px 0 0;
+  max-width: 900px;
+}
+
+.lib__stat {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  padding: 12px 0 14px;
+  border-top: 2px solid var(--text);
+}
+
+.lib__stat dt {
+  font-size: var(--fs-small);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-2);
+}
+
+.lib__stat dd {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.lib__stat dd.lib__sub {
+  font-size: var(--fs-small);
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.35;
+  color: var(--text-2);
+}
+
+@media (min-width: 640px) {
+  .lib__stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px;
+  }
+}
+
+/* ——— barra dei CFU ——— */
+
+.cfu {
+  margin-top: 6px;
+  max-width: 900px;
+}
+
+.cfu__track {
+  height: 10px;
+  border-radius: 5px;
+  background: var(--line-2);
+  overflow: hidden;
+}
+
+.cfu__fill {
+  height: 100%;
+  border-radius: 5px;
+  background: var(--disk);
+  transform-origin: left center;
+  transition: transform 0.6s var(--ease-out);
+}
+
+.cfu__text {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 16px;
+  margin-top: 8px;
+  font-size: var(--fs-small);
+  color: var(--text-2);
+}
+
+/* ——— corpo ——— */
+
+.lib__body {
+  position: relative;
+  z-index: 1;
+  padding-top: 28px;
+}
+
+.lib__main {
+  display: grid;
+  gap: 28px;
+  max-width: 1180px;
+}
+
+.lib__add-wide {
+  display: none;
+}
+
+.lib__add-mobile .btn {
+  width: 100%;
+}
+
+@media (min-width: 900px) {
+  .lib__main {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    grid-auto-flow: dense;
+    gap: 0 40px;
+    align-items: start;
+  }
+
+  .lib__main > .lib__sim {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    position: sticky;
+    top: calc(var(--nav-h) + 16px);
+  }
+
+  .lib__main > .lib__list {
+    grid-column: 1;
+    margin-bottom: 28px;
+  }
+
+  .lib__add-mobile {
+    display: none;
+  }
+
+  .lib__add-wide {
+    display: block;
+  }
+}
+
+/* ——— simulatore ——— */
+
+.lib__sim {
+  padding: 20px;
+  background: var(--panel);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-xl);
+}
+
+.lib__sim h2,
+.lib__list h2 {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.lib__target {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-top: 14px;
+}
+
+.lib__target label {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.lib__stepper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lib__step {
+  display: grid;
+  place-items: center;
+  width: var(--tap);
+  height: var(--tap);
+  border: 1px solid var(--line-2);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text);
+  transition:
+    transform 0.15s var(--ease-out),
+    background-color 0.2s ease;
+}
+
+.lib__step:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.lib__step:disabled {
+  opacity: 0.4;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .lib__step:hover:not(:disabled) {
+    background: var(--line);
+  }
+}
+
+.lib__target-input {
+  width: 4.5rem;
+  min-height: var(--tap);
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.lib__live {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 2px solid var(--text);
+}
+
+.lib__sentence {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+  text-wrap: pretty;
+}
+
+.lib__key {
+  color: var(--disk);
+  font-weight: 900;
+}
+
+.lib__hint {
+  margin-top: 10px;
+  font-size: var(--fs-small);
+  color: var(--text-2);
+}
+
+/* ——— elenchi ——— */
+
+.lib__list ul {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 2px solid var(--text);
+}
+
+.lib__list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.lib__list-head h2 {
+  padding-top: 4px;
+}
+
+.lib__empty {
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 2px solid var(--text);
+  color: var(--text-2);
+}
+
+.lib__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-height: 64px;
+  padding: 10px 6px 10px 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  transition: background-color 0.2s ease;
+}
+
+.lib__row:active {
+  background: var(--line);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .lib__row:hover {
+    background: rgba(185, 199, 238, 0.07);
+  }
+}
+
+.lib__row-main {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.lib__row-name {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.lib__row-meta {
+  font-size: var(--fs-small);
+  color: var(--text-2);
+}
+
+.lib__grade {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex: none;
+  font-size: 36px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.lib__grade--top {
+  color: var(--disk);
+}
+
+.lib__lode {
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--disk);
+}
+
+.lib__word {
+  flex: none;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.lib__word--dim {
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+/* ——— pannelli ——— */
+
+.lib-sheet__course {
+  font-size: 1.0625rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.lib-sheet__outcome {
+  display: flex;
+}
+
+.lib-sheet__outcome .segmented__item {
+  flex: 1;
+  min-width: 0;
+  padding: 0 6px;
+}
+
+.lib-sheet__check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--tap);
+  font-size: 0.9375rem;
+  color: var(--text);
+}
+
+.lib-formula__lead {
+  color: var(--text-2);
+}
+
+.lib-formula__bonuses {
+  display: grid;
+  gap: 10px;
+}
+
+.lib-formula__bonuses h3 {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.lib-formula__bonuses ul {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lib-bonus {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 10px;
+  align-items: end;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.lib-bonus__label {
+  grid-column: 1 / -1;
+}
+
+.lib-bonus__spacer {
+  display: none;
+}
+
+.lib-bonus__remove {
+  width: var(--tap);
+  padding: 0;
+}
+
+.lib-formula__hint {
+  font-size: var(--fs-small);
+  color: var(--text-2);
+}
+
+.lib-formula__preview {
+  font-size: 1.125rem;
+  font-weight: 800;
+}

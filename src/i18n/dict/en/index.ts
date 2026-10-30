@@ -5,6 +5,7 @@ import { art } from './art'
 import { briefing } from './briefing'
 import { common } from './common'
 import { dati } from './dati'
+import { libretto } from './libretto'
 import { energy } from './energy'
 import { errors } from './errors'
 import { benvenuto } from './benvenuto'
@@ -22,4 +23,4 @@ import { sport } from './sport'
 import { stats } from './stats'
 import { typing } from './typing'
 
-export const en: Dict = { common, app, nav, oggi, plan, briefing, regole, ruler, agenda, ripasso, typing, stats, dati, quicklog, errors, energy, sport, art, modules, blocks, profilo, benvenuto }
+export const en: Dict = { common, app, nav, oggi, plan, briefing, regole, ruler, agenda, ripasso, typing, stats, dati, quicklog, errors, energy, sport, art, modules, blocks, profilo, benvenuto, libretto }

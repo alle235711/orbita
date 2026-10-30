@@ -3,16 +3,36 @@ import { useMemo } from 'react'
 import type { ISODate } from '../lib/dates'
 import { db } from './db'
 import { alive } from './repo'
-import type { Course, DayRecord, Deadline, RuleConfig } from './schema'
+import type { Course, DayRecord, Deadline, ExamResult, RuleConfig } from './schema'
+import { activeCourses, normalizeGraduation, normalizeTargetAverage } from '../libretto/grades'
 import { normalizeModules, normalizeStudyBlock, type ModulesSettings, type StudyBlockSettings } from '../modules/types'
 import { DEFAULT_TUNING, resolveGroups, type Tuning } from '../rules/defaults'
 import { normalizeProfile, type Profile } from './profile'
-import { getSetting, type SettingValues } from './settings'
+import { getSetting, type GraduationSettings, type SettingValues } from './settings'
 
 const EMPTY: never[] = []
 
 export function useCourses(): Course[] {
   return useLiveQuery(() => db.courses.toArray().then(alive), [], EMPTY)
+}
+
+export function useResults(): ExamResult[] {
+  return useLiveQuery(() => db.results.toArray().then(alive), [], EMPTY)
+}
+
+/** Gli esami ancora da fare: quelli con un voto da superato escono. */
+export function useActiveCourses(): Course[] {
+  const courses = useCourses()
+  const results = useResults()
+  return useMemo(() => activeCourses(courses, results), [courses, results])
+}
+
+export function useGraduation(): GraduationSettings | undefined {
+  return useLiveQuery(async () => normalizeGraduation(await getSetting(db, 'graduation')), [])
+}
+
+export function useTargetAverage(): number | undefined {
+  return useLiveQuery(async () => normalizeTargetAverage(await getSetting(db, 'targetAverage')), [])
 }
 
 export function useDeadlines(): Deadline[] {

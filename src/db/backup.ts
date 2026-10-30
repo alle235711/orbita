@@ -1,4 +1,6 @@
 import { AppError } from '../i18n/errors'
+import { isISODate, isMonthOnly } from '../lib/dates'
+import { isRealDay, MAX_GRADE, MIN_GRADE } from '../libretto/grades'
 import type { OrbitaDB } from './db'
 import { migrateToV2, V2_INPUT_TABLES, type RawRow, type RawTables } from './migrations/v2'
 import { TABLE_NAMES, type Syncable, type TableName } from './schema'
@@ -49,10 +51,23 @@ export function parseBackup(json: unknown): Backup {
       if (typeof row !== 'object' || row === null || typeof (row as Syncable).id !== 'string' || typeof (row as Syncable).updatedAt !== 'number') {
         throw new BackupError('backupRecordNoId', { name })
       }
+      if (name === 'results' && !validResultRow(row as unknown as Record<string, unknown>)) throw new BackupError('backupResultRow')
     }
   }
   if (b.format <= 1) return upgradeV1(b as Backup)
   return b as Backup
+}
+
+const RESULT_OUTCOMES = ['superato', 'rifiutato', 'non-superato']
+
+/** Righe cancellate comprese: un voto non valido non entra nel database. */
+function validResultRow(r: Record<string, unknown>): boolean {
+  if (typeof r.courseId !== 'string') return false
+  if (typeof r.date !== 'string' || !isISODate(r.date) || isMonthOnly(r.date) || !isRealDay(r.date)) return false
+  if (typeof r.outcome !== 'string' || !RESULT_OUTCOMES.includes(r.outcome)) return false
+  if (r.grade !== undefined && !(typeof r.grade === 'number' && Number.isInteger(r.grade) && r.grade >= MIN_GRADE && r.grade <= MAX_GRADE)) return false
+  if (r.lode !== undefined && typeof r.lode !== 'boolean') return false
+  return true
 }
 
 /** Un backup di formato 1 passa dalla stessa trasformazione dell'aggiornamento di Dexie. */

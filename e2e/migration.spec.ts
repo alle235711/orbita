@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 import { seedV1Database } from './helpers'
 
 // Chi aggiorna dalla fase 1 trova i suoi dati: l'aggiornamento di Dexie (da
-// IndexedDB 10 a 20) li porta al formato nuovo e la copertina invita a
+// IndexedDB 10 a 30) li porta al formato nuovo e la copertina invita a
 // completare il profilo.
 
 test('un database della fase 1 si aggiorna e conserva i dati', async ({ page }) => {
@@ -10,10 +10,10 @@ test('un database della fase 1 si aggiorna e conserva i dati', async ({ page }) 
   await page.goto('/')
   await expect(page.getByRole('heading', { name: 'Completa il profilo' })).toBeVisible({ timeout: 20_000 })
 
-  // La versione è salita a 20 e le righe sono nel formato nuovo.
+  // La versione è salita a 30 e le righe sono nel formato nuovo.
   const state = await page.evaluate(
     () =>
-      new Promise<{ version: number; sessionTypes: Record<string, string>; ruleIds: string[]; deadlineIds: string[]; profile: unknown }>((resolve, reject) => {
+      new Promise<{ version: number; sessionTypes: Record<string, string>; ruleIds: string[]; deadlineIds: string[]; profile: unknown; resultsIndexes: string[] }>((resolve, reject) => {
         const open = indexedDB.open('orbita')
         open.onerror = () => reject(open.error)
         open.onsuccess = () => {
@@ -26,9 +26,11 @@ test('un database della fase 1 si aggiorna e conserva i dati', async ({ page }) 
             })
           void Promise.all([all('sessions'), all('rules'), all('deadlines'), all('settings')]).then(([sessions, rules, deadlines, settings]) => {
             const version = db.version
+            const resultsIndexes = db.objectStoreNames.contains('results') ? [...db.transaction('results', 'readonly').objectStore('results').indexNames] : []
             db.close()
             resolve({
               version,
+              resultsIndexes,
               sessionTypes: Object.fromEntries(sessions.map((s) => [s.id, s.type ?? ''])),
               ruleIds: rules.map((r) => r.id),
               deadlineIds: deadlines.map((d) => d.id),
@@ -38,7 +40,8 @@ test('un database della fase 1 si aggiorna e conserva i dati', async ({ page }) 
         }
       }),
   )
-  expect(state.version).toBe(20)
+  expect(state.version).toBe(30)
+  expect(state.resultsIndexes).toEqual(expect.arrayContaining(['courseId', 'date', 'updatedAt']))
   expect(state.sessionTypes).toMatchObject({ s1: 'abilita', s2: 'lingua', s3: 'studio' })
   expect(state.ruleIds).toEqual(expect.arrayContaining(['abilita', 'periodo']))
   expect(state.ruleIds).not.toContain('lean')

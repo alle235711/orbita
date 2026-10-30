@@ -23,6 +23,8 @@ interface Screen {
   full?: boolean
   type?: string
   otherLanguage?: boolean
+  /** Dopo il caricamento, preme il primo pulsante con questo nome (per fotografare un pannello aperto). */
+  click?: RegExp
 }
 
 const SCREENS: Screen[] = [
@@ -30,6 +32,8 @@ const SCREENS: Screen[] = [
   { name: 'agenda', hash: '#/agenda', full: true },
   { name: 'agenda-settimana', hash: '#/agenda?vista=settimana', full: true },
   { name: 'briefing', hash: '#/briefing', full: true },
+  { name: 'libretto', hash: '#/libretto', full: true },
+  { name: 'libretto-voto', hash: '#/libretto', click: /registra un voto|record a result/i },
   { name: 'regole', hash: '#/regole', full: true },
   { name: 'statistiche', hash: '#/statistiche', full: true },
   { name: 'ripasso', hash: '#/ripasso?materia=demo-c-1', type: 'Il periodo di un pendolo semplice dipende dalla lunghezza' },
@@ -81,6 +85,15 @@ for (const vp of VIEWPORTS) {
         if (await notice.count()) await notice.first().click()
         if (setup === 'wizard') await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
         await page.waitForTimeout(800)
+        if (screen.click) {
+          await page.getByRole('button', { name: screen.click }).first().click()
+          // Il pannello è fotografato a entrata finita.
+          await page.waitForFunction(() => {
+            const d = document.querySelector('dialog[open]')
+            return !!d && getComputedStyle(d).opacity === '1' && getComputedStyle(d).transform === 'none'
+          })
+          await page.waitForTimeout(500)
+        }
         const dir = testInfo.project.name === 'chromium' ? `docs/screenshots/${vp.name}` : testInfo.outputPath(vp.name)
         mkdirSync(dir, { recursive: true })
         await page.screenshot({ path: `${dir}/${screen.name}.png`, fullPage: !!screen.full })

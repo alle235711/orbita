@@ -12,6 +12,7 @@ export interface RuleContext {
   now: number
   /** Energia scelta oggi; se manca si ragiona come Seyfert. */
   energy?: Energy
+  /** Solo gli esami attivi: quelli superati non ci sono. */
   courses: Course[]
   deadlines: Deadline[]
   /** Impegni di oggi (e volendo dei giorni vicini). */

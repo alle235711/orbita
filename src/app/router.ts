@@ -7,6 +7,7 @@ export const ROUTES = [
   'oggi',
   'agenda',
   'briefing',
+  'libretto',
   'statistiche',
   'ripasso',
   'dattilografia',
