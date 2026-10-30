@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { Keyboard } from '../../components/Keyboard'
 import { useI18n, useT } from '../../i18n/store'
-import { MIN_SIMILARITY } from '../../review/leitner'
+import { useTuning } from '../../db/hooks'
 import { alignWords, type DiffOp } from '../../review/similarity'
 import { applyValue, freeWpm, startTyping } from '../../review/typing'
 
@@ -29,6 +29,7 @@ interface RecallExerciseProps {
 export function RecallExercise({ mode, reference, prompt, saved, onDecide, onNext, showKeyboard }: RecallExerciseProps) {
   const { t, f } = useI18n()
   const tr = t.ripasso
+  const minSimilarity = useTuning().ripasso.minSimilarity! / 100
   const [state, setState] = useState(() => startTyping(reference))
   const [checked, setChecked] = useState(false)
   const field = useRef<HTMLTextAreaElement & HTMLInputElement>(null)
@@ -40,7 +41,7 @@ export function RecallExercise({ mode, reference, prompt, saved, onDecide, onNex
   }, [reference, mode])
 
   const result = checked ? alignWords(reference, state.typed) : null
-  const suggestion = result ? result.similarity >= MIN_SIMILARITY : false
+  const suggestion = result ? result.similarity >= minSimilarity : false
 
   const check = () => {
     if (!state.typed.trim()) return
@@ -158,7 +159,7 @@ export function RecallExercise({ mode, reference, prompt, saved, onDecide, onNex
       </section>
       {showKeyboard ? (
         <div className="exercise__keyboard">
-          <Keyboard errors={state.typoKeys} label={t.legacy.keyboardRecall} />
+          <Keyboard errors={state.typoKeys} label={t.typing.keyboardRecall} />
           <p className="exercise__note">{tr.keyboardNote}</p>
         </div>
       ) : null}

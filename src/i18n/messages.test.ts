@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { SEED_COURSES, SEED_DEADLINES, seedRules } from '../db/seed'
+import { makeContext } from '../test/fixtures'
 import { evaluate } from '../rules/plan'
 import type { RuleContext } from '../rules/types'
 import { AppError, renderError } from './errors'
@@ -34,18 +34,7 @@ describe('messaggi', () => {
   })
 })
 
-const ctx: RuleContext = {
-  today: '2026-10-28',
-  now: 420,
-  energy: 3,
-  courses: SEED_COURSES,
-  deadlines: SEED_DEADLINES,
-  events: [],
-  sessions: [],
-  workouts: [],
-  cards: { due: { sdm: 12 }, fresh: {} },
-  rules: seedRules(),
-}
+const ctx: RuleContext = makeContext({ today: '2026-10-28', now: 420, cards: { due: { 'c-fis': 12 }, fresh: {} } })
 
 describe('renderPlan', () => {
   it('rende il piano in italiano come nella fase 1 (49c82bc)', () => {
@@ -53,17 +42,17 @@ describe('renderPlan', () => {
     expect(plan.headline).toEqual(['Una giornata', 'da esercizi'])
     expect(plan.rule).toBe('Accrescimento regolare: l’esame più vicino va per primo, in blocchi da 90 minuti.')
     expect(plan.items.map((i) => i.title)).toEqual([
-      'Esercizi di Struttura della Materia',
-      'Esercizi di Calcolo per l’Astronomia',
+      'Esercizi di Fisica Moderna',
+      'Esercizi di Calcolo Numerico',
       'Ripasso a 10 dita',
-      'Lean 4',
+      'Chitarra',
       'Arrampicata',
     ])
     expect(plan.items[0]!.detail).toBe('Esercizi d’esame. 16 giorni all’esame.')
-    expect(plan.items[2]!.detail).toBe('12 schede scadute, prima Struttura della Materia.')
+    expect(plan.items[2]!.detail).toBe('12 schede scadute, prima Fisica Moderna.')
     expect(plan.notes[0]!.text).toBe('L’esame è tra 16 giorni (13 novembre), entro la soglia di 21 giorni.')
     expect(plan.notes.find((n) => n.ruleId === 'schede-scadute')!.title).toBe('12 schede scadute')
-    expect(plan.notes.find((n) => n.ruleId === 'lean')!.title).toBe('Lean non ancora iniziato')
+    expect(plan.notes.find((n) => n.ruleId === 'abilita')!.title).toBe('Chitarra: nessuna sessione ancora')
   })
 
   it('non muta il piano e il piano resta serializzabile', () => {

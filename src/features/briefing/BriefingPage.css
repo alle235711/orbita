@@ -212,6 +212,18 @@
   background: var(--disk);
 }
 
+/* Il suggerimento del blocco: una nota con il suo pulsante, mai applicata da sola. */
+.note--hint {
+  justify-items: start;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding-bottom: 12px;
+}
+
+.note--hint::before {
+  background: var(--disk);
+}
+
 .note strong {
   font-size: 15px;
   font-weight: 800;

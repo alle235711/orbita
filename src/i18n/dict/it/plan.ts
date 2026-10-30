@@ -10,6 +10,8 @@ type NoParams = Record<never, never>
 /** "L’esame è oggi." / "domani." / "N giorni all’esame." */
 const examIn = (days: number) => (days === 0 ? 'L’esame è oggi.' : days === 1 ? 'L’esame è domani.' : `${days} giorni all’esame.`)
 
+const ABILITY_FALLBACK = 'Abilità personale'
+
 const energyName = (energy: Energy) => ENERGY[energy].name
 
 export const plan = {
@@ -52,9 +54,18 @@ export const plan = {
     runsCrowded: (p: { missing: number; sport: WorkoutType }, f: Format) => `${f.plural(p.missing, 'Ne manca', 'Ne mancano')} ${p.missing}: oggi c’è già ${sport.lower[p.sport]}, la corsa va nei prossimi giorni.`,
     runsPlanned: (p: { missing: number; minutes: number }, f: Format) => `${f.plural(p.missing, 'Ne manca', 'Ne mancano')} ${p.missing}: una corsa da ${f.count(p.minutes, 'minuto', 'minuti')} è nel piano.`,
 
-    periodTitle: (p: { period: string }) => `Periodo di ${p.period}`,
-    periodText: (p: { end: string; hoursPerDay: number }, f: Format) =>
-      `${f.until(p.end, { capital: true })}: obiettivo di ${f.hours(p.hoursPerDay)} al giorno, palestra e corsa al posto dell’arrampicata.`,
+    sportCrowded: (p: { missing: number; sport: WorkoutType; other: WorkoutType }, f: Format) =>
+      `${f.plural(p.missing, 'Ne manca', 'Ne mancano')} ${p.missing}: oggi c’è già ${sport.lower[p.other]}, il resto va nei prossimi giorni.`,
+    sportPlanned: (p: { missing: number; sport: WorkoutType; minutes: number }, f: Format) =>
+      `${f.plural(p.missing, 'Ne manca', 'Ne mancano')} ${p.missing}: una sessione da ${f.count(p.minutes, 'minuto', 'minuti')} è nel piano.`,
+
+    periodTitle: (p: { period: string }) => p.period,
+    periodText: (p: { end: string; hoursPerDay: number | null; sport: boolean }, f: Format) =>
+      `${f.until(p.end, { capital: true })}: ${
+        p.hoursPerDay === null && !p.sport
+          ? 'nessuna eccezione'
+          : `${p.hoursPerDay === null ? '' : `obiettivo di ${f.hours(p.hoursPerDay)} al giorno`}${p.hoursPerDay !== null && p.sport ? ', ' : ''}${p.sport ? 'sport con obiettivi a parte' : ''}`
+      }.`,
 
     lowTitle: (_p: NoParams) => 'Niente teoria nuova',
     lowText: (p: { energy: Energy; block: number }) => `Disco da ${energyName(p.energy)}: blocchi da ${p.block} minuti, ripasso attivo e schede.`,
@@ -67,11 +78,11 @@ export const plan = {
     examText: (p: { days: number; date: string; threshold: number }, f: Format) =>
       `L’esame ${p.days === 0 ? 'è oggi' : p.days === 1 ? 'è domani' : `è tra ${p.days} giorni`} (${f.date(p.date)}), entro la soglia di ${f.count(p.threshold, 'giorno', 'giorni')}.`,
 
-    abilityItemTitle: (p: { name: string }) => p.name,
-    abilityItemDetail: (p: { days: number }, f: Format) => `Fermo da ${f.count(p.days, 'giorno', 'giorni')}: esercizi del capitolo in corso.`,
+    abilityItemTitle: (p: { name: string | null }) => p.name ?? ABILITY_FALLBACK,
+    abilityItemDetail: (p: { days: number }, f: Format) => `Nessuna sessione da ${f.count(p.days, 'giorno', 'giorni')}: esercizi del capitolo in corso.`,
     abilityItemDetailNever: (_p: NoParams) => 'Riprendi dal capitolo in corso.',
-    abilityIdleTitle: (p: { name: string; days: number }, f: Format) => `${p.name} fermo da ${f.count(p.days, 'giorno', 'giorni')}`,
-    abilityNeverTitle: (p: { name: string }) => `${p.name} non ancora iniziato`,
+    abilityIdleTitle: (p: { name: string | null; days: number }, f: Format) => `${p.name ?? ABILITY_FALLBACK}: nessuna sessione da ${f.count(p.days, 'giorno', 'giorni')}`,
+    abilityNeverTitle: (p: { name: string | null }) => `${p.name ?? ABILITY_FALLBACK}: nessuna sessione ancora`,
     abilityText: (p: { threshold: number; minutes: number; alsoToday: boolean }, f: Format) =>
       `Oltre la soglia di ${p.threshold}: ${f.count(p.minutes, 'minuto', 'minuti')} nel piano di domani${p.alsoToday ? ' e già in quello di oggi' : ''}.`,
 

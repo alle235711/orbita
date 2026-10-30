@@ -1,5 +1,7 @@
 import { DEFAULT_LANGUAGE, type LanguageSettings } from '../i18n/lang'
+import { DEFAULT_MODULES, DEFAULT_STUDY_BLOCK, type ModulesSettings, type StudyBlockSettings } from '../modules/types'
 import type { OrbitaDB } from './db'
+import type { Profile } from './profile'
 
 export interface ActiveTimer {
   /** Chiave della voce del piano avviata. */
@@ -9,6 +11,8 @@ export interface ActiveTimer {
   type: string
   courseId?: string
   startedAt: number
+  /** Minuti del blocco di studio previsto (voci di studio del piano). */
+  planned?: number
 }
 
 /** Le impostazioni conosciute, con il loro tipo e il valore predefinito. */
@@ -19,6 +23,12 @@ export interface SettingValues {
   activeTimer: ActiveTimer | null
   /** Passare sempre da normalizeLanguage in lettura e scrittura. */
   language: LanguageSettings
+  /** null = mai configurato. Passare da normalizeProfile. */
+  profile: Profile | null
+  /** Passare da normalizeModules. */
+  modules: ModulesSettings
+  /** Passare da normalizeStudyBlock. */
+  studyBlock: StudyBlockSettings
 }
 
 export const SETTING_DEFAULTS: SettingValues = {
@@ -27,6 +37,9 @@ export const SETTING_DEFAULTS: SettingValues = {
   lastBackupAt: null,
   activeTimer: null,
   language: DEFAULT_LANGUAGE,
+  profile: null,
+  modules: DEFAULT_MODULES,
+  studyBlock: DEFAULT_STUDY_BLOCK,
 }
 
 export async function getSetting<K extends keyof SettingValues>(db: OrbitaDB, key: K): Promise<SettingValues[K]> {

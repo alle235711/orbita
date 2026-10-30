@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { RuleId, Session } from '../db/schema'
-import { SEED_COURSES, SEED_DEADLINES, seedRules } from '../db/seed'
+import { FAKE_COURSES, FAKE_DEADLINES, makeContext } from '../test/fixtures'
 import { addDays } from '../lib/dates'
 import type { Energy } from '../lib/energy'
 import { i18nFor } from '../i18n'
@@ -13,27 +13,13 @@ import type { RuleContext } from './types'
 // dell’utente, si tolgono prima del controllo).
 
 const EN = i18nFor('en')
-const TODAY = '2026-10-27' // martedì, Struttura della Materia tra 17 giorni
+const TODAY = '2026-10-27' // martedì, Fisica Moderna tra 17 giorni
 const BROKEN = /undefined|NaN|[{}]/
 
 let seq = 0
 const session = (date: string, minutes: number, type: Session['type']): Session => ({ id: `e${++seq}`, date, minutes, type, updatedAt: 1 })
 
-function ctx(over: Partial<RuleContext> = {}): RuleContext {
-  return {
-    today: TODAY,
-    now: 8 * 60,
-    energy: 3,
-    courses: structuredClone(SEED_COURSES),
-    deadlines: structuredClone(SEED_DEADLINES),
-    events: [],
-    sessions: [],
-    workouts: [],
-    cards: { due: {}, fresh: {} },
-    rules: seedRules(),
-    ...over,
-  }
-}
+const ctx = (over: Partial<RuleContext> = {}): RuleContext => makeContext({ today: TODAY, ...over })
 
 const render = (c: RuleContext): RenderedPlan => renderPlan(evaluate(c), EN)
 
@@ -47,7 +33,7 @@ function everyText(plan: RenderedPlan): string[] {
 }
 
 const ITALIAN_STOPWORDS = [' il ', ' della ', ' giorni', ' minuti', 'è ']
-const USER_NAMES = [...SEED_COURSES.map((c) => c.name), ...SEED_DEADLINES.map((d) => d.title)]
+const USER_NAMES = [...FAKE_COURSES.map((c) => c.name), ...FAKE_DEADLINES.map((d) => d.title)]
 
 function allText(plan: RenderedPlan): string {
   return ` ${everyText(plan).join(' | ')} `
@@ -107,16 +93,16 @@ describe('piano in inglese: una prova per regola', () => {
 
   it('sport', () => {
     const plan = render(ctx())
-    expect(plan.sport.main).toBeDefined()
+    expect(plan.sport.types.length).toBeGreaterThan(0)
     expectComplete(plan, 'sport')
     expectEnglish(plan, ['to go'])
   })
 
-  it('lean', () => {
-    const plan = render(ctx({ sessions: [session('2026-10-24', 40, 'lean')] }))
-    expect(plan.leanGap).toBe(3)
-    expectComplete(plan, 'lean')
-    expectEnglish(plan, ['Lean idle for 3 days', 'Past the threshold'])
+  it('abilita', () => {
+    const plan = render(ctx({ sessions: [session('2026-10-24', 40, 'abilita')] }))
+    expect(plan.abilityGap).toBe(3)
+    expectComplete(plan, 'abilita')
+    expectEnglish(plan, ['Chitarra: no sessions for 3 days', 'Past the threshold'])
   })
 
   it('ore-settimana', () => {
@@ -128,17 +114,17 @@ describe('piano in inglese: una prova per regola', () => {
   })
 
   it('schede-scadute', () => {
-    const plan = render(ctx({ cards: { due: { astrost: 5, sdm: 7 }, fresh: {} } }))
+    const plan = render(ctx({ cards: { due: { 'c-ast': 5, 'c-fis': 7 }, fresh: {} } }))
     expect(plan.items.some((i) => i.kind === 'ripasso')).toBe(true)
     expectComplete(plan, 'schede-scadute')
     expectEnglish(plan, ['overdue cards', 'ten-finger review'])
   })
 
-  it('tirocinio', () => {
-    const deadlines = structuredClone(SEED_DEADLINES).map((d) => (d.id === 'tirocinio' ? { ...d, date: '2027-03-15', endDate: '2027-04-24' } : d))
+  it('periodo', () => {
+    const deadlines = structuredClone(FAKE_DEADLINES).map((d) => (d.id === 'periodo-prova' ? { ...d, date: '2027-03-15', endDate: '2027-04-24', hoursPerDay: 8, sport: { palestra: 3 } } : d))
     const plan = render(ctx({ today: '2027-03-22', deadlines }))
-    expect(plan.tirocinio).toBe(true)
-    expectComplete(plan, 'tirocinio')
-    expectEnglish(plan, ['Internship period', 'a day, gym and running instead of climbing'])
+    expect(plan.period).toBeDefined()
+    expectComplete(plan, 'periodo')
+    expectEnglish(plan, ['Until 24 April', 'target of 8 h a day, sport with separate targets'])
   })
 })

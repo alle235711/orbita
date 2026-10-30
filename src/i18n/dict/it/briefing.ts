@@ -1,9 +1,10 @@
 import type { Energy } from '../../../lib/energy'
 import { ENERGY } from '../../../lib/energy'
 import { isMonthOnly } from '../../../lib/dates'
+import type { WorkoutType } from '../../../db/schema'
 import type { Format } from '../../format/types'
+import { sport } from './sport'
 import { capitalize } from '../../format/util'
-import { legacy } from './legacy'
 
 export const briefing = {
   /** Perché quella materia oggi. `hours` = ore dedicate alla priorità negli ultimi 7 giorni. */
@@ -38,11 +39,11 @@ export const briefing = {
   hoursOnPace: 'In pari con il ritmo della settimana.',
 
   sport: 'Sport',
-  sportSummary: (p: { main: 'arrampicata' | 'palestra'; runsDone: number; runsTarget: number }) =>
-    `${p.main === 'arrampicata' ? 'arrampicate' : 'palestra'}, ${p.runsDone}/${p.runsTarget} corse`,
+  sportSummary: (p: { parts: { type: WorkoutType; done: number; target: number }[] }) =>
+    p.parts.map((x) => `${sport.lower[x.type]} ${x.done}/${x.target}`).join(', '),
   sportGoalsReached: 'Obiettivi della settimana raggiunti.',
 
-  abilityTitle: legacy.leanItem,
+  abilityTitle: (p: { name: string }) => p.name,
   abilityToday: 'Oggi',
   abilityNever: 'Mai',
   abilityDays: (p: { n: number }) => `${p.n} g`,
@@ -50,10 +51,10 @@ export const briefing = {
   abilitySince: 'dall’ultima sessione',
   abilityWithin: 'Dentro la soglia.',
 
-  englishTitle: `Inglese con ${legacy.elsa}`,
+  languageTitle: (p: { name: string }) => p.name,
   streak: (p: { n: number }) => `${p.n} g`,
   streakSuffix: 'di fila',
-  englishDetail: (p: { minutes: number; lastScore?: number; change?: number }, f: Format) =>
+  languageDetail: (p: { minutes: number; lastScore?: number; change?: number }, f: Format) =>
     `${f.count(p.minutes, 'minuto', 'minuti')} questa settimana` +
     (p.lastScore !== undefined ? `, ultimo punteggio ${p.lastScore}` : '') +
     (p.change ? ` (${p.change > 0 ? '+' : ''}${p.change} in due settimane)` : '') +
@@ -71,6 +72,6 @@ export const briefing = {
 
   tomorrow: 'Domani',
   tomorrowGoal: (p: { hours: number }, f: Format) => `Obiettivo di ${f.hours(p.hours)}`,
-  tomorrowPeriod: legacy.stillInPeriod,
+  tomorrowPeriod: ', ancora nel periodo',
   tomorrowNothing: 'Niente da aggiungere per ora: il piano di domani si calcola domattina.',
 }

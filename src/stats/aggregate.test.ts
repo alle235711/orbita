@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import type { DayRecord, Session, TypingRun, Weight, Workout } from '../db/schema'
-import { SEED_COURSES } from '../db/seed'
+import { FAKE_COURSES } from '../test/fixtures'
 import {
   averageFor,
   dailyHours,
-  elsaDays,
+  languageDays,
   energyVsHours,
   hoursBySubject,
   kpis,
@@ -21,9 +21,9 @@ const s = (date: string, minutes: number, type: Session['type'], extra: Partial<
 const TYPE_LABEL: Record<Session['type'], string> = {
   studio: 'Studio senza corso',
   ripasso: 'Ripasso senza corso',
-  lavoro: 'Ripetizioni',
-  lean: 'Lean 4',
-  inglese: 'Inglese',
+  lavoro: 'Lezioni private',
+  abilita: 'Chitarra',
+  lingua: 'Inglese',
   lettura: 'Lettura',
   dattilografia: 'Dattilografia',
 }
@@ -34,15 +34,22 @@ describe('periodi', () => {
     expect(periodRange('14', TODAY).days).toHaveLength(14)
   })
 
-  it('da settembre dell’anno accademico', () => {
-    expect(periodRange('settembre', TODAY).from).toBe('2026-09-01')
-    expect(periodRange('settembre', '2027-02-10').from).toBe('2026-09-01')
-    expect(periodRange('settembre', '2026-09-01').days).toEqual(['2026-09-01'])
+  it('dall’inizio dell’anno accademico (predefinito 1° settembre)', () => {
+    expect(periodRange('anno', TODAY).from).toBe('2026-09-01')
+    expect(periodRange('anno', '2027-02-10').from).toBe('2026-09-01')
+    expect(periodRange('anno', '2026-09-01').days).toEqual(['2026-09-01'])
+  })
+
+  it('l’inizio dell’anno viene dal profilo: l’ultima occorrenza non successiva a oggi', () => {
+    expect(periodRange('anno', TODAY, '10-15').from).toBe('2026-10-15')
+    expect(periodRange('anno', TODAY, '11-01').from).toBe('2025-11-01')
+    expect(periodRange('anno', '2026-11-01', '11-01').from).toBe('2026-11-01')
+    expect(periodRange('anno', TODAY, 'rotto').from).toBe('2026-09-01')
   })
 })
 
 describe('ore', () => {
-  const sessions = [s(TODAY, 120, 'studio', { courseId: 'sdm' }), s(TODAY, 30, 'ripasso', { courseId: 'sdm' }), s(TODAY, 90, 'lavoro'), s(TODAY, 60, 'lean'), s('2026-10-27', 60, 'studio'), { ...s(TODAY, 600, 'studio'), deletedAt: 9 }]
+  const sessions = [s(TODAY, 120, 'studio', { courseId: 'c-fis' }), s(TODAY, 30, 'ripasso', { courseId: 'c-fis' }), s(TODAY, 90, 'lavoro'), s(TODAY, 60, 'abilita'), s('2026-10-27', 60, 'studio'), { ...s(TODAY, 600, 'studio'), deletedAt: 9 }]
 
   it('somma studio e lavoro per giorno, giorni vuoti compresi', () => {
     const days = dailyHours(sessions, ['2026-10-26', '2026-10-27', TODAY])
@@ -51,11 +58,11 @@ describe('ore', () => {
   })
 
   it('ripartisce le ore per corso e per tipo', () => {
-    const rows = hoursBySubject(sessions, SEED_COURSES, periodRange('7', TODAY), (ty) => TYPE_LABEL[ty])
+    const rows = hoursBySubject(sessions, FAKE_COURSES, periodRange('7', TODAY), (ty) => TYPE_LABEL[ty])
     expect(rows.map((r) => [r.label, r.hours])).toEqual([
-      ['Struttura della Materia', 2.5],
-      ['Ripetizioni', 1.5],
-      ['Lean 4', 1],
+      ['Fisica Moderna', 2.5],
+      ['Lezioni private', 1.5],
+      ['Chitarra', 1],
       ['Studio senza corso', 1],
     ])
   })
@@ -68,7 +75,7 @@ describe('sport e peso', () => {
       { id: 'b', date: '2026-10-20', type: 'arrampicata', minutes: 90, updatedAt: 1 },
       { id: 'c', date: '2026-10-26', type: 'corsa', minutes: 40, updatedAt: 1 },
     ]
-    const rows = workoutRows(w, periodRange('7', TODAY))
+    const rows = workoutRows(w, periodRange('7', TODAY), ['arrampicata', 'corsa', 'palestra'])
     expect(rows.map((r) => [r.type, r.count])).toEqual([
       ['arrampicata', 1],
       ['corsa', 1],
@@ -92,14 +99,14 @@ describe('sport e peso', () => {
   })
 })
 
-describe('dattilografia ed ELSA', () => {
+describe('dattilografia e lingua', () => {
   it('fa la media del giorno', () => {
     const runs: TypingRun[] = [30, 34].map((wpm, i) => ({ id: String(i), date: TODAY, at: i, lesson: 'base', wpm, accuracy: 0.9 + i * 0.04, chars: 100, keyErrors: {}, keyHits: {}, updatedAt: 1 }))
     expect(typingDays(runs, periodRange('7', TODAY))).toEqual([{ date: TODAY, wpm: 32, accuracy: 0.92, runs: 2 }])
   })
 
-  it('somma i minuti di ELSA e tiene l’ultimo punteggio', () => {
-    const days = elsaDays([s(TODAY, 15, 'inglese', { score: 70, start: '8:00' }), s(TODAY, 10, 'inglese', { score: 74, start: '21:00' })], ['2026-10-27', TODAY])
+  it('somma i minuti di lingua e tiene l’ultimo punteggio', () => {
+    const days = languageDays([s(TODAY, 15, 'lingua', { score: 70, start: '8:00' }), s(TODAY, 10, 'lingua', { score: 74, start: '21:00' })], ['2026-10-27', TODAY])
     expect(days).toEqual([
       { date: '2026-10-27', minutes: 0 },
       { date: TODAY, minutes: 25, score: 74 },
@@ -131,8 +138,8 @@ describe('numeri in testa', () => {
       { id: 'a', date: '2026-10-05', type: 'arrampicata', minutes: 90, updatedAt: 1 },
       { id: 'b', date: '2026-09-30', type: 'arrampicata', minutes: 90, updatedAt: 1 },
     ]
-    const k = kpis(sessions, workouts, [], periodRange('14', TODAY), TODAY, 8, 3)
-    expect(k).toMatchObject({ hours7: 8, target7: 56, climbsMonth: 1, climbsMonthTarget: 12 })
+    const k = kpis(sessions, workouts, [], periodRange('14', TODAY), TODAY, 8, { type: 'arrampicata', target: 3 })
+    expect(k).toMatchObject({ hours7: 8, target7: 56, sportMonth: 1, sportMonthTarget: 12, sportType: 'arrampicata' })
     expect(k.averagePerDay).toBeCloseTo(16 / 14)
   })
 })

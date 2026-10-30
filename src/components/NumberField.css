@@ -1,0 +1,17 @@
+/* Il campo riempie la sua cella e non la supera mai: la larghezza naturale di
+   un input (circa venti caratteri) farebbe uscire dalla colonna le celle strette. */
+.number-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.number-field .field {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+}
+
+.number-field .field[aria-invalid='true'] {
+  border-color: var(--error-text);
+}

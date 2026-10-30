@@ -51,3 +51,7 @@
   background: transparent;
   color: var(--text-2);
 }
+
+body:has(.welcome) .toasts {
+  bottom: calc(96px + env(safe-area-inset-bottom));
+}

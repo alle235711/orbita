@@ -1,5 +1,6 @@
 import type { ISODate } from '../lib/dates'
 import { applyReview, type ReviewOutcome } from '../review/leitner'
+import { resolveGroups } from '../rules/defaults'
 import { db } from './db'
 import { patch, save } from './repo'
 import type { Card, CardReview, ReviewMode } from './schema'
@@ -14,9 +15,9 @@ export interface ReviewResult {
 
 /** Salva la revisione e aggiorna la scatola (tranne che per le revisioni in anticipo). */
 export async function saveReview(cardId: string, result: ReviewResult, today: ISODate): Promise<ReviewOutcome> {
-  return db.transaction('rw', db.cardState, db.cardReviews, async () => {
+  return db.transaction('rw', db.cardState, db.cardReviews, db.rules, async () => {
     const current = await db.cardState.get(cardId)
-    const outcome = applyReview(current, cardId, result.ok, today)
+    const outcome = applyReview(current, cardId, result.ok, today, resolveGroups(await db.rules.toArray()))
     if (outcome.changed) await db.cardState.put(outcome.state)
     await save<CardReview>(db.cardReviews, {
       cardId,

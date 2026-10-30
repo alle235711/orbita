@@ -36,8 +36,8 @@ describe('orbita del giorno', () => {
   it('alterna le etichette e le gira a sinistra vicino al bordo', () => {
     const placed = placePlanets(
       [
-        { id: 'a', minutes: 9 * 60, label: 'Astrofisica Stellare', time: '9:00', kind: 'event' },
-        { id: 'b', minutes: 11 * 60, label: 'Topologia Algebrica', time: '11:00', kind: 'event' },
+        { id: 'a', minutes: 9 * 60, label: 'Cosmologia Osservativa', time: '9:00', kind: 'event' },
+        { id: 'b', minutes: 11 * 60, label: 'Topologia Generale', time: '11:00', kind: 'event' },
         { id: 'c', minutes: 18.5 * 60, label: 'Arrampicata', time: '18:30', kind: 'event' },
       ],
       MOCKUP,

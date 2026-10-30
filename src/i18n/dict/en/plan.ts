@@ -10,6 +10,8 @@ type NoParams = Record<never, never>
 /** "The exam is today." / "tomorrow." / "The exam is in N days." */
 const examIn = (days: number) => (days === 0 ? 'The exam is today.' : days === 1 ? 'The exam is tomorrow.' : `The exam is in ${days} days.`)
 
+const ABILITY_FALLBACK = 'Personal skill'
+
 const energyName = (energy: Energy) => ENERGY[energy].name
 
 export const plan = {
@@ -48,13 +50,20 @@ export const plan = {
     sportProgress: (p: { sport: WorkoutType; done: number; target: number }) => `${sport.label[p.sport]}: ${p.done} of ${p.target}`,
     sportMissing: (p: { missing: number; byDay: number | null; inPlanToday: boolean }, f: Format) =>
       `${p.missing} to go${p.byDay === null ? ' this week' : ` by ${f.weekdayName(p.byDay)}`}${p.inPlanToday ? ': one is in today’s plan' : ''}.`,
-    runsCrowded: (p: { missing: number; sport: WorkoutType }) => `${p.missing} to go: there’s already ${sport.lower[p.sport]} today, so the run goes in the coming days.`,
-    runsPlanned: (p: { missing: number; minutes: number }) => `${p.missing} to go: a ${p.minutes}-minute run is in the plan.`,
+    runsCrowded: (p: { missing: number; sport: WorkoutType }, _f: Format) => `${p.missing} to go: there’s already ${sport.lower[p.sport]} today, so the run goes in the coming days.`,
+    runsPlanned: (p: { missing: number; minutes: number }, _f: Format) => `${p.missing} to go: a ${p.minutes}-minute run is in the plan.`,
 
-    // `period` carries the Italian legacy word ("tirocinio"): not shown in English.
-    periodTitle: (_p: { period: string }) => 'Internship period',
-    periodText: (p: { end: string; hoursPerDay: number }, f: Format) =>
-      `${f.until(p.end, { capital: true })}: target of ${f.hours(p.hoursPerDay)} a day, gym and running instead of climbing.`,
+    sportCrowded: (p: { missing: number; sport: WorkoutType; other: WorkoutType }, _f: Format) =>
+      `${p.missing} to go: there’s already ${sport.lower[p.other]} today, so the rest goes in the coming days.`,
+    sportPlanned: (p: { missing: number; sport: WorkoutType; minutes: number }, _f: Format) => `${p.missing} to go: a ${p.minutes}-minute session is in the plan.`,
+
+    periodTitle: (p: { period: string }) => p.period,
+    periodText: (p: { end: string; hoursPerDay: number | null; sport: boolean }, f: Format) =>
+      `${f.until(p.end, { capital: true })}: ${
+        p.hoursPerDay === null && !p.sport
+          ? 'no exceptions'
+          : `${p.hoursPerDay === null ? '' : `target of ${f.hours(p.hoursPerDay)} a day`}${p.hoursPerDay !== null && p.sport ? ', ' : ''}${p.sport ? 'sport with separate targets' : ''}`
+      }.`,
 
     lowTitle: (_p: NoParams) => 'No new theory',
     lowText: (p: { energy: Energy; block: number }) => `${energyName(p.energy)} disc: ${p.block}-minute blocks, active review and cards.`,
@@ -67,11 +76,11 @@ export const plan = {
     examText: (p: { days: number; date: string; threshold: number }, f: Format) =>
       `The exam ${p.days === 0 ? 'is today' : p.days === 1 ? 'is tomorrow' : `is in ${p.days} days`} (${f.date(p.date)}), within the threshold of ${f.count(p.threshold, 'day', 'days')}.`,
 
-    abilityItemTitle: (p: { name: string }) => p.name,
-    abilityItemDetail: (p: { days: number }, f: Format) => `Idle for ${f.count(p.days, 'day', 'days')}: exercises from the current chapter.`,
+    abilityItemTitle: (p: { name: string | null }) => p.name ?? ABILITY_FALLBACK,
+    abilityItemDetail: (p: { days: number }, f: Format) => `No sessions for ${f.count(p.days, 'day', 'days')}: exercises from the current chapter.`,
     abilityItemDetailNever: (_p: NoParams) => 'Pick up from the current chapter.',
-    abilityIdleTitle: (p: { name: string; days: number }, f: Format) => `${p.name} idle for ${f.count(p.days, 'day', 'days')}`,
-    abilityNeverTitle: (p: { name: string }) => `${p.name} not started yet`,
+    abilityIdleTitle: (p: { name: string | null; days: number }, f: Format) => `${p.name ?? ABILITY_FALLBACK}: no sessions for ${f.count(p.days, 'day', 'days')}`,
+    abilityNeverTitle: (p: { name: string | null }) => `${p.name ?? ABILITY_FALLBACK}: no sessions yet`,
     abilityText: (p: { threshold: number; minutes: number; alsoToday: boolean }, f: Format) =>
       `Past the threshold of ${p.threshold}: ${f.count(p.minutes, 'minute', 'minutes')} in tomorrow’s plan${p.alsoToday ? ' and already in today’s' : ''}.`,
 

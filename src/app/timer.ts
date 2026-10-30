@@ -12,7 +12,7 @@ import { toast } from './toast'
 // Il timer di sessione avviato dal sommario di Oggi. Sta nelle impostazioni,
 // così sopravvive a una ricarica della pagina e all'uscita dall'app.
 
-const WORKOUTS: string[] = ['arrampicata', 'corsa', 'palestra']
+const WORKOUTS: string[] = ['arrampicata', 'corsa', 'palestra', 'nuoto', 'altro']
 
 export function timerFor(item: RenderedItem): ActiveTimer {
   return {
@@ -22,6 +22,7 @@ export function timerFor(item: RenderedItem): ActiveTimer {
     type: item.kind,
     courseId: item.courseId,
     startedAt: Date.now(),
+    ...(item.kind === 'studio' ? { planned: item.blocks.minutes } : {}),
   }
 }
 
@@ -45,7 +46,7 @@ export async function stopTimer(): Promise<void> {
     await logWorkout({ date, start, minutes, type: timer.type as WorkoutType })
     toast(t.app.timer.savedWorkout({ minutes, title: timer.title }, f))
   } else {
-    await logSession({ date, start, minutes, type: timer.type as SessionType, courseId: timer.courseId })
+    await logSession({ date, start, minutes, type: timer.type as SessionType, courseId: timer.courseId, planned: timer.planned })
     toast(t.app.timer.savedSession({ minutes, title: timer.title }, f))
   }
 }

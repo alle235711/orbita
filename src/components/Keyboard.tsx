@@ -25,7 +25,7 @@ interface KeyboardProps {
   label: string
 }
 
-/** La tastiera HP 250 G8 disegnata, coi colori delle dita sul bordo di ogni tasto. */
+/** La tastiera italiana disegnata, coi colori delle dita sul bordo di ogni tasto. */
 export function Keyboard({ next, errors, errorScale = 3, label }: KeyboardProps) {
   const [ref, width] = useElementWidth<HTMLDivElement>()
   const scale = width ? Math.min(1, width / WIDTH) : 1

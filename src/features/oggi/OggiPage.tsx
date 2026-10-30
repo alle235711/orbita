@@ -8,7 +8,7 @@ import { EnergyPicker } from '../../components/EnergyPicker'
 import { QuickLog } from '../../components/QuickLog'
 import { Ruler } from '../../components/Ruler'
 import { setEnergy } from '../../db/actions'
-import { useDay } from '../../db/hooks'
+import { useDay, useTuning } from '../../db/hooks'
 import { useDayPlan } from '../../db/plan-context'
 import { renderMsg } from '../../i18n/messages'
 import { useI18n, useRenderedPlan } from '../../i18n/store'
@@ -18,6 +18,7 @@ import { useElementWidth } from '../../lib/useElementWidth'
 import { scheduleDay } from '../../rules/schedule'
 import { OrbitArcs, OrbitPlanets } from './DayOrbit'
 import { DAY_END, type Mapping, type PlanetInput } from './orbit'
+import { CompleteProfileCard } from './CompleteProfileCard'
 import { PlanSummary } from './PlanSummary'
 import './OggiPage.css'
 
@@ -34,6 +35,7 @@ export default function OggiPage() {
   const today = useToday()
   const day = useDay(today)
   const state = useDayPlan(today)
+  const tuning = useTuning()
   const i18n = useI18n()
   const to = i18n.t.oggi
   const [logOpen, setLogOpen] = useState(false)
@@ -64,8 +66,8 @@ export default function OggiPage() {
 
   const suggestions = useMemo(() => {
     if (!state) return []
-    return scheduleDay(state.plan.items, state.context.events, { from: state.now })
-  }, [state])
+    return scheduleDay(state.plan.items, state.context.events, { from: state.now, tuning })
+  }, [state, tuning])
 
   const planets = useMemo<PlanetInput[]>(() => {
     if (!state) return []
@@ -164,6 +166,8 @@ export default function OggiPage() {
               <p>{to.suggestedBlocks({ blocks: suggestions.map((b) => ({ start: b.start, title: renderMsg(b.item.title, i18n) })) })}</p>
             ) : null}
           </div>
+
+          <CompleteProfileCard />
 
           {plan ? <PlanSummary items={plan.items} tierKey={plan.tier} /> : <div className="plan plan--empty" />}
 

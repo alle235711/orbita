@@ -5,8 +5,10 @@ import { ensureSeed } from './seed'
 
 type ContentLoader = () => Promise<unknown>
 
-// Il JSON delle schede sta in un pezzo a parte: si carica solo al primo
-// avvio e il service worker lo tiene in cache per l'offline.
+// Il JSON delle schede sta in un pezzo a parte: si carica solo se serve e il
+// service worker lo tiene in cache per l'offline. Dalla versione 2 non si
+// importa più da solo: si sceglie tra i mazzi d'esempio. `ensureCards` resta
+// per i dati e i test della fase 1 (bandiera `cardsImported`).
 const loadBundledCards: ContentLoader = () => import('../../content/schede-2026-27.json').then((m) => m.default)
 
 /** Al primo avvio importa le schede incluse nell'app. */
@@ -19,9 +21,8 @@ export async function ensureCards(db: OrbitaDB, load: ContentLoader = loadBundle
   return true
 }
 
-export async function initDb(db: OrbitaDB, load?: ContentLoader): Promise<void> {
+export async function initDb(db: OrbitaDB): Promise<void> {
   await ensureSeed(db)
-  await ensureCards(db, load)
 }
 
 /** Chiede al browser di non cancellare i dati locali (Safari, Chrome). */

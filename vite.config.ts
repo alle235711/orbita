@@ -45,7 +45,7 @@ export default defineConfig({
         id: './',
         name: 'Orbita',
         short_name: 'Orbita',
-        description: 'Le giornate fino alla laurea: studio, lavoro, sport e ripasso, anche offline.',
+        description: 'Orbita: le giornate di studio, lavoro, sport e ripasso, anche offline.',
         lang: 'it',
         dir: 'ltr',
         start_url: './',

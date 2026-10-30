@@ -1,5 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useMemo, useState } from 'react'
+import { useTuning } from '../../db/hooks'
 import { Page } from '../../app/Page'
 import { navigate, useRoute } from '../../app/router'
 import { useActivityClock } from '../../app/useActivityClock'
@@ -12,7 +13,7 @@ import { useI18n } from '../../i18n/store'
 import { mulberry32 } from '../../lib/rng'
 import { KEYS } from '../../review/keyboard'
 import { corpusWords, generateDrill, generateTargeted, LESSON_BY_ID, LESSONS, TARGETED, type LessonId } from '../../typing/lessons'
-import { isPassed, keyRates, lessonProgress, PASS, recommendedLesson, worstKeys } from '../../typing/stats'
+import { isPassed, keyRates, lessonProgress, recommendedLesson, worstKeys } from '../../typing/stats'
 import { TypingExercise, type TypingDone } from '../ripasso/TypingExercise'
 import '../ripasso/RipassoPage.css'
 import './DattilografiaPage.css'
@@ -48,8 +49,10 @@ export default function DattilografiaPage() {
   const corpus = useMemo(() => corpusWords(data?.texts ?? []), [data?.texts])
   const progress = useMemo(() => lessonProgress(runs), [runs])
   const rates = useMemo(() => keyRates(runs), [runs])
-  const worst = useMemo(() => worstKeys(runs), [runs])
-  const recommended = recommendedLesson(runs)
+  const tuning = useTuning()
+  const pass = { accuracy: tuning.dattilografia.passAccuracy! / 100, wpm: tuning.dattilografia.passWpm! }
+  const worst = useMemo(() => worstKeys(runs, tuning), [runs, tuning])
+  const recommended = recommendedLesson(runs, tuning)
   const requested = route.query.get('lezione') as LessonId | null
   // Senza scelta esplicita vale la lezione consigliata all'apertura: superarla
   // non deve far saltare l'esercizio alla lezione dopo.
@@ -95,13 +98,13 @@ export default function DattilografiaPage() {
       keyErrors: r.keyErrors,
       keyHits: r.keyHits,
     })
-    const passed = r.accuracy >= PASS.accuracy && r.wpm >= PASS.wpm
+    const passed = r.accuracy >= pass.accuracy && r.wpm >= pass.wpm
     const tail =
       lessonId === 'testi' || lessonId === 'mirato'
         ? ''
         : passed
           ? tt.lessonPassed
-          : tt.toPass({ accuracy: PASS.accuracy * 100, wpm: PASS.wpm })
+          : tt.toPass({ accuracy: pass.accuracy * 100, wpm: pass.wpm })
     setOutcome(`${tt.result({ wpm: r.wpm, accuracy: r.accuracy }, f)} ${tail}`)
   }
 
@@ -118,7 +121,7 @@ export default function DattilografiaPage() {
           {tt.title}
         </h1>
         <p className="page__lead">
-          {canPractice ? tt.leadPractice({ accuracy: PASS.accuracy * 100, wpm: PASS.wpm }) : tt.leadStats}
+          {canPractice ? tt.leadPractice({ accuracy: pass.accuracy * 100, wpm: pass.wpm }) : tt.leadStats}
         </p>
       </header>
 
@@ -128,7 +131,7 @@ export default function DattilografiaPage() {
           <ol className="path" role="list">
             {LESSONS.map((l, i) => {
               const p = progress[l.id]
-              const passed = isPassed(p)
+              const passed = isPassed(p, tuning)
               const current = canPractice && l.id === lessonId
               const body = (
                 <>

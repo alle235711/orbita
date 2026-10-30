@@ -1,9 +1,10 @@
 import type { Energy } from '../../../lib/energy'
 import { ENERGY } from '../../../lib/energy'
 import { isMonthOnly } from '../../../lib/dates'
+import type { WorkoutType } from '../../../db/schema'
 import type { Format } from '../../format/types'
+import { sport } from './sport'
 import { capitalize } from '../../format/util'
-import { legacy } from './legacy'
 
 export const briefing = {
   /** Why that subject today. `hours` = hours spent on the priority in the last 7 days. */
@@ -38,11 +39,11 @@ export const briefing = {
   hoursOnPace: 'On pace for the week.',
 
   sport: 'Sport',
-  sportSummary: (p: { main: 'arrampicata' | 'palestra'; runsDone: number; runsTarget: number }) =>
-    `${p.main === 'arrampicata' ? 'climbing' : 'gym'}, ${p.runsDone}/${p.runsTarget} runs`,
+  sportSummary: (p: { parts: { type: WorkoutType; done: number; target: number }[] }) =>
+    p.parts.map((x) => `${sport.lower[x.type]} ${x.done}/${x.target}`).join(', '),
   sportGoalsReached: 'This week’s goals reached.',
 
-  abilityTitle: legacy.leanItem,
+  abilityTitle: (p: { name: string }) => p.name,
   abilityToday: 'Today',
   abilityNever: 'Never',
   abilityDays: (p: { n: number }) => `${p.n} d`,
@@ -50,10 +51,10 @@ export const briefing = {
   abilitySince: 'since the last session',
   abilityWithin: 'Within the threshold.',
 
-  englishTitle: `English with ${legacy.elsa}`,
+  languageTitle: (p: { name: string }) => p.name,
   streak: (p: { n: number }) => `${p.n} d`,
   streakSuffix: 'in a row',
-  englishDetail: (p: { minutes: number; lastScore?: number; change?: number }, f: Format) =>
+  languageDetail: (p: { minutes: number; lastScore?: number; change?: number }, f: Format) =>
     `${f.count(p.minutes, 'minute', 'minutes')} this week` +
     (p.lastScore !== undefined ? `, last score ${p.lastScore}` : '') +
     (p.change ? ` (${p.change > 0 ? '+' : ''}${p.change} in two weeks)` : '') +
@@ -71,6 +72,6 @@ export const briefing = {
 
   tomorrow: 'Tomorrow',
   tomorrowGoal: (p: { hours: number }, f: Format) => `Target of ${f.hours(p.hours)}`,
-  tomorrowPeriod: legacy.stillInPeriod,
+  tomorrowPeriod: ', still in the period',
   tomorrowNothing: 'Nothing to add for now: tomorrow’s plan is calculated in the morning.',
 }

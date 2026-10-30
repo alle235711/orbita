@@ -3,7 +3,10 @@ import { toast } from '../../app/toast'
 import { Sheet } from '../../components/Sheet'
 import { db } from '../../db/db'
 import { remove, save } from '../../db/repo'
+import { useModules } from '../../db/hooks'
 import type { CalendarEvent, Course, EventType } from '../../db/schema'
+import { eventTypeEnabled } from '../../modules/registry'
+import { DEFAULT_MODULES } from '../../modules/types'
 import { useI18n } from '../../i18n/store'
 import { toHHMM, toMinutes, toTimeInput, type ISODate } from '../../lib/dates'
 
@@ -20,6 +23,7 @@ interface EventSheetProps {
 export function EventSheet({ draft, courses, onClose }: EventSheetProps) {
   const { t, f } = useI18n()
   const ta = t.agenda
+  const modules = useModules() ?? DEFAULT_MODULES
   const [title, setTitle] = useState('')
   const [date, setDate] = useState('')
   const [start, setStart] = useState('09:00')
@@ -78,7 +82,7 @@ export function EventSheet({ draft, courses, onClose }: EventSheetProps) {
           <input className="field" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={ta.sheet.titlePlaceholder} autoFocus />
         </label>
         <div className="choices" role="radiogroup" aria-label={ta.sheet.type}>
-          {EVENT_TYPES.map((id) => (
+          {EVENT_TYPES.filter((id) => id === type || eventTypeEnabled(modules, id)).map((id) => (
             <button key={id} type="button" role="radio" aria-checked={type === id} className="chip" onClick={() => setType(id)}>
               {ta.eventType[id]}
             </button>

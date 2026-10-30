@@ -432,3 +432,106 @@
     clip: rect(0 0 0 0);
   }
 }
+
+/* ——— invito a completare il profilo ——— */
+
+.complete-card {
+  position: relative;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 12px;
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--text);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--bg) 62%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+.complete-card__dot {
+  grid-row: 1;
+  width: 10px;
+  height: 10px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: var(--disk);
+}
+
+.complete-card h2 {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.complete-card p {
+  margin-top: 2px;
+  font-size: var(--fs-small);
+  line-height: 1.4;
+  color: var(--text-rule);
+}
+
+.complete-card__actions {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 10px;
+}
+
+.complete-card__later {
+  min-height: var(--tap);
+  padding: 0 6px;
+  border: 0;
+  background: transparent;
+  color: var(--text-rule);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* Sui layout larghi la scheda è una riga di altezza fissa e la copertina cresce
+   di altrettanto: lo spazio sopra (orbita, chip, gesso) resta quello di sempre. */
+.cover--wide:has(.complete-card) {
+  min-height: calc(100dvh + 88px);
+}
+
+.cover--wide .complete-card {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  height: 72px;
+  margin-bottom: 16px;
+  padding-block: 0;
+}
+
+.cover--wide .complete-card__dot {
+  margin-top: 0;
+}
+
+.cover--wide .complete-card__body {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  min-width: 0;
+}
+
+.cover--wide .complete-card h2 {
+  flex: none;
+}
+
+.cover--wide .complete-card p {
+  margin: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.cover--wide .complete-card__actions {
+  grid-column: auto;
+  margin-top: 0;
+}

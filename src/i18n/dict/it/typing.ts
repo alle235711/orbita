@@ -25,6 +25,8 @@ const fingerOne: Record<Finger, string> = { mignolo: 'mignolo', anulare: 'anular
 const handWord: Record<Hand, string> = { sinistra: 'sinistro', destra: 'destro' }
 
 export const typing = {
+  keyboardRecall: 'Tastiera italiana: in rosso i tasti degli errori di battitura.',
+  keyboardTyping: (p: { hint: string }) => `Tastiera italiana con i tasti colorati per dito. ${p.hint}`,
   lessons,
   fingers,
   legendLabel: 'Colori delle dita',

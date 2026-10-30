@@ -30,18 +30,20 @@ const SAME_IN_BOTH = new Set<string>([
   'app.titles.briefing',
   'nav.items.briefing',
   'quicklog.scorePlaceholder', // "0–100"
-  'quicklog.kind.lean', // nomi legacy
-  'quicklog.kind.elsa',
-  'legacy.lean',
-  'legacy.leanItem',
-  'legacy.elsa',
   'stats.hUnit', // " h"
-  'stats.typeLabel.lean',
   'regole.units.min', // "min"
   'regole.units.hours', // "h"
-  // Parole identiche per natura: "Sport", "Backup", "Lean 4" (legacy), "4 g"/"ELSA" e simili.
+  // Parole identiche per natura: "Sport", "Backup", "4 g" e simili.
   'agenda.eventType.sport',
-  'briefing.abilityTitle',
+  'modules.sport.label',
+  'profilo.exams.cfu', // sigla
+  'stats.sportTitle',
+  'plan.msg.periodTitle', // solo il nome del periodo
+  'regole.rules.sport.title',
+  'briefing.abilityTitle', // solo il nome
+  'briefing.languageTitle',
+  'stats.abilityTitle',
+  'stats.languageTitle',
   'briefing.sport',
   'dati.backup',
   'oggi.planItemAria', // solo punteggiatura e parametri

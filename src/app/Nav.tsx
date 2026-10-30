@@ -1,5 +1,8 @@
 import { useEffect, useRef } from 'react'
+import { useModules } from '../db/hooks'
 import { useBaseLang, useLang, useT } from '../i18n/store'
+import { routeEnabled } from '../modules/registry'
+import { DEFAULT_MODULES } from '../modules/types'
 import { href, type RouteId } from './router'
 import { TimerChip } from './TimerChip'
 import './Nav.css'
@@ -26,7 +29,9 @@ export function Nav({ current, bordered }: NavProps) {
   const t = useT()
   const lang = useLang()
   const base = useBaseLang()
+  const modules = useModules() ?? DEFAULT_MODULES
   const active = PARENT[current] ?? current
+  const items = NAV_ITEMS.filter((item) => routeEnabled(modules, item.id))
   const listRef = useRef<HTMLUListElement>(null)
 
   // Sul telefono la barra scorre: la voce attiva resta sempre visibile.
@@ -49,7 +54,7 @@ export function Nav({ current, bordered }: NavProps) {
           ) : null}
         </div>
         <ul className="topbar__list" role="list" ref={listRef}>
-          {NAV_ITEMS.map((item) => (
+          {items.map((item) => (
             <li key={item.id}>
               <a
                 className="topbar__link"

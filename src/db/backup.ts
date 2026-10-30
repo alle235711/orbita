@@ -1,11 +1,14 @@
 import { AppError } from '../i18n/errors'
 import type { OrbitaDB } from './db'
+import { migrateToV2, V2_INPUT_TABLES, type RawRow, type RawTables } from './migrations/v2'
 import { TABLE_NAMES, type Syncable, type TableName } from './schema'
 
 // Backup completo in JSON. L'importazione fonde record per record con la
 // stessa regola della futura sincronizzazione: vince l'updatedAt più recente.
 
-export const BACKUP_FORMAT = 1
+export const BACKUP_FORMAT = 2
+/** Tabelle che, se mancano in un backup di formato 1, contano come vuote per produrre le righe derivate. */
+const V1_EMPTY_OK: TableName[] = ['settings', 'rules', 'deadlines']
 
 export interface Backup {
   app: 'orbita'
@@ -48,7 +51,19 @@ export function parseBackup(json: unknown): Backup {
       }
     }
   }
+  if (b.format <= 1) return upgradeV1(b as Backup)
   return b as Backup
+}
+
+/** Un backup di formato 1 passa dalla stessa trasformazione dell'aggiornamento di Dexie. */
+function upgradeV1(b: Backup): Backup {
+  const input: RawTables = {}
+  for (const name of V2_INPUT_TABLES) {
+    const rows = b.tables[name]
+    if (rows) input[name] = rows as RawRow[]
+    else if (V1_EMPTY_OK.includes(name)) input[name] = []
+  }
+  return { ...b, format: BACKUP_FORMAT, tables: { ...b.tables, ...migrateToV2(input) } as Backup['tables'] }
 }
 
 /** Fonde il backup nei dati locali: per ogni id resta la versione più recente. */

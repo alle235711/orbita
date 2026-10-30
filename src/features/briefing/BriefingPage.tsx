@@ -6,13 +6,17 @@ import { useToday } from '../../app/useToday'
 import { Sky } from '../../art/Sky'
 import { Ruler } from '../../components/Ruler'
 import { db } from '../../db/db'
+import { setSetting } from '../../db/settings'
 import { useDayPlan } from '../../db/plan-context'
 import { alive } from '../../db/repo'
 import type { Deadline } from '../../db/schema'
 import { addDays, diffDays, isBetween, resolveDate, toHHMM } from '../../lib/dates'
+import { briefingTiles, moduleLabel } from '../../modules/registry'
+import { normalizeStudyBlock } from '../../modules/types'
+import { blockHint } from '../../rules/blocks'
 import { priorityReason, weekStatus } from '../../rules/briefing'
 import { itemDuration } from '../../rules/plan'
-import { WORK_TYPES } from '../../rules/rules'
+import { WORK_TYPES, examsAhead } from '../../rules/rules'
 import { useI18n, useRenderedPlan } from '../../i18n/store'
 import './BriefingPage.css'
 
@@ -34,15 +38,23 @@ export default function BriefingPage() {
         .filter((s) => s.courseId === plan.priority!.courseId && WORK_TYPES.includes(s.type) && isBetween(s.date, addDays(today, -6), today))
         .reduce((n, s) => n + s.minutes, 0) / 60
     : 0
-  const upcoming = context.courses
-    .filter((c) => c.examDate && diffDays(today, c.examDate) >= 0)
-    .map((c): { id: string; title: string; date: string; days: number; end?: string } => ({ id: c.id, title: c.name, date: c.examDate!, days: diffDays(today, c.examDate!) }))
+  const upcoming = examsAhead(context.courses, today).map(
+    (e): { id: string; title: string; date: string; days: number; end?: string } => ({ id: e.course.id, title: e.course.name, date: e.course.examDate!, days: e.days }),
+  )
   const others = context.deadlines
     .filter((d): d is Deadline & { date: string } => !!d.date && diffDays(today, d.endDate ?? d.date) >= 0)
-    .map((d) => ({ id: d.id, title: d.kind === 'laurea' ? `${d.title}${d.notes ? `, ${d.notes.toLowerCase()}` : ''}` : d.title, date: d.date, days: diffDays(today, d.date), end: d.endDate }))
+    .map((d) => ({ id: d.id, title: d.title, date: d.date, days: diffDays(today, d.date), end: d.endDate }))
   const milestones = [...upcoming, ...others].sort((a, b) => resolveDate(a.date).localeCompare(resolveDate(b.date))).slice(0, 7)
 
   const { sport, hours } = plan
+  const tiles = briefingTiles(context.modules)
+  const sportParts = sport.types.filter((x) => x.target > 0)
+  const sportDone = sportParts.reduce((n, x) => n + x.done, 0)
+  const sportTarget = sportParts.reduce((n, x) => n + x.target, 0)
+  const hint = blockHint(context.sessions, today, context.studyBlock)
+  const applyHint = () => {
+    if (hint) void setSetting(db, 'studyBlock', normalizeStudyBlock({ ...context.studyBlock, preset: hint.to }))
+  }
   const deficit = Math.max(0, hours.target7 - hours.last7)
 
   return (
@@ -116,29 +128,36 @@ export default function BriefingPage() {
                 : tb.hoursOnPace}
             </dd>
           </div>
+          {tiles.has('sport') ? (
+            <div>
+              <dt>{tb.sport}</dt>
+              <dd className="week-status__value">
+                {sportDone}/{sportTarget} <span>{tb.sportSummary({ parts: sportParts })}</span>
+              </dd>
+              <dd>{plan.notes.find((n) => n.ruleId === 'sport')?.text ?? tb.sportGoalsReached}</dd>
+            </div>
+          ) : null}
+          {tiles.has('ability') ? (
           <div>
-            <dt>{tb.sport}</dt>
+            <dt>{tb.abilityTitle({ name: moduleLabel(context.modules, 'abilita', t) })}</dt>
             <dd className="week-status__value">
-              {sport.mainDone}/{sport.mainTarget} <span>{tb.sportSummary({ main: sport.main === 'arrampicata' ? 'arrampicata' : 'palestra', runsDone: sport.runsDone, runsTarget: sport.runsTarget })}</span>
+              {Number.isFinite(plan.abilityGap) ? (plan.abilityGap === 0 ? tb.abilityToday : tb.abilityDays({ n: plan.abilityGap })) : tb.abilityNever} <span>{plan.abilityGap === 0 ? tb.abilityDone : tb.abilitySince}</span>
             </dd>
-            <dd>{plan.notes.find((n) => n.ruleId === 'sport')?.text ?? tb.sportGoalsReached}</dd>
+            <dd>{plan.notes.find((n) => n.ruleId === 'abilita')?.text ?? tb.abilityWithin}</dd>
           </div>
+          ) : null}
+          {tiles.has('language') ? (
           <div>
-            <dt>{tb.abilityTitle}</dt>
+            <dt>{tb.languageTitle({ name: moduleLabel(context.modules, 'lingua', t) })}</dt>
             <dd className="week-status__value">
-              {Number.isFinite(plan.leanGap) ? (plan.leanGap === 0 ? tb.abilityToday : tb.abilityDays({ n: plan.leanGap })) : tb.abilityNever} <span>{plan.leanGap === 0 ? tb.abilityDone : tb.abilitySince}</span>
-            </dd>
-            <dd>{plan.notes.find((n) => n.ruleId === 'lean')?.text ?? tb.abilityWithin}</dd>
-          </div>
-          <div>
-            <dt>{tb.englishTitle}</dt>
-            <dd className="week-status__value">
-              {tb.streak({ n: status.english.streak })} <span>{tb.streakSuffix}</span>
+              {tb.streak({ n: status.language.streak })} <span>{tb.streakSuffix}</span>
             </dd>
             <dd>
-              {tb.englishDetail({ minutes: status.english.minutes7, lastScore: status.english.lastScore, change: status.english.scoreChange }, f)}
+              {tb.languageDetail({ minutes: status.language.minutes7, lastScore: status.language.lastScore, change: status.language.scoreChange }, f)}
             </dd>
           </div>
+          ) : null}
+          {tiles.has('typing') ? (
           <div>
             <dt>{tb.typingTitle}</dt>
             <dd className="week-status__value">
@@ -150,12 +169,21 @@ export default function BriefingPage() {
                 : tb.typingNone}
             </dd>
           </div>
+          ) : null}
         </dl>
       </section>
 
       <div className="brief__columns">
         <section className="brief__section" aria-labelledby="h-regole">
           <h2 id="h-regole">{tb.todayRules}</h2>
+          {hint ? (
+            <div className="note note--hint" role="group" aria-label={t.blocks.hintTitle}>
+              <span>{t.blocks.hint({ from: hint.from, to: hint.to, over: hint.over, total: hint.sessions }, f)}</span>
+              <button type="button" className="btn" onClick={applyHint}>
+                {t.blocks.use({ preset: hint.to })}
+              </button>
+            </div>
+          ) : null}
           {plan.notes.length ? (
             <ul className="notes" role="list">
               {plan.notes.map((n, i) => (
@@ -177,7 +205,7 @@ export default function BriefingPage() {
           <h2 id="h-domani">{tb.tomorrow}</h2>
           <p className="brief__muted">
             {tb.tomorrowGoal({ hours: hours.tomorrow }, f)}
-            {plan.tirocinio ? tb.tomorrowPeriod : ''}.
+            {plan.period ? tb.tomorrowPeriod : ''}.
           </p>
           {plan.tomorrow.length ? (
             <ul className="notes" role="list">

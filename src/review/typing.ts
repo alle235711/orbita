@@ -103,12 +103,13 @@ export interface TypingStats {
   exact: boolean
 }
 
-export function typingStats(state: TypingState, now?: number): TypingStats {
+/** `minSeconds` è il tempo minimo (in secondi) con cui si calcolano le parole al minuto. */
+export function typingStats(state: TypingState, now?: number, minSeconds = 3): TypingStats {
   let correctChars = 0
   for (let i = 0; i < state.typed.length; i++) if (state.typed[i] === state.target[i]) correctChars++
   const strokes = state.hits + state.misses
   const end = now ?? state.lastAt ?? state.startedAt
-  const minutes = state.startedAt !== undefined && end !== undefined ? Math.max(3000, end - state.startedAt) / 60_000 : 0
+  const minutes = state.startedAt !== undefined && end !== undefined ? Math.max(minSeconds * 1000, end - state.startedAt) / 60_000 : 0
   return {
     correctChars,
     accuracy: strokes ? state.hits / strokes : 1,

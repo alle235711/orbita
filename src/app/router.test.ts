@@ -25,7 +25,7 @@ describe('parseHash', () => {
 describe('href', () => {
   it('costruisce hash con e senza parametri', () => {
     expect(href('briefing')).toBe('#/briefing')
-    expect(href('ripasso', { materia: 'sdm' })).toBe('#/ripasso?materia=sdm')
-    expect(parseHash(href('ripasso', { materia: 'sdm' })).query.get('materia')).toBe('sdm')
+    expect(href('ripasso', { materia: 'corso-prova' })).toBe('#/ripasso?materia=corso-prova')
+    expect(parseHash(href('ripasso', { materia: 'corso-prova' })).query.get('materia')).toBe('corso-prova')
   })
 })

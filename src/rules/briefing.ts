@@ -4,15 +4,14 @@
 import type { Session, TypingRun } from '../db/schema'
 import type { I18n } from '../i18n'
 import { addDays, diffDays, isBetween, type ISODate } from '../lib/dates'
-import type { ThresholdSpec } from './defaults'
 import type { DayPlan, RuleContext } from './types'
 
-export interface EnglishStatus {
-  /** Giorni di fila con ELSA, fino a oggi (o fino a ieri se oggi manca ancora). */
+export interface LanguageStatus {
+  /** Giorni di fila con la lingua, fino a oggi (o fino a ieri se oggi manca ancora). */
   streak: number
   minutes7: number
   lastScore?: number
-  /** Differenza tra l'ultimo punteggio e il primo degli ultimi 14 giorni. */
+  /** Differenza tra l'ultimo punteggio e il primo della finestra dei punteggi. */
   scoreChange?: number
 }
 
@@ -25,12 +24,12 @@ export interface TypingStatus {
 }
 
 export interface WeekStatus {
-  english: EnglishStatus
+  language: LanguageStatus
   typing: TypingStatus
 }
 
-export function englishStatus(sessions: Session[], today: ISODate): EnglishStatus {
-  const english = sessions.filter((s) => !s.deletedAt && s.type === 'inglese')
+export function languageStatus(sessions: Session[], today: ISODate, scoreDays = 14): LanguageStatus {
+  const english = sessions.filter((s) => !s.deletedAt && s.type === 'lingua')
   const days = new Set(english.map((s) => s.date))
   let day = days.has(today) ? today : addDays(today, -1)
   let streak = 0
@@ -40,7 +39,7 @@ export function englishStatus(sessions: Session[], today: ISODate): EnglishStatu
   }
   const minutes7 = english.filter((s) => isBetween(s.date, addDays(today, -6), today)).reduce((n, s) => n + s.minutes, 0)
   const scored = english
-    .filter((s) => typeof s.score === 'number' && isBetween(s.date, addDays(today, -13), today))
+    .filter((s) => typeof s.score === 'number' && isBetween(s.date, addDays(today, -(scoreDays - 1)), today))
     .sort((a, b) => a.date.localeCompare(b.date) || (a.start ?? '').localeCompare(b.start ?? ''))
   const last = scored.at(-1)?.score
   const first = scored[0]?.score
@@ -66,8 +65,8 @@ export function typingStatus(runs: TypingRun[], today: ISODate): TypingStatus {
   }
 }
 
-export function weekStatus(ctx: Pick<RuleContext, 'sessions' | 'today'>, runs: TypingRun[]): WeekStatus {
-  return { english: englishStatus(ctx.sessions, ctx.today), typing: typingStatus(runs, ctx.today) }
+export function weekStatus(ctx: Pick<RuleContext, 'sessions' | 'today'>, runs: TypingRun[], scoreDays = 14): WeekStatus {
+  return { language: languageStatus(ctx.sessions, ctx.today, scoreDays), typing: typingStatus(runs, ctx.today) }
 }
 
 /** La frase sulla priorità: perché quella materia oggi. */
@@ -77,10 +76,4 @@ export function priorityReason(plan: DayPlan, workedOnPriority7: number, i18n: P
   return i18n.t.briefing.priorityReason({ days: p.days, date: p.examDate, hours: workedOnPriority7 }, i18n.f)
 }
 
-/** Una soglia valida: dentro i limiti e sul passo previsto. */
-export function clampThreshold(spec: ThresholdSpec, value: number): number {
-  if (!Number.isFinite(value)) return spec.value
-  const step = spec.step ?? 1
-  const stepped = Math.round(value / step) * step
-  return Math.min(spec.max, Math.max(spec.min, Number(stepped.toFixed(4))))
-}
+export { clampThreshold } from './defaults'

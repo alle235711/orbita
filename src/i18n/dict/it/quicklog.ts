@@ -1,17 +1,17 @@
 import type { Format } from '../../format/types'
-import { legacy } from './legacy'
+import type { QuickLogKind } from '../../../modules/registry'
 
-export type QuickKind = 'studio' | 'lavoro' | 'arrampicata' | 'corsa' | 'palestra' | 'peso' | 'lean' | 'elsa' | 'lettura'
-
-const kind: Record<QuickKind, string> = {
+const kind: Record<QuickLogKind, string> = {
   studio: 'Studio',
   lavoro: 'Lavoro',
   arrampicata: 'Arrampicata',
   corsa: 'Corsa',
   palestra: 'Palestra',
+  nuoto: 'Nuoto',
+  altro: 'Altro sport',
   peso: 'Peso',
-  lean: legacy.lean,
-  elsa: legacy.elsa,
+  abilita: 'Abilità personale',
+  lingua: 'Lingua straniera',
   lettura: 'Lettura',
 }
 
@@ -29,9 +29,9 @@ export const quicklog = {
   scorePlaceholder: '0–100',
   errWeight: 'Scrivi il peso in chilogrammi, per esempio 72,5.',
   errMinutes: 'Scrivi quanti minuti, da 1 a 1440.',
-  errScore: `Il punteggio ${legacy.elsa} va da 0 a 100.`,
+  errScore: 'Il punteggio va da 0 a 100.',
   errSave: 'Non sono riuscito a salvare. Riprova.',
   weightLogged: (p: { kg: number }, f: Format) => `Registrato il peso: ${f.number(p.kg, 3)} kg.`,
-  logged: (p: { minutes: number; kind: QuickKind }, f: Format) =>
-    `Registrati ${f.minutes(p.minutes)} di ${p.kind === 'elsa' ? legacy.elsa : kind[p.kind].toLowerCase()}.`,
+  /** `label` è già pronto: il nome scritto dall'utente o il tipo in minuscolo. */
+  logged: (p: { minutes: number; label: string }, f: Format) => `Registrati ${f.minutes(p.minutes)} di ${p.label}.`,
 }

@@ -5,21 +5,23 @@ import type { Course } from '../db/schema'
 import type { Format } from '../i18n/format/types'
 import { m as msg, type PlanMsg } from '../i18n/messages'
 import { DEFAULT_ENERGY, type Energy } from '../lib/energy'
+import { blocksFor } from './blocks'
+import { resolveGroups, type Tuning } from './defaults'
 import {
   examsAhead,
   resolveRules,
+  ruleAbility,
   ruleCards,
   ruleExam,
   ruleHighEnergy,
   ruleHours,
-  ruleLean,
   ruleLowEnergy,
   ruleMidEnergy,
+  rulePeriod,
   ruleSport,
-  ruleTirocinio,
   type Exam,
 } from './rules'
-import type { BriefingNote, DayPlan, PlanItem, RuleContext, Rules, Tier } from './types'
+import type { BriefingNote, DayPlan, PlanItem, RuleContext, Tier } from './types'
 
 const HEADLINES: Record<Tier, [PlanMsg, PlanMsg]> = {
   low: [msg('headlineLowA'), msg('headlineLowB')],
@@ -27,16 +29,19 @@ const HEADLINES: Record<Tier, [PlanMsg, PlanMsg]> = {
   high: [msg('headlineHighA'), msg('headlineHighB')],
 }
 
-function ruleSentence(tier: Tier, energy: Energy, rules: Rules, hasExam: boolean): PlanMsg {
+interface BlockPair {
+  block: number
+  pause: number
+}
+
+function ruleSentence(tier: Tier, energy: Energy, bp: BlockPair, hasExam: boolean): PlanMsg {
   switch (tier) {
     case 'low':
-      return msg('ruleLow', { block: rules['energia-bassa'].t.block! })
+      return msg('ruleLow', { block: bp.block })
     case 'high':
       return msg('ruleHigh', { energy })
     default:
-      return hasExam
-        ? msg('ruleMidExam', { block: rules['energia-media'].t.block! })
-        : msg('ruleMid', { block: rules['energia-media'].t.block!, pause: rules['energia-media'].t.pause! })
+      return hasExam ? msg('ruleMidExam', { block: bp.block }) : msg('ruleMid', { block: bp.block, pause: bp.pause })
   }
 }
 
@@ -51,13 +56,13 @@ function block(count: number, minutes: number, pause: number) {
   return { count, minutes, pause }
 }
 
-function studyItems(tier: Tier, rules: Rules, exams: Exam[], priority: Exam | undefined): PlanItem[] {
+function studyItems(tier: Tier, bp: BlockPair, tuning: Tuning, exams: Exam[], priority: Exam | undefined): PlanItem[] {
   const fromRule1 = priority !== undefined
   const first = priority ?? exams[0]
   const others = exams.filter((e) => e.course.id !== first?.course.id)
 
   if (!first) {
-    const minutes = tier === 'low' ? rules['energia-bassa'].t.block! : rules['energia-media'].t.block!
+    const minutes = bp.block
     return [
       {
         key: 'studio',
@@ -72,14 +77,14 @@ function studyItems(tier: Tier, rules: Rules, exams: Exam[], priority: Exam | un
   }
 
   if (tier === 'low') {
-    const m = rules['energia-bassa'].t.block!
+    const m = bp.block
     return [
       {
         key: `studio:${first.course.id}:ripasso-attivo`,
         title: msg('activeReviewTitle', { course: first.course.name }),
         detail: msg('activeReviewDetail'),
         minutes: m,
-        blocks: block(1, m, 10),
+        blocks: block(1, m, bp.pause),
         kind: 'studio',
         courseId: first.course.id,
         ruleId: 'energia-bassa',
@@ -88,29 +93,31 @@ function studyItems(tier: Tier, rules: Rules, exams: Exam[], priority: Exam | un
   }
 
   if (tier === 'mid') {
-    const { block: m, pause } = rules['energia-media'].t
+    const m = bp.block
+    const pause = bp.pause
+    const second = tuning.giornata.secondExerciseMinutes!
     const items: PlanItem[] = [
       {
         key: `studio:${first.course.id}:esercizi`,
         title: msg('exercisesTitle', { course: first.course.name }),
         detail: msg('exercisesFirstDetail', { days: first.days }),
-        minutes: 2 * m!,
-        blocks: block(2, m!, pause!),
+        minutes: 2 * m,
+        blocks: block(2, m, pause),
         kind: 'studio',
         courseId: first.course.id,
         ruleId: fromRule1 ? 'esame-vicino' : 'energia-media',
       },
     ]
-    const second = others[0]
-    if (second) {
+    const other = others[0]
+    if (other) {
       items.push({
-        key: `studio:${second.course.id}:esercizi`,
-        title: msg('exercisesTitle', { course: second.course.name }),
+        key: `studio:${other.course.id}:esercizi`,
+        title: msg('exercisesTitle', { course: other.course.name }),
         detail: msg('exercisesSecondDetail'),
-        minutes: 60,
-        blocks: block(1, 60, pause!),
+        minutes: second,
+        blocks: block(1, second, pause),
         kind: 'studio',
-        courseId: second.course.id,
+        courseId: other.course.id,
         ruleId: 'energia-media',
       })
     }
@@ -118,7 +125,7 @@ function studyItems(tier: Tier, rules: Rules, exams: Exam[], priority: Exam | un
   }
 
   // tier alto: con un esame entro la soglia la teoria è sua, altrimenti della più difficile
-  const m = rules['energia-alta'].t.block!
+  const m = bp.block
   const theory = fromRule1 ? first.course : hardestCourse(exams)!
   const items: PlanItem[] = [
     {
@@ -126,7 +133,7 @@ function studyItems(tier: Tier, rules: Rules, exams: Exam[], priority: Exam | un
       title: msg('theoryTitle', { course: theory.name }),
       detail: msg('theoryDetail'),
       minutes: 2 * m,
-      blocks: block(2, m, 15),
+      blocks: block(2, m, bp.pause),
       kind: 'studio',
       courseId: theory.id,
       ruleId: 'energia-alta',
@@ -140,7 +147,7 @@ function studyItems(tier: Tier, rules: Rules, exams: Exam[], priority: Exam | un
       title: msg('exercisesTitle', { course: next.course.name }),
       detail: msg('exercisesHighDetail', { days: next.days }),
       minutes: m,
-      blocks: block(1, m, 15),
+      blocks: block(1, m, bp.pause),
       kind: 'studio',
       courseId: next.course.id,
       ruleId: 'energia-alta',
@@ -151,28 +158,33 @@ function studyItems(tier: Tier, rules: Rules, exams: Exam[], priority: Exam | un
 
 export function evaluate(ctx: RuleContext): DayPlan {
   const rules = resolveRules(ctx.rules)
+  const tuning = resolveGroups(ctx.rules)
   const energy = ctx.energy ?? DEFAULT_ENERGY
   const exams = examsAhead(ctx.courses, ctx.today)
 
-  const profile = ruleTirocinio(ctx, rules)
+  const tier: Tier = rules['energia-bassa'].enabled && energy <= rules['energia-bassa'].t.maxEnergy! ? 'low' : rules['energia-alta'].enabled && energy >= rules['energia-alta'].t.minEnergy! ? 'high' : 'mid'
+  const bp = blocksFor(ctx.studyBlock.preset, tier)
+  const midBp = blocksFor(ctx.studyBlock.preset, 'mid')
+
+  const profile = rulePeriod(ctx, rules)
   const exam = ruleExam(ctx, rules['esame-vicino'])
-  const low = ruleLowEnergy(energy, rules['energia-bassa'])
+  const low = ruleLowEnergy(energy, rules['energia-bassa'], bp.block)
   const high = low ? undefined : ruleHighEnergy(energy, rules['energia-alta'])
-  const mid = ruleMidEnergy(energy, rules['energia-media'], !!low, !!high)
-  const tier: Tier = low ? 'low' : high ? 'high' : 'mid'
+  const mid = ruleMidEnergy(energy, rules['energia-media'], !!low, !!high, midBp.block, midBp.pause)
   const sport = ruleSport(ctx, rules.sport, profile)
-  const lean = ruleLean(ctx, rules.lean)
+  const ability = ruleAbility(ctx, rules.abilita)
   const hours = ruleHours(ctx, rules['ore-settimana'], profile.hoursPerDay)
   const cards = ruleCards(ctx, rules['schede-scadute'])
 
   const priorityExam = exam.priority ? exams.find((e) => e.course.id === exam.priority!.courseId) : undefined
-  const study = studyItems(tier, rules, exams, priorityExam)
+  const study = studyItems(tier, bp, tuning, exams, priorityExam)
 
   let sportItems = sport.items
   if (tier === 'low' && sportItems.some((i) => !i.at)) {
     // Con il disco quasi spento lo sport proposto diventa recupero attivo;
     // quello già fissato in agenda resta.
     const fixed = sportItems.filter((i) => i.at)
+    const walk = tuning.giornata.walkMinutes!
     sportItems = fixed.length
       ? fixed
       : [
@@ -180,8 +192,8 @@ export function evaluate(ctx: RuleContext): DayPlan {
             key: 'camminata',
             title: msg('walkTitle'),
             detail: msg('walkDetail'),
-            minutes: 30,
-            blocks: block(1, 30, 0),
+            minutes: walk,
+            blocks: block(1, walk, 0),
             kind: 'camminata',
             ruleId: 'energia-bassa',
             evening: true,
@@ -189,25 +201,27 @@ export function evaluate(ctx: RuleContext): DayPlan {
         ]
   }
 
-  const extras = [cards.item, lean.today].filter((i): i is PlanItem => !!i)
+  const extras = [cards.item, ability.today].filter((i): i is PlanItem => !!i)
   let items: PlanItem[]
-  if (tier === 'high') items = [...study, ...(lean.today ? [lean.today] : []), ...(cards.item ? [cards.item] : []), ...sportItems]
+  if (tier === 'high') items = [...study, ...(ability.today ? [ability.today] : []), ...(cards.item ? [cards.item] : []), ...sportItems]
   else items = [...study, ...extras, ...sportItems]
 
-  if (tier === 'low' && items.length < 4) {
+  // La lettura riempie le giornate leggere, solo se il modulo è acceso.
+  if (tier === 'low' && items.length < tuning.giornata.fillerBelow! && ctx.modules.lettura.enabled) {
+    const reading = tuning.giornata.readingMinutes!
     items.push({
       key: 'lettura',
       title: msg('readingTitle'),
       detail: msg('readingDetail'),
-      minutes: 30,
-      blocks: block(1, 30, 0),
+      minutes: reading,
+      blocks: block(1, reading, 0),
       kind: 'lettura',
       ruleId: 'energia-bassa',
       evening: true,
     })
   }
 
-  const notes = [profile.note, exam.note, low ?? mid ?? high, hours.note, cards.note, ...sport.notes, lean.note].filter(
+  const notes = [profile.note, exam.note, low ?? mid ?? high, hours.note, cards.note, ...sport.notes, ability.note].filter(
     (n): n is BriefingNote => !!n,
   )
 
@@ -215,15 +229,15 @@ export function evaluate(ctx: RuleContext): DayPlan {
     tier,
     energy,
     headline: HEADLINES[tier],
-    rule: ruleSentence(tier, energy, rules, exams.length > 0),
+    rule: ruleSentence(tier, energy, tier === 'mid' ? midBp : bp, exams.length > 0),
     items,
-    tomorrow: lean.tomorrow ? [lean.tomorrow] : [],
+    tomorrow: ability.tomorrow ? [ability.tomorrow] : [],
     notes,
     priority: exam.priority,
     hours: hours.status,
     sport: sport.status,
-    leanGap: lean.gap,
-    tirocinio: profile.tirocinio,
+    abilityGap: ability.gap,
+    period: profile.period,
   }
 }
 

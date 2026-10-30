@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { FingerLegend, Keyboard } from '../../components/Keyboard'
 import { useI18n } from '../../i18n/store'
 import { strokeFor, strokeHint } from '../../review/keyboard'
-import { MIN_ACCURACY } from '../../review/leitner'
+import { useTuning } from '../../db/hooks'
 import { inRanges, keyRanges } from '../../review/mask'
 import { applyValue, charStates, startTyping, typingStats } from '../../review/typing'
 import type { ReviewMode } from '../../db/schema'
@@ -54,7 +54,10 @@ export function TypingExercise({ text, mode, hiddenKey, outcome, onDone, onNext,
     return () => window.clearInterval(id)
   }, [state.startedAt])
 
-  const stats = typingStats(state, finished.current ? undefined : now)
+  const tuning = useTuning()
+  const minAccuracy = tuning.ripasso.minAccuracy! / 100
+  const minSeconds = tuning.dattilografia.minSeconds!
+  const stats = typingStats(state, finished.current ? undefined : now, minSeconds)
   const states = charStates(state)
   const pos = state.typed.length
   const next = text[pos]
@@ -63,7 +66,7 @@ export function TypingExercise({ text, mode, hiddenKey, outcome, onDone, onNext,
   useEffect(() => {
     if (!stats.done || finished.current) return
     finished.current = true
-    const final = typingStats(state)
+    const final = typingStats(state, undefined, minSeconds)
     onDone({
       wpm: final.wpm,
       accuracy: final.accuracy,
@@ -150,7 +153,7 @@ export function TypingExercise({ text, mode, hiddenKey, outcome, onDone, onNext,
           <span>
             <strong className="tnum">{Math.round(stats.progress * 100)}%</strong> {tr.ofCard}
           </span>
-          <span className={`exercise__hint${stats.done ? (stats.accuracy >= MIN_ACCURACY ? ' exercise__hint--ok' : ' exercise__hint--ko') : ''}`} aria-live="polite">
+          <span className={`exercise__hint${stats.done ? (stats.accuracy >= minAccuracy ? ' exercise__hint--ok' : ' exercise__hint--ko') : ''}`} aria-live="polite">
             {hint}
           </span>
         </p>
@@ -160,7 +163,7 @@ export function TypingExercise({ text, mode, hiddenKey, outcome, onDone, onNext,
           <Keyboard
             next={stats.done || hiddenHere || next === undefined ? null : strokeFor(next)}
             errors={hiddenHere ? state.keyErrors : undefined}
-            label={t.legacy.keyboardTyping({ hint })}
+            label={t.typing.keyboardTyping({ hint })}
           />
           <FingerLegend />
         </div>

@@ -1,28 +1,40 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { toast } from '../app/toast'
 import { logSession, logWeight, logWorkout } from '../db/actions'
+import { useModules, useTuning } from '../db/hooks'
 import type { Course, SessionType, WorkoutType } from '../db/schema'
-import type { QuickKind } from '../i18n/dict/it/quicklog'
 import { useI18n } from '../i18n/store'
 import { todayISO } from '../lib/dates'
+import { moduleLabel, quickLogKinds, type QuickLogKind } from '../modules/registry'
+import { DEFAULT_MODULES, type ModulesSettings } from '../modules/types'
+import type { Tuning } from '../rules/defaults'
 import { examsAhead } from '../rules/rules'
 import { Sheet } from './Sheet'
 
-type Kind = QuickKind
+type Kind = QuickLogKind
 
-const KINDS: { id: Kind; minutes?: number }[] = [
-  { id: 'studio', minutes: 90 },
-  { id: 'lavoro', minutes: 60 },
-  { id: 'arrampicata', minutes: 120 },
-  { id: 'corsa', minutes: 40 },
-  { id: 'palestra', minutes: 60 },
-  { id: 'peso' },
-  { id: 'lean', minutes: 30 },
-  { id: 'elsa', minutes: 15 },
-  { id: 'lettura', minutes: 30 },
-]
+const WORKOUT: Kind[] = ['arrampicata', 'palestra', 'corsa', 'nuoto', 'altro']
 
-const WORKOUT: Kind[] = ['arrampicata', 'corsa', 'palestra']
+/** I minuti proposti per tipo: dal gruppo `registra`, o dal tipo di sport. */
+function presetMinutes(kind: Kind, tuning: Tuning, modules: ModulesSettings): number | undefined {
+  const r = tuning.registra
+  switch (kind) {
+    case 'studio':
+      return r.studyMinutes
+    case 'lavoro':
+      return r.lavoroMinutes
+    case 'abilita':
+      return r.abilitaMinutes
+    case 'lingua':
+      return r.linguaMinutes
+    case 'lettura':
+      return r.letturaMinutes
+    case 'peso':
+      return undefined
+    default:
+      return modules.sport.types[kind].minutes
+  }
+}
 
 interface QuickLogProps {
   open: boolean
@@ -34,9 +46,13 @@ interface QuickLogProps {
 export function QuickLog({ open, onClose, courses }: QuickLogProps) {
   const { t, f } = useI18n()
   const tq = t.quicklog
+  const modules = useModules() ?? DEFAULT_MODULES
+  const tuning = useTuning()
+  const kinds = useMemo(() => quickLogKinds(modules), [modules])
+  const labelOf = (k: Kind) => (k === 'abilita' || k === 'lingua' ? moduleLabel(modules, k, t) : tq.kind[k])
   const today = todayISO()
   const [kind, setKind] = useState<Kind>('studio')
-  const [minutes, setMinutes] = useState('90')
+  const [minutes, setMinutes] = useState(() => String(tuning.registra.studyMinutes))
   const [date, setDate] = useState(today)
   const [courseId, setCourseId] = useState('')
   const [score, setScore] = useState('')
@@ -58,9 +74,17 @@ export function QuickLog({ open, onClose, courses }: QuickLogProps) {
     if (!courseId && sortedCourses[0]) setCourseId(sortedCourses[0].id)
   }, [courseId, sortedCourses])
 
+  // Se il tipo scelto non c'è più (modulo spento), si torna allo studio.
+  useEffect(() => {
+    if (!kinds.includes(kind)) {
+      setKind('studio')
+      setMinutes(String(tuning.registra.studyMinutes))
+    }
+  }, [kinds, kind, tuning])
+
   const pick = (next: Kind) => {
     setKind(next)
-    const preset = KINDS.find((k) => k.id === next)?.minutes
+    const preset = presetMinutes(next, tuning, modules)
     if (preset) setMinutes(String(preset))
     setError('')
   }
@@ -78,14 +102,15 @@ export function QuickLog({ open, onClose, courses }: QuickLogProps) {
         if (!(m > 0 && m <= 24 * 60)) return setError(tq.errMinutes)
         if (WORKOUT.includes(kind)) {
           await logWorkout({ date, type: kind as WorkoutType, minutes: m })
-        } else if (kind === 'elsa') {
+        } else if (kind === 'lingua') {
           const s = score.trim() ? Number(score.replace(',', '.')) : undefined
           if (s !== undefined && !(s >= 0 && s <= 100)) return setError(tq.errScore)
-          await logSession({ date, type: 'inglese', minutes: m, score: s, notes: t.legacy.elsa })
+          await logSession({ date, type: 'lingua', minutes: m, score: s, notes: modules.lingua.appName })
         } else {
           await logSession({ date, type: kind as SessionType, minutes: m, courseId: kind === 'studio' ? courseId || undefined : undefined })
         }
-        toast(tq.logged({ minutes: m, kind }, f))
+        const named = kind === 'abilita' || kind === 'lingua'
+        toast(tq.logged({ minutes: m, label: named ? labelOf(kind) : labelOf(kind).toLowerCase() }, f))
       }
       setScore('')
       setKg('')
@@ -99,9 +124,9 @@ export function QuickLog({ open, onClose, courses }: QuickLogProps) {
     <Sheet open={open} title={tq.title} onClose={onClose}>
       <form className="form" onSubmit={(e) => void submit(e)}>
         <div className="choices" role="radiogroup" aria-label={tq.groupLabel}>
-          {KINDS.map((k) => (
-            <button key={k.id} type="button" role="radio" aria-checked={kind === k.id} className="chip" onClick={() => pick(k.id)}>
-              {tq.kind[k.id]}
+          {kinds.map((k) => (
+            <button key={k} type="button" role="radio" aria-checked={kind === k} className="chip" onClick={() => pick(k)}>
+              {labelOf(k)}
             </button>
           ))}
         </div>
@@ -130,7 +155,7 @@ export function QuickLog({ open, onClose, courses }: QuickLogProps) {
               </select>
             </label>
           ) : null}
-          {kind === 'elsa' ? (
+          {kind === 'lingua' ? (
             <label className="form-field">
               <span>{tq.score}</span>
               <input className="field" inputMode="decimal" value={score} onChange={(e) => setScore(e.target.value)} placeholder={tq.scorePlaceholder} />

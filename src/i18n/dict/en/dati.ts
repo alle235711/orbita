@@ -1,14 +1,13 @@
 import type { Format } from '../../format/types'
 import type { Lang } from '../../lang'
-import { legacy } from './legacy'
 
 export const dati = {
   title: 'Data',
-  lead: legacy.datiLead,
+  lead: 'Everything stays on this device and works offline. Export a backup now and then.',
 
-  courses: 'Courses and exams',
+  courses: 'Exams',
   coursesHint:
-    'If you only know the month, the exam counts from the 1st. The theory’s difficulty decides what goes in the first hours when energy is high.',
+    'If you only know the month, the exam stays upcoming until the end of the month. The theory’s difficulty decides what goes in the first hours when energy is high.',
   secondSemester: 'Second semester',
   cardsMeta: (p: { n: number }, f: Format) => f.count(p.n, 'card', 'cards'),
   exam: (p: { date: string }, f: Format) => `Exam, ${f.date(p.date, { year: true })}`,
@@ -16,12 +15,6 @@ export const dati = {
   difficultyGroup: (p: { name: string }) => `Theory difficulty for ${p.name}`,
   difficulty: 'Difficulty',
   levels: { 1: 'low', 2: 'medium', 3: 'high' } as Record<1 | 2 | 3, string>,
-
-  deadlines: 'Deadlines',
-  periodStart: legacy.periodStartLabel,
-  periodEnd: 'Return',
-  periodMissing: 'Until both dates are set, the plan won’t switch to gym and running.',
-  graduation: 'Graduation',
 
   backup: 'Backup',
   backupNone: 'No backup yet.',
@@ -45,7 +38,7 @@ export const dati = {
   importCards: 'Import cards',
   overwrite: 'Overwrite the cards I’ve edited too',
   cardsExported: (p: { n: number }, f: Format) => `Exported ${f.count(p.n, 'card', 'cards')}.`,
-  cardsImported: (p: { added: number; updated: number; unchanged: number; keptEdited: number }) =>
+  cardsImported: (p: { added: number; updated: number; unchanged: number; keptEdited: number }, _f: Format) =>
     `Cards imported: ${p.added} new, ${p.updated} updated, ${p.unchanged} unchanged${p.keptEdited ? `, ${p.keptEdited} edited by you left as they are` : ''}.`,
   language: {
     title: 'Language',

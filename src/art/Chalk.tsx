@@ -24,7 +24,7 @@ function T({ x, y, size, delay, children }: { x: number; y: number; size: number
   )
 }
 
-/** Livelli dell'idrogeno: Struttura della Materia. */
+/** Livelli dell'idrogeno. */
 function Hydrogen() {
   return (
     <g>
@@ -52,7 +52,7 @@ function Hydrogen() {
   )
 }
 
-/** Complesso di catene e toro: Topologia Algebrica. */
+/** Complesso di catene e toro. */
 function ChainsAndTorus() {
   return (
     <g>
@@ -71,7 +71,7 @@ function ChainsAndTorus() {
   )
 }
 
-/** Diagramma HR: Astrofisica Stellare. */
+/** Diagramma di Hertzsprung-Russell. */
 function HertzsprungRussell() {
   const art = useT().art
   return (
@@ -91,18 +91,19 @@ function HertzsprungRussell() {
   )
 }
 
+/** Le chiavi sono gli id dei mazzi d'esempio del file incluso. */
 const DRAWINGS: Record<string, () => ReactNode> = {
   sdm: Hydrogen,
   topalg: ChainsAndTorus,
   astrost: HertzsprungRussell,
 }
 
-/** Il disegno della materia; cambia materia, si ridisegna. */
-export function SubjectChalk({ courseId, className }: { courseId: string; className?: string }) {
-  const Drawing = DRAWINGS[courseId]
+/** Il disegno del mazzo d'esempio del corso (`sampleDeck ?? id`); senza un disegno corrispondente resta la lavagna vuota. */
+export function SubjectChalk({ deckId, className }: { deckId: string; className?: string }) {
+  const Drawing = DRAWINGS[deckId]
   if (!Drawing) return null
   return (
-    <svg key={courseId} className={`chalk ${className ?? ''}`} viewBox="900 60 380 250" aria-hidden="true">
+    <svg key={deckId} className={`chalk ${className ?? ''}`} viewBox="900 60 380 250" aria-hidden="true">
       <Drawing />
     </svg>
   )

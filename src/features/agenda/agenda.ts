@@ -4,9 +4,13 @@
 import type { CalendarEvent, Session } from '../../db/schema'
 import { toMinutes, weekDays, type ISODate } from '../../lib/dates'
 import { WORK_TYPES } from '../../rules/rules'
+import type { Tuning } from '../../rules/defaults'
 
-export const AGENDA_START = 8 * 60
-export const AGENDA_END = 21 * 60
+/** Le ore intere che l'agenda mostra di base: dalla soglia di inizio a quella di fine della giornata. */
+export function agendaWindow(tuning: Tuning): { start: number; end: number } {
+  const g = tuning.giornata
+  return { start: Math.floor(g.dayStart! / 60) * 60, end: Math.ceil(g.dayEnd! / 60) * 60 }
+}
 
 export interface Placed<T> {
   item: T
@@ -64,10 +68,10 @@ export function eventsByDay(events: CalendarEvent[], days: ISODate[]): Map<ISODa
  * per oggi quelle registrate (studio, ripasso, lavoro), per quelli futuri
  * quelle già in agenda.
  */
-export function weekHours(day: ISODate, today: ISODate, sessions: Session[], events: CalendarEvent[]): number[] {
+export function weekHours(day: ISODate, today: ISODate, sessions: Session[], events: CalendarEvent[], workTypes: readonly Session['type'][] = WORK_TYPES): number[] {
   return weekDays(day).map((d) => {
     if (d <= today) {
-      return sessions.filter((s) => !s.deletedAt && s.date === d && WORK_TYPES.includes(s.type)).reduce((n, s) => n + s.minutes, 0) / 60
+      return sessions.filter((s) => !s.deletedAt && s.date === d && workTypes.includes(s.type)).reduce((n, s) => n + s.minutes, 0) / 60
     }
     return events
       .filter((e) => !e.deletedAt && e.date === d && e.type !== 'sport')

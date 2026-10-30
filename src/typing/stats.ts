@@ -2,6 +2,7 @@
 
 import type { TypingRun } from '../db/schema'
 import { KEYS } from '../review/keyboard'
+import { DEFAULT_TUNING, type Tuning } from '../rules/defaults'
 import { LESSONS, type LessonId } from './lessons'
 
 export interface KeyRate {
@@ -32,7 +33,9 @@ export function keyRates(runs: TypingRun[]): Map<string, KeyRate> {
 }
 
 /** I tasti dove sbagli di più, con abbastanza tentativi per fidarsi. */
-export function worstKeys(runs: TypingRun[], n = 5, minHits = 8): KeyRate[] {
+export function worstKeys(runs: TypingRun[], tuning: Tuning = DEFAULT_TUNING): KeyRate[] {
+  const n = tuning.dattilografia.worstKeys!
+  const minHits = tuning.dattilografia.worstKeysMinHits!
   return [...keyRates(runs).values()]
     .filter((r) => r.hits >= minHits && r.errors > 0 && KEYS.has(r.key) && r.key !== 'space')
     .sort((a, b) => b.rate - a.rate || b.errors - a.errors)
@@ -58,15 +61,16 @@ export function lessonProgress(runs: TypingRun[]): Record<string, LessonProgress
   return out
 }
 
-/** Una lezione è superata con almeno il 95% di precisione e 25 parole al minuto. */
+/** Soglie predefinite: una lezione è superata con il 95% di precisione e 25 parole al minuto. */
 export const PASS = { accuracy: 0.95, wpm: 25 }
 
-export function isPassed(p: LessonProgress | undefined): boolean {
-  return !!p && p.runs > 0 && p.bestAccuracy >= PASS.accuracy && p.bestWpm >= PASS.wpm
+export function isPassed(p: LessonProgress | undefined, tuning: Tuning = DEFAULT_TUNING): boolean {
+  const t = tuning.dattilografia
+  return !!p && p.runs > 0 && p.bestAccuracy >= t.passAccuracy! / 100 && p.bestWpm >= t.passWpm!
 }
 
 /** La prossima lezione del percorso: la prima non ancora superata. */
-export function recommendedLesson(runs: TypingRun[]): LessonId {
+export function recommendedLesson(runs: TypingRun[], tuning: Tuning = DEFAULT_TUNING): LessonId {
   const progress = lessonProgress(runs)
-  return LESSONS.find((l) => !isPassed(progress[l.id]))?.id ?? 'testi'
+  return LESSONS.find((l) => !isPassed(progress[l.id], tuning))?.id ?? 'testi'
 }

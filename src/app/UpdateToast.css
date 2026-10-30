@@ -39,3 +39,8 @@
     align-items: stretch;
   }
 }
+
+/* Nel percorso guidato i pulsanti stanno in basso: gli avvisi salgono sopra di loro. */
+body:has(.welcome) .update-toast {
+  bottom: calc(96px + env(safe-area-inset-bottom));
+}

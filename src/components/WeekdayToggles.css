@@ -1,0 +1,10 @@
+.weekdays {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.weekdays .chip {
+  min-width: var(--tap);
+  padding: 0 12px;
+}

@@ -1,4 +1,4 @@
-// Tastiera del portatile HP 250 G8, layout italiano (SPEC §5), con la mappa
+// Tastiera del portatile, layout italiano (SPEC §5), con la mappa
 // delle dita del mockup Rivista-Ripasso. Le larghezze sono quelle del mockup
 // in pixel (tasto normale 50, spazio fra i tasti 6): ogni riga fa 840.
 

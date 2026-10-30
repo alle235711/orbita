@@ -23,6 +23,13 @@
   transition: opacity 0.8s ease;
 }
 
+/* Il movimento ridotto salta la composizione: ogni livello è già al suo posto. */
+@media (prefers-reduced-motion: reduce) {
+  .bh__lvl {
+    transition: none !important;
+  }
+}
+
 /* Le striature del disco scorrono: l'unica animazione continua dell'app. */
 .bh__flow {
   animation: bh-flow 18s linear infinite;

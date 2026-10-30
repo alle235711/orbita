@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { resolveGroups } from '../rules/defaults'
 import content from '../../content/schede-2026-27.json'
 import type { TypingRun } from '../db/schema'
 import { it as itDict } from '../i18n/dict/it'
@@ -72,7 +73,7 @@ describe('statistiche', () => {
 
   it('trova i tasti peggiori con abbastanza tentativi', () => {
     expect(worstKeys(runs).map((r) => r.key)).toEqual(['è', 'à', 'a'])
-    expect(worstKeys(runs, 5, 12).map((r) => r.key)).toEqual(['à', 'a'])
+    expect(worstKeys(runs, resolveGroups([{ id: 'dattilografia', thresholds: { worstKeysMinHits: 12 } }])).map((r) => r.key)).toEqual(['à', 'a'])
   })
 
   it('tiene il meglio di ogni lezione e consiglia la prossima', () => {

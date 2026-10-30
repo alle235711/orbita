@@ -7,7 +7,7 @@ import { inRanges, keyRanges, maskText } from './mask'
 import { alignWords, similarity, tokenize } from './similarity'
 import { applyValue, charStates, freeWpm, nextChar, normalizeTyped, startTyping, typingStats } from './typing'
 
-describe('tastiera HP 250 G8', () => {
+describe('tastiera italiana', () => {
   it('ha righe larghe 840 come nel mockup', () => {
     for (const row of ROWS.slice(0, 4)) {
       const width = row.reduce((w, k) => w + k.width, 0) + (row.length - 1) * 6

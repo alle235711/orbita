@@ -3,6 +3,7 @@
 
 import type { CalendarEvent } from '../db/schema'
 import { toHHMM, toMinutes } from '../lib/dates'
+import { DEFAULT_TUNING, type Tuning } from './defaults'
 import type { PlanItem } from './types'
 
 export interface SuggestedBlock {
@@ -22,6 +23,10 @@ export interface ScheduleOptions {
   dayEnd?: number
   /** Le attività "di sera" non partono prima di quest'ora, se c'è posto. */
   eveningFrom?: number
+  /** Gli orari trovati si arrotondano a questo passo (minuti). */
+  roundStep?: number
+  /** I valori del gruppo `giornata`: i predefiniti per ciò che manca sopra. */
+  tuning?: Tuning
 }
 
 type Interval = [number, number]
@@ -42,9 +47,11 @@ function firstGap(busy: Interval[], from: number, length: number, end: number): 
 }
 
 export function scheduleDay(items: PlanItem[], events: CalendarEvent[], options: ScheduleOptions): SuggestedBlock[] {
-  const dayStart = options.dayStart ?? 8 * 60
-  const dayEnd = options.dayEnd ?? 21 * 60
-  const eveningFrom = options.eveningFrom ?? 17 * 60 + 30
+  const g = (options.tuning ?? DEFAULT_TUNING).giornata
+  const dayStart = options.dayStart ?? g.dayStart!
+  const dayEnd = options.dayEnd ?? g.dayEnd!
+  const eveningFrom = options.eveningFrom ?? g.eveningFrom!
+  const step = options.roundStep ?? g.roundStep!
   const busy: Interval[] = events
     .filter((e) => !e.deletedAt)
     .map((e): Interval => [toMinutes(e.start), toMinutes(e.end)])
@@ -55,7 +62,7 @@ export function scheduleDay(items: PlanItem[], events: CalendarEvent[], options:
     busy.sort((a, b) => a[0] - b[0])
   }
 
-  const start = Math.max(dayStart, roundUp(options.from))
+  const start = Math.max(dayStart, roundUp(options.from, step))
   let cursor = start
   const out: SuggestedBlock[] = []
   // Prima le attività del mattino, poi le altre nell'ordine del piano; le

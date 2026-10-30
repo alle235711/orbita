@@ -19,6 +19,7 @@ export function logSession(entry: {
   courseId?: string
   score?: number
   notes?: string
+  planned?: number
 }): Promise<Session> {
   return save<Session>(db.sessions, entry)
 }

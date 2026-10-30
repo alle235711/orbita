@@ -44,7 +44,7 @@ describe('settimana', () => {
   it('conta le ore registrate nei giorni passati e quelle in agenda nei futuri', () => {
     const sessions: Session[] = [
       { id: '1', date: '2026-10-26', minutes: 240, type: 'studio', updatedAt: 1 },
-      { id: '2', date: '2026-10-26', minutes: 60, type: 'lean', updatedAt: 1 },
+      { id: '2', date: '2026-10-26', minutes: 60, type: 'abilita', updatedAt: 1 },
       { id: '3', date: '2026-10-28', minutes: 90, type: 'lavoro', updatedAt: 1 },
     ]
     const events = [ev('2026-10-30', '9:00', '13:00'), ev('2026-10-30', '18:30', '20:30', 'Arrampicata', 'sport')]

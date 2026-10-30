@@ -135,14 +135,43 @@
   justify-items: start;
 }
 
-.dati__days {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+
+.dati__field--wide {
+  justify-items: stretch;
 }
 
-.dati__days .chip {
-  min-width: var(--tap);
-  padding: 0 12px;
+.course__input {
+  font-size: 1.0625rem;
+  font-weight: 800;
+  letter-spacing: -0.015em;
 }
 
+.course--new {
+  border-top: 1px solid var(--line);
+}
+
+.dati__actions--end {
+  align-self: end;
+}
+
+/* I campi riempiono la loro cella senza uscirne e con il loro respiro. */
+.dati__field .field,
+.dati__pair .field,
+.dati__number .field {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.dati__field,
+.dati__pair > * {
+  min-width: 0;
+}
+
+.dati__field .field,
+.dati__pair .field {
+  width: 100%;
+}
+
+.dati__pair {
+  padding-inline: 2px;
+}

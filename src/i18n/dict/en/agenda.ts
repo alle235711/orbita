@@ -53,7 +53,7 @@ export const agenda = {
   sheet: {
     edit: 'Edit event',
     title: 'Title',
-    titlePlaceholder: 'Algebraic Topology',
+    titlePlaceholder: 'Modern Physics',
     type: 'Type',
     day: 'Day',
     start: 'Start',

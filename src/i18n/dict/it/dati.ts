@@ -1,14 +1,13 @@
 import type { Format } from '../../format/types'
 import type { Lang } from '../../lang'
-import { legacy } from './legacy'
 
 export const dati = {
   title: 'Dati',
-  lead: legacy.datiLead,
+  lead: 'Tutto resta su questo dispositivo e funziona senza rete. Esporta un backup ogni tanto.',
 
-  courses: 'Corsi ed esami',
+  courses: 'Esami',
   coursesHint:
-    'Se conosci solo il mese, l’esame conta dal 1°. La difficoltà della teoria decide cosa va nelle prime ore quando l’energia è alta.',
+    'Se conosci solo il mese, l’esame resta in arrivo fino a fine mese. La difficoltà della teoria decide cosa va nelle prime ore quando l’energia è alta.',
   secondSemester: 'Secondo semestre',
   cardsMeta: (p: { n: number }, f: Format) => f.count(p.n, 'scheda', 'schede'),
   exam: (p: { date: string }, f: Format) => `Esame, ${f.date(p.date, { year: true })}`,
@@ -16,12 +15,6 @@ export const dati = {
   difficultyGroup: (p: { name: string }) => `Difficoltà della teoria di ${p.name}`,
   difficulty: 'Difficoltà',
   levels: { 1: 'bassa', 2: 'media', 3: 'alta' } as Record<1 | 2 | 3, string>,
-
-  deadlines: 'Scadenze',
-  periodStart: legacy.periodStartLabel,
-  periodEnd: 'Rientro',
-  periodMissing: 'Finché mancano le due date, il piano non passa a palestra e corsa.',
-  graduation: 'Laurea',
 
   backup: 'Backup',
   backupNone: 'Nessun backup finora.',

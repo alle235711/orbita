@@ -141,8 +141,9 @@
     display: none;
   }
 
+  /* Il segno della lingua dista dalla prima voce quanto le voci tra loro. */
   .topbar__brand {
-    margin-right: 0;
+    margin-right: 20px;
   }
 
   .topbar__list {

@@ -53,7 +53,7 @@ export const agenda = {
   sheet: {
     edit: 'Modifica impegno',
     title: 'Titolo',
-    titlePlaceholder: 'Topologia Algebrica',
+    titlePlaceholder: 'Fisica Moderna',
     type: 'Tipo',
     day: 'Giorno',
     start: 'Inizio',

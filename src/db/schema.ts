@@ -12,8 +12,10 @@ export interface Syncable {
   deletedAt?: number
 }
 
-export type SessionType = 'studio' | 'lavoro' | 'lean' | 'ripasso' | 'dattilografia' | 'inglese' | 'lettura'
-export type WorkoutType = 'arrampicata' | 'corsa' | 'palestra'
+export type SessionType = 'studio' | 'lavoro' | 'abilita' | 'ripasso' | 'dattilografia' | 'lingua' | 'lettura'
+export type WorkoutType = 'arrampicata' | 'corsa' | 'palestra' | 'nuoto' | 'altro'
+/** Ordine del piano e dell'interfaccia. */
+export const WORKOUT_ORDER: readonly WorkoutType[] = ['arrampicata', 'palestra', 'corsa', 'nuoto', 'altro']
 export type EventType = 'lezione' | 'studio' | 'lavoro' | 'sport' | 'esame' | 'altro'
 export type ReviewMode = 'copia' | 'completa' | 'nome' | 'memoria'
 export type LeitnerBox = 1 | 2 | 3 | 4 | 5
@@ -33,7 +35,9 @@ export interface Session extends Syncable {
   type: SessionType
   courseId?: string
   notes?: string
-  /** Punteggio ELSA (sessioni di inglese). */
+  /** Minuti del blocco di studio previsto, se la sessione è partita dal timer del piano. */
+  planned?: number
+  /** Punteggio dell'app di lingua (0–100). */
   score?: number
 }
 
@@ -83,9 +87,13 @@ export interface Course extends Syncable {
   difficulty: 1 | 2 | 3
   semester?: 1 | 2
   color?: string
+  /** Crediti (CFU). Facoltativi: i dati vecchi e le righe da compilare non li hanno. */
+  cfu?: number
+  /** Id del mazzo d'esempio da cui vengono le schede del corso. */
+  sampleDeck?: string
 }
 
-export type DeadlineKind = 'periodo' | 'laurea' | 'scadenza'
+export type DeadlineKind = 'periodo' | 'scadenza'
 
 export interface Deadline extends Syncable {
   title: string
@@ -94,6 +102,12 @@ export interface Deadline extends Syncable {
   date?: string
   endDate?: string
   notes?: string
+  /** Eccezioni del periodo (solo kind 'periodo'); se mancano vale il valore normale. */
+  hoursPerDay?: number
+  /** Obiettivo settimanale per tipo di sport durante il periodo (0 = non proporlo). */
+  sport?: Partial<Record<WorkoutType, number>>
+  /** Giorno ISO della settimana (1–7) entro cui chiudere gli obiettivi di sport. */
+  deadlineDay?: number
 }
 
 export interface Card extends Syncable {
@@ -137,7 +151,7 @@ export interface TypingRun extends Syncable {
   wpm: number
   accuracy: number
   chars: number
-  /** Errori e tentativi per tasto (id del tasto della tastiera HP). */
+  /** Errori e tentativi per tasto (id del tasto della tastiera). */
   keyErrors: Record<string, number>
   keyHits: Record<string, number>
 }
@@ -148,14 +162,17 @@ export type RuleId =
   | 'energia-media'
   | 'energia-alta'
   | 'sport'
-  | 'lean'
+  | 'abilita'
   | 'ore-settimana'
   | 'schede-scadute'
-  | 'tirocinio'
+  | 'periodo'
+/** Gruppi di soglie generali, salvati nella tabella delle regole. */
+export type GroupId = 'giornata' | 'storico' | 'ripasso' | 'dattilografia' | 'registra'
+export type ConfigId = RuleId | GroupId
 
-/** id = identificativo della regola. */
+/** id = identificativo della regola o del gruppo. */
 export interface RuleConfig extends Syncable {
-  id: RuleId
+  id: ConfigId
   enabled: boolean
   thresholds: Record<string, number>
 }

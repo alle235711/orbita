@@ -2,19 +2,18 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { Page } from '../../app/Page'
 import { useToday } from '../../app/useToday'
-import { DateField } from '../../components/DateField'
 import { backupFileName, exportAll, importBackup, parseBackup } from '../../db/backup'
 import { exportCards, importCards, parseContentFile } from '../../db/cards-io'
 import { db } from '../../db/db'
-import { useCourses, useDeadlines, useSetting } from '../../db/hooks'
-import { patch } from '../../db/repo'
-import type { Course } from '../../db/schema'
+import { useSetting } from '../../db/hooks'
 import { setSetting } from '../../db/settings'
 import { LANG_NAME, LANGS, MAX_OTHER_DAYS, normalizeLanguage, otherLang, type Lang } from '../../i18n/lang'
-import { diffDays, resolveDate, todayISO } from '../../lib/dates'
+import { diffDays, todayISO } from '../../lib/dates'
 import { renderError } from '../../i18n/errors'
 import { getI18n, useI18n } from '../../i18n/store'
 import { downloadJson, readJsonFile } from '../../lib/download'
+import { WeekdayToggles } from '../../components/WeekdayToggles'
+import { DecksSection, ExamsSection, ModulesSection, PeriodsSection, ProfileSection } from './DatiSections'
 import './DatiPage.css'
 
 type Area = 'backup' | 'schede'
@@ -24,18 +23,13 @@ interface Notice {
   error?: boolean
 }
 
-const DIFFICULTY: Course['difficulty'][] = [1, 2, 3]
-const WEEK = [1, 2, 3, 4, 5, 6, 7]
 
 export default function DatiPage() {
   const { t, f } = useI18n()
   const td = t.dati
   const today = useToday()
-  const courses = useCourses()
-  const deadlines = useDeadlines()
   const newPerDay = useSetting('newCardsPerDay')
   const lastBackupAt = useSetting('lastBackupAt')
-  const language = normalizeLanguage(useSetting('language'))
   const cardCounts = useLiveQuery(async () => {
     const cards = (await db.cards.toArray()).filter((c) => !c.deletedAt)
     const byCourse = new Map<string, number>()
@@ -51,14 +45,6 @@ export default function DatiPage() {
   useEffect(() => {
     void navigator.storage?.persisted?.().then(setPersisted)
   }, [])
-
-  const tirocinio = deadlines.find((d) => d.id === 'tirocinio')
-  const laurea = deadlines.find((d) => d.id === 'laurea')
-  const byExam = (a: Course, b: Course) =>
-    (a.examDate ? resolveDate(a.examDate) : '9999').localeCompare(b.examDate ? resolveDate(b.examDate) : '9999') ||
-    a.name.localeCompare(b.name, 'it')
-  const examCourses = courses.filter((c) => c.semester !== 2).sort(byExam)
-  const laterCourses = courses.filter((c) => c.semester === 2).sort(byExam)
 
   const run = async (area: Area, task: () => Promise<string>) => {
     try {
@@ -106,12 +92,6 @@ export default function DatiPage() {
     setPersisted(await navigator.storage?.persist?.())
   }
 
-  const saveLanguage = (next: { base?: Lang; otherDays?: number[] }) =>
-    void setSetting(db, 'language', normalizeLanguage({ ...language, ...next }))
-  const toggleDay = (day: number) =>
-    saveLanguage({ otherDays: language.otherDays.includes(day) ? language.otherDays.filter((d) => d !== day) : [...language.otherDays, day] })
-  const daysFull = language.otherDays.length >= MAX_OTHER_DAYS
-
   const backupAge = lastBackupAt ? diffDays(todayISO(new Date(lastBackupAt)), today) : null
 
   return (
@@ -124,52 +104,12 @@ export default function DatiPage() {
       </header>
 
       <div className="dati__grid">
-        <section className="dati__section dati__section--courses" aria-labelledby="h-corsi">
-          <h2 id="h-corsi">{td.courses}</h2>
-          <p className="dati__hint">{td.coursesHint}</p>
-          <ul className="courses" role="list">
-            {examCourses.map((c) => (
-              <CourseRow key={c.id} course={c} cards={cardCounts?.byCourse.get(c.id) ?? 0} />
-            ))}
-          </ul>
-          <h3 className="dati__sub">{td.secondSemester}</h3>
-          <ul className="courses" role="list">
-            {laterCourses.map((c) => (
-              <CourseRow key={c.id} course={c} cards={cardCounts?.byCourse.get(c.id) ?? 0} />
-            ))}
-          </ul>
-        </section>
-
-        <section className="dati__section" aria-labelledby="h-scadenze">
-          <h2 id="h-scadenze">{td.deadlines}</h2>
-          {tirocinio ? (
-            <>
-              <div className="dati__pair">
-                <DateField
-                  label={td.periodStart}
-                  value={tirocinio.date}
-                  onChange={(v) => void patch(db.deadlines, tirocinio.id, { date: v })}
-                />
-                <DateField
-                  label={td.periodEnd}
-                  value={tirocinio.endDate}
-                  onChange={(v) => void patch(db.deadlines, tirocinio.id, { endDate: v })}
-                />
-              </div>
-              {!tirocinio.date || !tirocinio.endDate ? (
-                <p className="dati__hint">{td.periodMissing}</p>
-              ) : null}
-            </>
-          ) : null}
-          {laurea ? (
-            <DateField
-              label={td.graduation}
-              value={laurea.date}
-              allowMonthOnly
-              onChange={(v) => v && void patch(db.deadlines, laurea.id, { date: v })}
-            />
-          ) : null}
-        </section>
+        <ProfileSection />
+        <LanguageSection />
+        <ModulesSection />
+        <ExamsSection cardCounts={cardCounts?.byCourse} />
+        <PeriodsSection />
+        <DecksSection cardCounts={cardCounts?.byCourse} />
 
         <section className="dati__section" aria-labelledby="h-backup">
           <h2 id="h-backup">{td.backup}</h2>
@@ -232,7 +172,20 @@ export default function DatiPage() {
           <Message notice={notice} area="schede" />
         </section>
 
-        <section className="dati__section" aria-labelledby="h-lingua">
+      </div>
+    </Page>
+  )
+}
+
+function LanguageSection() {
+  const { t } = useI18n()
+  const td = t.dati
+  const language = normalizeLanguage(useSetting('language'))
+  const saveLanguage = (next: { base?: Lang; otherDays?: number[] }) =>
+    void setSetting(db, 'language', normalizeLanguage({ ...language, ...next }))
+  const daysFull = language.otherDays.length >= MAX_OTHER_DAYS
+  return (
+    <section className="dati__section" aria-labelledby="h-lingua">
           <h2 id="h-lingua">{td.language.title}</h2>
           <div className="dati__field">
             <span className="date-field__label" id="l-base">
@@ -257,71 +210,13 @@ export default function DatiPage() {
             <span className="date-field__label" id="l-giorni">
               {td.language.otherDays}
             </span>
-            <div className="dati__days" role="group" aria-labelledby="l-giorni">
-              {WEEK.map((day) => {
-                const on = language.otherDays.includes(day)
-                return (
-                  <button
-                    key={day}
-                    type="button"
-                    className="chip"
-                    aria-pressed={on}
-                    aria-label={f.weekdayName(day)}
-                    disabled={daysFull && !on}
-                    onClick={() => toggleDay(day)}
-                  >
-                    {f.weekdayShort(day)}
-                  </button>
-                )
-              })}
-            </div>
+            <WeekdayToggles value={language.otherDays} onChange={(days) => saveLanguage({ otherDays: days })} labelledBy="l-giorni" />
           </div>
           <p className="dati__hint">
             {language.otherDays.length ? td.language.otherDaysUsage({ other: otherLang(language.base) }) : td.language.otherDaysNone}
             {daysFull ? ` ${td.language.otherDaysMax}` : ''}
           </p>
-        </section>
-      </div>
-    </Page>
-  )
-}
-
-function CourseRow({ course, cards }: { course: Course; cards: number }) {
-  const { t, f } = useI18n()
-  const td = t.dati
-  const meta = [course.code, course.degree, cards ? td.cardsMeta({ n: cards }, f) : null].filter(Boolean).join(', ')
-  return (
-    <li className="course">
-      <div className="course__name">
-        <span className="course__title">{course.name}</span>
-        {meta ? <span className="course__meta">{meta}</span> : null}
-      </div>
-      <DateField
-        label={course.examDate ? td.exam({ date: course.examDate }, f) : td.examTbd}
-        value={course.examDate}
-        allowMonthOnly
-        onChange={(v) => void patch(db.courses, course.id, { examDate: v })}
-      />
-      <div className="course__difficulty" role="radiogroup" aria-label={td.difficultyGroup({ name: course.name })}>
-        <span className="date-field__label" aria-hidden="true">
-          {td.difficulty}
-        </span>
-        <div className="segmented">
-          {DIFFICULTY.map((d) => (
-            <button
-              key={d}
-              type="button"
-              role="radio"
-              aria-checked={course.difficulty === d}
-              className="segmented__item"
-              onClick={() => void patch(db.courses, course.id, { difficulty: d })}
-            >
-              {td.levels[d]}
-            </button>
-          ))}
-        </div>
-      </div>
-    </li>
+    </section>
   )
 }
 

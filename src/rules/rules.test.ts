@@ -1,39 +1,26 @@
 import { describe, expect, it } from 'vitest'
-import type { CalendarEvent, Course, RuleConfig, RuleId, Session, Workout } from '../db/schema'
-import { SEED_COURSES, SEED_DEADLINES, seedRules } from '../db/seed'
+import type { CalendarEvent, Course, Deadline, RuleConfig, RuleId, Session, Workout } from '../db/schema'
+import { FAKE_COURSES, FAKE_DEADLINES, fakeRules, makeContext } from '../test/fixtures'
 import { addDays } from '../lib/dates'
+import { DEFAULT_STUDY_BLOCK } from '../modules/types'
 import type { Energy } from '../lib/energy'
 import { i18nFor } from '../i18n'
 import { renderPlan } from '../i18n/render'
 import { evaluate as evaluateRaw, hardestCourse, itemDuration } from './plan'
-import { examsAhead, leanGap } from './rules'
+import { abilityGap, examsAhead } from './rules'
 import { scheduleDay } from './schedule'
 import type { RuleContext } from './types'
 
 const IT = i18nFor('it')
 const evaluate = (c: RuleContext) => renderPlan(evaluateRaw(c), IT)
 
-// Martedì 27 ottobre 2026: Struttura della Materia tra 17 giorni.
+// Martedì 27 ottobre 2026: Fisica Moderna tra 17 giorni.
 const TODAY = '2026-10-27'
 
 let seq = 0
 const id = () => `x${++seq}`
 
-function ctx(over: Partial<RuleContext> = {}): RuleContext {
-  return {
-    today: TODAY,
-    now: 8 * 60,
-    energy: 3,
-    courses: structuredClone(SEED_COURSES),
-    deadlines: structuredClone(SEED_DEADLINES),
-    events: [],
-    sessions: [],
-    workouts: [],
-    cards: { due: {}, fresh: {} },
-    rules: seedRules(),
-    ...over,
-  }
-}
+const ctx = (over: Partial<RuleContext> = {}): RuleContext => makeContext({ today: TODAY, ...over })
 
 const session = (date: string, minutes: number, type: Session['type'] = 'studio'): Session => ({ id: id(), date, minutes, type, updatedAt: 1 })
 const workout = (date: string, type: Workout['type']): Workout => ({ id: id(), date, type, minutes: 90, updatedAt: 1 })
@@ -51,11 +38,11 @@ const event = (date: string, start: string, end: string, title: string, type: Ca
 })
 
 function withRule(id: RuleId, change: Partial<Pick<RuleConfig, 'enabled'>> & { thresholds?: Record<string, number> }): RuleConfig[] {
-  return seedRules().map((r) => (r.id === id ? { ...r, ...change, thresholds: { ...r.thresholds, ...change.thresholds } } : r))
+  return fakeRules().map((r) => (r.id === id ? { ...r, ...change, thresholds: { ...r.thresholds, ...change.thresholds } } : r))
 }
 
 const withDifficulty = (courseId: string, difficulty: Course['difficulty']) =>
-  structuredClone(SEED_COURSES).map((c) => (c.id === courseId ? { ...c, difficulty } : c))
+  structuredClone(FAKE_COURSES).map((c) => (c.id === courseId ? { ...c, difficulty } : c))
 
 const titles = (c: RuleContext) => evaluate(c).items.map((i) => i.title)
 const noteRules = (c: RuleContext) => evaluate(c).notes.map((n) => n.ruleId)
@@ -63,14 +50,14 @@ const noteRules = (c: RuleContext) => evaluate(c).notes.map((n) => n.ruleId)
 describe('regola 1: esame entro 21 giorni', () => {
   it('rende la materia la priorità 1', () => {
     const plan = evaluate(ctx())
-    expect(plan.priority).toMatchObject({ courseId: 'sdm', days: 17, fromRule: true })
-    expect(plan.notes[0]).toMatchObject({ ruleId: 'esame-vicino', title: 'Struttura della Materia è la priorità 1' })
-    expect(plan.items[0]?.courseId).toBe('sdm')
+    expect(plan.priority).toMatchObject({ courseId: 'c-fis', days: 17, fromRule: true })
+    expect(plan.notes[0]).toMatchObject({ ruleId: 'esame-vicino', title: 'Fisica Moderna è la priorità 1' })
+    expect(plan.items[0]?.courseId).toBe('c-fis')
   })
 
   it('non scatta oltre la soglia, che si può cambiare', () => {
     expect(evaluate(ctx({ today: '2026-10-20' })).priority).toBeUndefined()
-    expect(evaluate(ctx({ today: '2026-10-20', rules: withRule('esame-vicino', { thresholds: { days: 30 } }) })).priority?.courseId).toBe('sdm')
+    expect(evaluate(ctx({ today: '2026-10-20', rules: withRule('esame-vicino', { thresholds: { days: 30 } }) })).priority?.courseId).toBe('c-fis')
   })
 
   it('si può disattivare', () => {
@@ -81,11 +68,11 @@ describe('regola 1: esame entro 21 giorni', () => {
   it('le date con solo il mese contano dal 1°', () => {
     expect(evaluate(ctx({ today: '2027-01-10' })).priority).toBeUndefined()
     const plan = evaluate(ctx({ today: '2027-01-11' }))
-    expect(plan.priority).toMatchObject({ courseId: 'anelli', days: 21 })
+    expect(plan.priority).toMatchObject({ courseId: 'c-alg', days: 21 })
   })
 
   it('ignora gli esami già passati e considera quello di oggi', () => {
-    expect(examsAhead(SEED_COURSES, '2026-11-14')[0]?.course.id).toBe('calcolo')
+    expect(examsAhead(FAKE_COURSES, '2026-11-14')[0]?.course.id).toBe('c-calc')
     expect(evaluate(ctx({ today: '2026-11-13' })).notes[0]?.text).toMatch(/è oggi/)
   })
 })
@@ -100,10 +87,11 @@ describe('regole 2–4: energia', () => {
   it('regola 2: niente teoria nuova e blocchi da 45 minuti', () => {
     const plan = evaluate(ctx({ energy: 2 }))
     expect(plan.headline).toEqual(['Una giornata', 'per ricaricarsi'])
-    expect(plan.items[0]).toMatchObject({ title: 'Ripasso attivo di Struttura della Materia', minutes: 45 })
+    expect(plan.items[0]).toMatchObject({ title: 'Ripasso attivo di Fisica Moderna', minutes: 50 })
     expect(plan.items.some((i) => /Teoria nuova/.test(i.title))).toBe(false)
-    expect(plan.rule).toMatch(/blocchi da 45 minuti/)
-    expect(evaluate(ctx({ energy: 1, rules: withRule('energia-bassa', { thresholds: { block: 30 } }) })).items[0]?.minutes).toBe(30)
+    expect(plan.rule).toMatch(/blocchi da 50 minuti/)
+    // il blocco basso è il preset subito più corto di quello scelto: 45/10 → 25
+    expect(evaluate(ctx({ energy: 1, studyBlock: { ...DEFAULT_STUDY_BLOCK, preset: '45/10' } })).items[0]?.minutes).toBe(25)
   })
 
   it('regola 2 disattivata: l’energia bassa segue la fascia regolare', () => {
@@ -113,28 +101,28 @@ describe('regole 2–4: energia', () => {
   it('regola 3: esame più vicino per primo, 90 minuti con 15 di pausa', () => {
     const plan = evaluate(ctx({ energy: 3 }))
     expect(plan.headline[1]).toBe('da esercizi')
-    expect(plan.items[0]).toMatchObject({ title: 'Esercizi di Struttura della Materia', blocks: { count: 2, minutes: 90, pause: 15 } })
+    expect(plan.items[0]).toMatchObject({ title: 'Esercizi di Fisica Moderna', blocks: { count: 2, minutes: 90, pause: 15 } })
     expect(itemDuration(plan.items[0]!, IT.f)).toBe('2 × 90 min')
-    expect(plan.items[1]?.title).toBe('Esercizi di Calcolo per l’Astronomia')
-    const custom = evaluate(ctx({ rules: withRule('energia-media', { thresholds: { block: 60, pause: 10 } }) }))
-    expect(custom.items[0]?.blocks).toEqual({ count: 2, minutes: 60, pause: 10 })
+    expect(plan.items[1]?.title).toBe('Esercizi di Calcolo Numerico')
+    const custom = evaluate(ctx({ studyBlock: { ...DEFAULT_STUDY_BLOCK, preset: '50/10' } }))
+    expect(custom.items[0]?.blocks).toEqual({ count: 2, minutes: 50, pause: 10 })
   })
 
   it('regola 4: la teoria più difficile nelle prime ore', () => {
     const plan = evaluate(ctx({ energy: 4 }))
     expect(plan.headline[1]).toBe('da teoria nuova')
-    expect(plan.items[0]).toMatchObject({ title: 'Teoria nuova di Struttura della Materia', morning: true })
+    expect(plan.items[0]).toMatchObject({ title: 'Teoria nuova di Fisica Moderna', morning: true })
     expect(plan.rule).toMatch(/quasar/)
     expect(evaluate(ctx({ energy: 5 })).rule).toMatch(/blazar/)
   })
 
   it('regola 4 senza esami vicini: vince la difficoltà, poi l’esame più vicino', () => {
     const early = { today: '2026-10-01', energy: 5 as Energy }
-    expect(evaluate(ctx(early)).items[0]?.title).toBe('Teoria nuova di Struttura della Materia')
-    const plan = evaluate(ctx({ ...early, courses: withDifficulty('topalg', 3) }))
-    expect(plan.items[0]?.title).toBe('Teoria nuova di Topologia Algebrica')
-    expect(plan.items[1]?.title).toBe('Esercizi di Struttura della Materia')
-    expect(hardestCourse(examsAhead(withDifficulty('astrost', 3), '2026-10-01'))?.id).toBe('astrost')
+    expect(evaluate(ctx(early)).items[0]?.title).toBe('Teoria nuova di Fisica Moderna')
+    const plan = evaluate(ctx({ ...early, courses: withDifficulty('c-top', 3) }))
+    expect(plan.items[0]?.title).toBe('Teoria nuova di Topologia Generale')
+    expect(plan.items[1]?.title).toBe('Esercizi di Fisica Moderna')
+    expect(hardestCourse(examsAhead(withDifficulty('c-ast', 3), '2026-10-01'))?.id).toBe('c-ast')
   })
 
   it('regola 4 con soglia più alta: Quasar resta regolare', () => {
@@ -174,7 +162,7 @@ describe('regola 5: arrampicata e corsa', () => {
 
   it('conta solo la settimana da lunedì', () => {
     const plan = evaluate(ctx({ workouts: [workout('2026-10-25', 'arrampicata'), workout('2026-10-24', 'arrampicata')] }))
-    expect(plan.sport.mainDone).toBe(0)
+    expect(plan.sport.types.find((x) => x.type === 'arrampicata')?.done).toBe(0)
   })
 
   it('meno di 2 corse: propone una corsa, ma non nello stesso giorno se c’è tempo', () => {
@@ -201,30 +189,30 @@ describe('regola 5: arrampicata e corsa', () => {
   })
 })
 
-describe('regola 6: Lean', () => {
+describe('regola 6: abilità personale', () => {
   it('fermo da più di 2 giorni: 30 minuti nel piano di domani', () => {
-    const plan = evaluate(ctx({ sessions: [session('2026-10-24', 40, 'lean')] }))
-    expect(plan.leanGap).toBe(3)
-    expect(plan.tomorrow[0]).toMatchObject({ kind: 'lean', minutes: 30 })
-    expect(plan.items.some((i) => i.kind === 'lean')).toBe(false)
-    expect(plan.notes.find((n) => n.ruleId === 'lean')?.title).toBe('Lean fermo da 3 giorni')
+    const plan = evaluate(ctx({ sessions: [session('2026-10-24', 40, 'abilita')] }))
+    expect(plan.abilityGap).toBe(3)
+    expect(plan.tomorrow[0]).toMatchObject({ kind: 'abilita', minutes: 30 })
+    expect(plan.items.some((i) => i.kind === 'abilita')).toBe(false)
+    expect(plan.notes.find((n) => n.ruleId === 'abilita')?.title).toBe('Chitarra: nessuna sessione da 3 giorni')
   })
 
   it('il giorno dopo la mezz’ora è nel piano di oggi', () => {
-    const plan = evaluate(ctx({ sessions: [session('2026-10-23', 40, 'lean')] }))
-    expect(plan.items.find((i) => i.kind === 'lean')?.minutes).toBe(30)
+    const plan = evaluate(ctx({ sessions: [session('2026-10-23', 40, 'abilita')] }))
+    expect(plan.items.find((i) => i.kind === 'abilita')?.minutes).toBe(30)
   })
 
   it('niente note entro la soglia o se l’hai già fatto oggi', () => {
-    expect(evaluate(ctx({ sessions: [session('2026-10-25', 40, 'lean')] })).tomorrow).toEqual([])
-    expect(evaluate(ctx({ sessions: [session(TODAY, 20, 'lean')] })).notes.some((n) => n.ruleId === 'lean')).toBe(false)
-    expect(evaluate(ctx({ sessions: [session('2026-10-23', 40, 'lean')], rules: withRule('lean', { thresholds: { days: 5 } }) })).tomorrow).toEqual([])
+    expect(evaluate(ctx({ sessions: [session('2026-10-25', 40, 'abilita')] })).tomorrow).toEqual([])
+    expect(evaluate(ctx({ sessions: [session(TODAY, 20, 'abilita')] })).notes.some((n) => n.ruleId === 'abilita')).toBe(false)
+    expect(evaluate(ctx({ sessions: [session('2026-10-23', 40, 'abilita')], rules: withRule('abilita', { thresholds: { days: 5 } }) })).tomorrow).toEqual([])
   })
 
   it('mai fatto: entra subito', () => {
-    expect(leanGap([], TODAY)).toBe(Infinity)
-    expect(evaluate(ctx()).items.some((i) => i.kind === 'lean')).toBe(true)
-    expect(evaluate(ctx({ rules: withRule('lean', { enabled: false }) })).items.some((i) => i.kind === 'lean')).toBe(false)
+    expect(abilityGap([], TODAY)).toBe(Infinity)
+    expect(evaluate(ctx()).items.some((i) => i.kind === 'abilita')).toBe(true)
+    expect(evaluate(ctx({ rules: withRule('abilita', { enabled: false }) })).items.some((i) => i.kind === 'abilita')).toBe(false)
   })
 })
 
@@ -251,8 +239,8 @@ describe('regola 7: ore degli ultimi 7 giorni', () => {
   it('conta studio, ripasso e lavoro degli ultimi 7 giorni, non il resto', () => {
     const sessions = [
       session(TODAY, 120, 'ripasso'),
-      session(TODAY, 300, 'lean'),
-      session(TODAY, 300, 'inglese'),
+      session(TODAY, 300, 'abilita'),
+      session(TODAY, 300, 'lingua'),
       session(addDays(TODAY, -7), 600, 'studio'),
       session(addDays(TODAY, -6), 60, 'lavoro'),
     ]
@@ -262,81 +250,104 @@ describe('regola 7: ore degli ultimi 7 giorni', () => {
 
 describe('regola 8: schede scadute', () => {
   it('inserisce 15–20 minuti a partire dall’esame più vicino', () => {
-    const plan = evaluate(ctx({ cards: { due: { astrost: 5, sdm: 7 }, fresh: {} } }))
+    const plan = evaluate(ctx({ cards: { due: { 'c-ast': 5, 'c-fis': 7 }, fresh: {} } }))
     const item = plan.items.find((i) => i.kind === 'ripasso')
-    expect(item).toMatchObject({ minutes: 15, courseId: 'sdm', detail: '12 schede scadute, prima Struttura della Materia.' })
+    expect(item).toMatchObject({ minutes: 15, courseId: 'c-fis', detail: '12 schede scadute, prima Fisica Moderna.' })
     expect(plan.notes.find((n) => n.ruleId === 'schede-scadute')?.title).toBe('12 schede scadute')
-    expect(evaluate(ctx({ cards: { due: { sdm: 40 }, fresh: {} } })).items.find((i) => i.kind === 'ripasso')?.minutes).toBe(20)
+    expect(evaluate(ctx({ cards: { due: { 'c-fis': 40 }, fresh: {} } })).items.find((i) => i.kind === 'ripasso')?.minutes).toBe(20)
   })
 
   it('senza scadute propone le nuove, senza nota', () => {
-    const plan = evaluate(ctx({ cards: { due: {}, fresh: { sdm: 15 } } }))
-    expect(plan.items.find((i) => i.kind === 'ripasso')?.detail).toBe('15 schede nuove di Struttura della Materia.')
+    const plan = evaluate(ctx({ cards: { due: {}, fresh: { 'c-fis': 15 } } }))
+    expect(plan.items.find((i) => i.kind === 'ripasso')?.detail).toBe('15 schede nuove di Fisica Moderna.')
     expect(plan.notes.some((n) => n.ruleId === 'schede-scadute')).toBe(false)
   })
 
   it('niente schede o regola spenta: niente ripasso', () => {
     expect(titles(ctx())).not.toContain('Ripasso a 10 dita')
-    expect(titles(ctx({ cards: { due: { sdm: 3 }, fresh: {} }, rules: withRule('schede-scadute', { enabled: false }) }))).not.toContain('Ripasso a 10 dita')
+    expect(titles(ctx({ cards: { due: { 'c-fis': 3 }, fresh: {} }, rules: withRule('schede-scadute', { enabled: false }) }))).not.toContain('Ripasso a 10 dita')
   })
 })
 
-describe('regola 9: tirocinio', () => {
-  // Date finte: nel seed il tirocinio non ne ha, si inseriscono in Dati.
-  const tirocinio = (date?: string, endDate?: string) =>
-    structuredClone(SEED_DEADLINES).map((d) => (d.id === 'tirocinio' ? { ...d, date, endDate } : d))
-  const deadlines = tirocinio('2027-03-15', '2027-04-24')
+describe('regola 9: periodo speciale', () => {
+  // Il periodo porta le sue eccezioni: nel periodo palestra e corsa al posto dell'arrampicata.
+  const period = (date?: string, endDate?: string, extra: Partial<Deadline> = {}): Deadline[] =>
+    structuredClone(FAKE_DEADLINES).map((d) => (d.id === 'periodo-prova' ? { ...d, date, endDate, hoursPerDay: 8, sport: { arrampicata: 0, palestra: 3, corsa: 2 }, ...extra } : d))
+  const deadlines = period('2027-03-15', '2027-04-24')
   const DURING = '2027-03-22' // lunedì
+  const target = (plan: ReturnType<typeof evaluate>, type: string) => plan.sport.types.find((x) => x.type === type)?.target
 
   it('la nota elide l’articolo: "Fino all’11 aprile"', () => {
-    const plan = evaluate(ctx({ today: DURING, deadlines: tirocinio('2027-03-15', '2027-04-11') }))
+    const plan = evaluate(ctx({ today: DURING, deadlines: period('2027-03-15', '2027-04-11') }))
     expect(plan.notes[0]?.text).toMatch(/^Fino all’11 aprile:/)
+    expect(plan.notes[0]?.title).toBe('Periodo di prova')
+  })
+
+  it('la nota dice solo le eccezioni che ci sono', () => {
+    const hoursOnly = evaluate(ctx({ today: DURING, deadlines: period('2027-03-15', '2027-04-24', { sport: undefined }) }))
+    expect(hoursOnly.notes[0]?.text).toBe('Fino al 24 aprile: obiettivo di 8 h al giorno.')
+    const none = evaluate(ctx({ today: DURING, deadlines: period('2027-03-15', '2027-04-24', { sport: undefined, hoursPerDay: undefined }) }))
+    expect(none.notes[0]?.text).toBe('Fino al 24 aprile: nessuna eccezione.')
+    expect(evaluate(ctx({ today: DURING, deadlines })).notes[0]?.text).toBe('Fino al 24 aprile: obiettivo di 8 h al giorno, sport con obiettivi a parte.')
   })
 
   it('nel periodo: palestra e corsa al posto dell’arrampicata', () => {
     const plan = evaluate(ctx({ today: DURING, deadlines }))
-    expect(plan.tirocinio).toBe(true)
-    expect(plan.sport.main).toBe('palestra')
+    expect(plan.period).toMatchObject({ name: 'Periodo di prova', start: '2027-03-15', end: '2027-04-24' })
+    expect(target(plan, 'palestra')).toBe(3)
+    expect(target(plan, 'arrampicata')).toBe(0)
     expect(titles(ctx({ today: DURING, deadlines }))).toContain('Palestra')
     expect(titles(ctx({ today: DURING, deadlines }))).not.toContain('Arrampicata')
-    expect(plan.notes[0]?.ruleId).toBe('tirocinio')
+    expect(plan.notes[0]?.ruleId).toBe('periodo')
   })
 
   it('estremi compresi', () => {
-    expect(evaluate(ctx({ today: '2027-03-15', deadlines })).tirocinio).toBe(true)
-    expect(evaluate(ctx({ today: '2027-04-24', deadlines })).tirocinio).toBe(true)
-    expect(evaluate(ctx({ today: '2027-03-14', deadlines })).tirocinio).toBe(false)
-    expect(evaluate(ctx({ today: '2027-04-25', deadlines })).tirocinio).toBe(false)
+    expect(evaluate(ctx({ today: '2027-03-15', deadlines })).period).toBeDefined()
+    expect(evaluate(ctx({ today: '2027-04-24', deadlines })).period).toBeDefined()
+    expect(evaluate(ctx({ today: '2027-03-14', deadlines })).period).toBeUndefined()
+    expect(evaluate(ctx({ today: '2027-04-25', deadlines })).period).toBeUndefined()
   })
 
-  it('ha un obiettivo orario e soglie sportive a parte', () => {
-    const rules = withRule('tirocinio', { thresholds: { hoursPerDay: 6, gym: 2 } })
-    const plan = evaluate(ctx({ today: DURING, deadlines, rules }))
+  it('ha un obiettivo orario e obiettivi sportivi a parte', () => {
+    const plan = evaluate(ctx({ today: DURING, deadlines: period('2027-03-15', '2027-04-24', { hoursPerDay: 6, sport: { palestra: 2 } }) }))
     expect(plan.hours.target7).toBe(42)
-    expect(plan.sport.mainTarget).toBe(2)
+    expect(target(plan, 'palestra')).toBe(2)
+    expect(target(plan, 'arrampicata')).toBe(3) // non nominata: resta il valore normale
+  })
+
+  it('l’eccezione per un tipo spento è ignorata e il giorno limite si cambia', () => {
+    const plan = evaluate(ctx({ today: DURING, deadlines: period('2027-03-15', '2027-04-24', { sport: { nuoto: 2 }, deadlineDay: 2 }) }))
+    expect(plan.sport.types.some((x) => x.type === 'nuoto')).toBe(false)
+    expect(plan.sport.deadline).toBe(2)
   })
 
   it('disattivata: valgono le regole di sempre', () => {
-    const plan = evaluate(ctx({ today: DURING, deadlines, rules: withRule('tirocinio', { enabled: false }) }))
-    expect(plan.tirocinio).toBe(false)
-    expect(plan.sport.main).toBe('arrampicata')
+    const plan = evaluate(ctx({ today: DURING, deadlines, rules: withRule('periodo', { enabled: false }) }))
+    expect(plan.period).toBeUndefined()
+    expect(target(plan, 'arrampicata')).toBe(3)
   })
 
   it('segue le date modificate', () => {
-    expect(evaluate(ctx({ today: DURING, deadlines: tirocinio('2027-04-01', '2027-04-24') })).tirocinio).toBe(false)
+    expect(evaluate(ctx({ today: DURING, deadlines: period('2027-04-01', '2027-04-24') })).period).toBeUndefined()
   })
 
   it('senza date, o con una sola, non scatta', () => {
-    expect(evaluate(ctx({ today: DURING })).tirocinio).toBe(false)
-    expect(evaluate(ctx({ today: DURING, deadlines: tirocinio('2027-03-15') })).tirocinio).toBe(false)
-    expect(evaluate(ctx({ today: DURING, deadlines: tirocinio(undefined, '2027-04-24') })).tirocinio).toBe(false)
+    expect(evaluate(ctx({ today: DURING })).period).toBeUndefined()
+    expect(evaluate(ctx({ today: DURING, deadlines: period('2027-03-15') })).period).toBeUndefined()
+    expect(evaluate(ctx({ today: DURING, deadlines: period(undefined, '2027-04-24') })).period).toBeUndefined()
+  })
+
+  it('più periodi attivi: vince quello iniziato per ultimo', () => {
+    const second: Deadline = { id: 'altro', title: 'Secondo periodo', kind: 'periodo', date: '2027-03-20', endDate: '2027-04-10', updatedAt: 0 }
+    const plan = evaluate(ctx({ today: DURING, deadlines: [...deadlines, second] }))
+    expect(plan.period?.name).toBe('Secondo periodo')
   })
 })
 
 describe('piano', () => {
   it('ha sempre titolo, regola e almeno tre attività', () => {
     for (const energy of [1, 2, 3, 4, 5] as Energy[]) {
-      const plan = evaluate(ctx({ energy, cards: { due: { sdm: 4 }, fresh: {} } }))
+      const plan = evaluate(ctx({ energy, cards: { due: { 'c-fis': 4 }, fresh: {} } }))
       expect(plan.headline[0]).toBe('Una giornata')
       expect(plan.rule.length).toBeGreaterThan(20)
       expect(plan.items.length).toBeGreaterThanOrEqual(3)
@@ -345,27 +356,27 @@ describe('piano', () => {
   })
 
   it('senza esami propone studio libero', () => {
-    const plan = evaluate(ctx({ courses: SEED_COURSES.map((c) => ({ ...c, examDate: undefined })) }))
+    const plan = evaluate(ctx({ courses: FAKE_COURSES.map((c) => ({ ...c, examDate: undefined })) }))
     expect(plan.items[0]?.title).toBe('Studio')
   })
 })
 
 describe('agenda: collocazione dei blocchi', () => {
   const lessons = [
-    event(TODAY, '9:00', '11:00', 'Astrofisica Stellare'),
-    event(TODAY, '11:00', '13:00', 'Topologia Algebrica'),
-    event(TODAY, '14:30', '16:00', 'Ripetizioni', 'lavoro'),
+    event(TODAY, '9:00', '11:00', 'Cosmologia Osservativa'),
+    event(TODAY, '11:00', '13:00', 'Topologia Generale'),
+    event(TODAY, '14:30', '16:00', 'Lezioni private', 'lavoro'),
   ]
 
   it('mette i blocchi negli spazi liberi con la pausa', () => {
     const plan = evaluateRaw(ctx())
     const blocks = scheduleDay(plan.items, lessons, { from: 8 * 60 })
-    const ex = blocks.filter((b) => b.item.key === 'studio:sdm:esercizi')
+    const ex = blocks.filter((b) => b.item.key === 'studio:c-fis:esercizi')
     expect(ex.map((b) => [b.start, b.end])).toEqual([
       ['13:00', '14:30'],
       ['16:00', '17:30'],
     ])
-    expect(ex.map((b) => b.key)).toEqual(['studio:sdm:esercizi#1', 'studio:sdm:esercizi#2'])
+    expect(ex.map((b) => b.key)).toEqual(['studio:c-fis:esercizi#1', 'studio:c-fis:esercizi#2'])
   })
 
   it('parte da adesso, arrotondato al quarto d’ora', () => {
@@ -376,10 +387,10 @@ describe('agenda: collocazione dei blocchi', () => {
 
   it('non ripropone i blocchi già confermati', () => {
     const plan = evaluateRaw(ctx())
-    const confirmed = event(TODAY, '13:00', '14:30', 'Esercizi di Struttura della Materia', 'studio', 'studio:sdm:esercizi#1')
+    const confirmed = event(TODAY, '13:00', '14:30', 'Esercizi di Fisica Moderna', 'studio', 'studio:c-fis:esercizi#1')
     const blocks = scheduleDay(plan.items, [...lessons, confirmed], { from: 8 * 60 })
-    expect(blocks.map((b) => b.key)).not.toContain('studio:sdm:esercizi#1')
-    expect(blocks.find((b) => b.key === 'studio:sdm:esercizi#2')?.start).toBe('16:00')
+    expect(blocks.map((b) => b.key)).not.toContain('studio:c-fis:esercizi#1')
+    expect(blocks.find((b) => b.key === 'studio:c-fis:esercizi#2')?.start).toBe('16:00')
   })
 
   it('le attività serali vanno dopo le 17:30, quelle con orario restano dove sono', () => {

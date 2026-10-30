@@ -1,1 +1,1 @@
-export function demoBackup(today: string, options?: { cards?: { id: string }[] }): unknown
+export function demoBackup(today: string, options?: { deckIds?: string[] }): unknown

@@ -9,19 +9,22 @@ import { DeepField } from '../../art/DeepField'
 import { StatsChalk } from '../../art/StatsChalk'
 import { logWeight } from '../../db/actions'
 import { db } from '../../db/db'
-import { useCourses } from '../../db/hooks'
+import { useCourses, useProfile } from '../../db/hooks'
 import { useDayPlan } from '../../db/plan-context'
 import { alive } from '../../db/repo'
+import { WORKOUT_ORDER } from '../../db/schema'
 import { useI18n } from '../../i18n/store'
+import { moduleLabel, sessionTypeEnabled, statsPanels, workSessionTypes, workoutTypeEnabled } from '../../modules/registry'
 import { ENERGY } from '../../lib/energy'
 import {
   averageFor,
   dailyHours,
-  elsaDays,
+  languageDays,
   energyVsHours,
   hoursBySubject,
   kpis,
   periodRange,
+  primarySport,
   typingDays,
   weightTrend,
   workoutRows,
@@ -30,7 +33,7 @@ import {
 import { Bars, Columns, DataTable, LineChart, Lollipops, Strips } from './charts'
 import './StatistichePage.css'
 
-const PERIODS: Period[] = ['7', '14', 'settembre']
+const PERIODS: Period[] = ['7', '14', 'anno']
 
 export default function StatistichePage() {
   const { t, f } = useI18n()
@@ -42,8 +45,9 @@ export default function StatistichePage() {
   const courses = useCourses()
   const state = useDayPlan(today)
   const period = (PERIODS.find((p) => p === route.query.get('periodo')) ?? '14') as Period
-  const range = useMemo(() => periodRange(period, today), [period, today])
-  const since = periodRange('settembre', today).from
+  const yearStart = useProfile()?.yearStart
+  const range = useMemo(() => periodRange(period, today, yearStart), [period, today, yearStart])
+  const since = periodRange('anno', today, yearStart).from
   const [kg, setKg] = useState('')
 
   const data = useLiveQuery(async () => {
@@ -60,20 +64,29 @@ export default function StatistichePage() {
   const view = useMemo(() => {
     if (!data || !state) return null
     const target = state.plan.hours.hoursPerDay
-    const daily = dailyHours(data.sessions, range.days)
+    const modules = state.context.modules
+    const workTypes = workSessionTypes(modules)
+    const daily = dailyHours(data.sessions, range.days, workTypes)
+    const sportTypes = WORKOUT_ORDER.filter((x) => workoutTypeEnabled(modules, x))
     return {
       target,
       daily,
-      subjects: hoursBySubject(data.sessions, courses, range, (ty) => ts.typeLabel[ty]),
-      workouts: workoutRows(data.workouts, range),
+      subjects: hoursBySubject(
+        data.sessions,
+        courses,
+        range,
+        (ty) => (ty === 'abilita' || ty === 'lingua' ? moduleLabel(modules, ty, t) : ts.typeLabel[ty]),
+        (ty) => sessionTypeEnabled(modules, ty),
+      ),
+      workouts: workoutRows(data.workouts, range, sportTypes),
       weight: weightTrend(data.weights, range),
       typing: typingDays(data.runs, range),
-      elsa: elsaDays(data.sessions, range.days),
-      energy: energyVsHours(data.days, data.sessions, range),
-      kpi: kpis(data.sessions, data.workouts, data.runs, range, today, target, state.plan.sport.mainTarget),
+      language: languageDays(data.sessions, range.days),
+      energy: energyVsHours(data.days, data.sessions, range, workTypes),
+      kpi: kpis(data.sessions, data.workouts, data.runs, range, today, target, primarySport(state.plan.sport.types), workTypes),
       overTarget: daily.filter((d) => d.total >= target).length,
     }
-  }, [data, state, range, courses, today, ts])
+  }, [data, state, range, courses, today, ts, t])
 
   const addWeight = async (e: FormEvent) => {
     e.preventDefault()
@@ -89,6 +102,9 @@ export default function StatistichePage() {
   const high = averageFor(view.energy, [4, 5])
   const low = averageFor(view.energy, [1, 2])
   const priority = state.plan.priority?.courseId
+  const modules = state.context.modules
+  const panels = statsPanels(modules)
+  const names = { language: moduleLabel(modules, 'lingua', t) }
 
   return (
     <Page className="stats" labelledBy="titolo-stats">
@@ -128,20 +144,24 @@ export default function StatistichePage() {
             <span>{ts.hUnit}</span>
           </dd>
         </div>
-        <div>
-          <dt>{ts.kpiClimbs({ month: today.slice(0, 7) }, f)}</dt>
-          <dd>
-            {kpi.climbsMonth}
-            <span>{ts.kpiClimbsOf({ target: kpi.climbsMonthTarget })}</span>
-          </dd>
-        </div>
-        <div>
-          <dt>{ts.kpiTyping}</dt>
-          <dd>
-            {kpi.lastWpm ?? '–'}
-            <span>{ts.wpmShort}</span>
-          </dd>
-        </div>
+        {kpi.sportMonth !== undefined ? (
+          <div>
+            <dt>{ts.kpiSport({ sport: kpi.sportType!, month: today.slice(0, 7) }, f)}</dt>
+            <dd>
+              {kpi.sportMonth}
+              <span>{ts.kpiSportOf({ target: kpi.sportMonthTarget ?? 0 })}</span>
+            </dd>
+          </div>
+        ) : null}
+        {panels.has('typing') ? (
+          <div>
+            <dt>{ts.kpiTyping}</dt>
+            <dd>
+              {kpi.lastWpm ?? '–'}
+              <span>{ts.wpmShort}</span>
+            </dd>
+          </div>
+        ) : null}
       </dl>
 
       <div className="stats__grid">
@@ -149,7 +169,7 @@ export default function StatistichePage() {
           <div className="panel__head">
             <h2 id="h-giorni">{ts.hoursPerDay}</h2>
             <p>
-              {ts.hoursNote({ target: view.target, over: view.overTarget, days: view.daily.length }, f)}
+              {ts.hoursNote({ target: view.target, over: view.overTarget, days: view.daily.length, work: panels.has('workHours') }, f)}
             </p>
           </div>
           <Lollipops
@@ -163,8 +183,8 @@ export default function StatistichePage() {
           />
           <DataTable
             caption={ts.hoursPerDay}
-            head={[ts.colDay, ts.colStudy, ts.colWork, ts.colTotal]}
-            rows={view.daily.map((d) => [f.dateShort(d.date), num(d.study), num(d.work), num(d.total)])}
+            head={panels.has('workHours') ? [ts.colDay, ts.colStudy, ts.colWork, ts.colTotal] : [ts.colDay, ts.colStudy, ts.colTotal]}
+            rows={view.daily.map((d) => (panels.has('workHours') ? [f.dateShort(d.date), num(d.study), num(d.work), num(d.total)] : [f.dateShort(d.date), num(d.study), num(d.total)]))}
           />
         </section>
 
@@ -182,6 +202,7 @@ export default function StatistichePage() {
           {priority ? <p className="panel__note">{ts.priorityNote}</p> : null}
         </section>
 
+        {panels.has('sport') ? (
         <section className="panel panel--third" aria-labelledby="h-sport">
           <div className="panel__head">
             <h2 id="h-sport">{ts.sportTitle}</h2>
@@ -201,7 +222,9 @@ export default function StatistichePage() {
             rows={view.workouts.map((w) => [t.sport.label[w.type], String(w.count), num(w.minutes / 60)])}
           />
         </section>
+        ) : null}
 
+        {panels.has('weight') ? (
         <section className="panel panel--third" aria-labelledby="h-peso">
           <div className="panel__head">
             <h2 id="h-peso">{ts.weight}</h2>
@@ -227,6 +250,7 @@ export default function StatistichePage() {
             </button>
           </form>
         </section>
+        ) : null}
 
         <section className="panel panel--third" aria-labelledby="h-energia">
           <div className="panel__head">
@@ -254,6 +278,7 @@ export default function StatistichePage() {
           />
         </section>
 
+        {panels.has('typing') ? (
         <section className="panel panel--half" aria-labelledby="h-datti">
           <div className="panel__head">
             <h2 id="h-datti">{ts.typing}</h2>
@@ -282,34 +307,37 @@ export default function StatistichePage() {
             </div>
           </div>
         </section>
+        ) : null}
 
-        <section className="panel panel--half" aria-labelledby="h-elsa">
+        {panels.has('language') ? (
+        <section className="panel panel--half" aria-labelledby="h-lingua">
           <div className="panel__head">
-            <h2 id="h-elsa">{ts.english}</h2>
-            <p>{ts.englishMinutes({ n: view.elsa.reduce((n, d) => n + d.minutes, 0) }, f)}</p>
+            <h2 id="h-lingua">{ts.languageTitle({ name: names.language })}</h2>
+            <p>{ts.languageMinutes({ n: view.language.reduce((n, d) => n + d.minutes, 0) }, f)}</p>
           </div>
           <div className="pair">
             <div>
               <h3>{ts.minutesPerDay}</h3>
               <Columns
-                data={view.elsa.map((d) => ({ date: d.date, value: d.minutes, title: ts.minutesPoint({ date: d.date, n: d.minutes }, f) }))}
+                data={view.language.map((d) => ({ date: d.date, value: d.minutes, title: ts.minutesPoint({ date: d.date, n: d.minutes }, f) }))}
                 days={range.days}
                 format={(v) => ts.minutesFmt({ v })}
-                label={ts.englishChart}
+                label={ts.languageChart({ name: names.language })}
               />
             </div>
             <div>
               <h3>{ts.score}</h3>
               <LineChart
-                points={view.elsa.filter((d) => d.score !== undefined).map((d) => ({ date: d.date, value: d.score!, title: ts.scorePoint({ date: d.date, score: d.score! }, f) }))}
+                points={view.language.filter((d) => d.score !== undefined).map((d) => ({ date: d.date, value: d.score!, title: ts.scorePoint({ date: d.date, score: d.score! }, f) }))}
                 days={range.days}
                 format={(v) => String(Math.round(v))}
-                label={ts.scoreChart}
+                label={ts.scoreChart({ name: names.language })}
                 minSpan={10}
               />
             </div>
           </div>
         </section>
+        ) : null}
 
         <section className="panel panel--future" aria-labelledby="h-orologio">
           <h2 id="h-orologio">{ts.watch}</h2>

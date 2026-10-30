@@ -4,8 +4,15 @@
 
 import type { CardState, LeitnerBox, ReviewMode } from '../db/schema'
 import { addDays, type ISODate } from '../lib/dates'
+import { DEFAULT_TUNING, type Tuning } from '../rules/defaults'
 
+/** Intervalli predefiniti: i valori modificabili stanno nel gruppo `ripasso`. */
 export const INTERVALS: Record<LeitnerBox, number> = { 1: 1, 2: 2, 3: 4, 4: 8, 5: 16 }
+
+export function intervalsFor(tuning: Tuning = DEFAULT_TUNING): Record<LeitnerBox, number> {
+  const r = tuning.ripasso
+  return { 1: r.box1!, 2: r.box2!, 3: r.box3!, 4: r.box4!, 5: r.box5! }
+}
 
 /** Precisione minima in Copia e Completa, somiglianza suggerita nelle modalità a memoria. */
 export const MIN_ACCURACY = 0.97
@@ -25,8 +32,9 @@ export function modeForBox(box: LeitnerBox | undefined): ReviewMode {
 }
 
 /** Esito suggerito: in Copia e Completa decide la precisione, a memoria la somiglianza (poi decidi tu). */
-export function suggestedOutcome(mode: ReviewMode, score: number): boolean {
-  return mode === 'copia' || mode === 'completa' ? score >= MIN_ACCURACY : score >= MIN_SIMILARITY
+export function suggestedOutcome(mode: ReviewMode, score: number, tuning: Tuning = DEFAULT_TUNING): boolean {
+  const r = tuning.ripasso
+  return mode === 'copia' || mode === 'completa' ? score >= r.minAccuracy! / 100 : score >= r.minSimilarity! / 100
 }
 
 export interface ReviewOutcome {
@@ -37,7 +45,7 @@ export interface ReviewOutcome {
   changed: boolean
 }
 
-export function applyReview(current: CardState | undefined, cardId: string, ok: boolean, today: ISODate): ReviewOutcome {
+export function applyReview(current: CardState | undefined, cardId: string, ok: boolean, today: ISODate, tuning: Tuning = DEFAULT_TUNING): ReviewOutcome {
   if (current && !current.deletedAt && current.due > today) {
     return { state: current, boxAfter: current.box, early: true, changed: false }
   }
@@ -46,7 +54,7 @@ export function applyReview(current: CardState | undefined, cardId: string, ok: 
   const state: CardState = {
     id: cardId,
     box,
-    due: addDays(today, INTERVALS[box]),
+    due: addDays(today, intervalsFor(tuning)[box]),
     firstReviewed: current?.firstReviewed ?? today,
     lastReviewed: today,
     updatedAt: Date.now(),

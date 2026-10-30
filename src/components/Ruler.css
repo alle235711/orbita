@@ -18,12 +18,12 @@
 }
 
 .ruler__period rect {
-  fill: var(--maldive);
+  fill: var(--period);
 }
 
 .ruler__period text {
   font-weight: 700;
-  fill: var(--maldive);
+  fill: var(--period);
 }
 
 .ruler__group rect {

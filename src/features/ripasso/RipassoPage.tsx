@@ -6,13 +6,13 @@ import { useActivityClock } from '../../app/useActivityClock'
 import { useToday } from '../../app/useToday'
 import { SubjectChalk } from '../../art/Chalk'
 import { db } from '../../db/db'
-import { useCourses, useSetting } from '../../db/hooks'
+import { useCourses, useSetting, useTuning } from '../../db/hooks'
 import { alive } from '../../db/repo'
 import { saveReview, setNeedsFix } from '../../db/review-actions'
 import type { Card, ReviewMode } from '../../db/schema'
 import { useI18n } from '../../i18n/store'
 import { diffDays } from '../../lib/dates'
-import { MIN_ACCURACY, modeForBox } from '../../review/leitner'
+import { modeForBox } from '../../review/leitner'
 import { courseRank, dailyQueue } from '../../review/queue'
 import { CardEditor } from './CardEditor'
 import { RecallExercise, type RecallDone } from './RecallExercise'
@@ -24,6 +24,7 @@ export default function RipassoPage() {
   const tr = t.ripasso
   const route = useRoute()
   const today = useToday()
+  const tuning = useTuning()
   const courses = useCourses()
   const newPerDay = useSetting('newCardsPerDay') ?? 15
   // Scheda, modalità e scatola si fissano quando la scheda arriva: salvando
@@ -116,7 +117,7 @@ export default function RipassoPage() {
   const onTypingDone = async (r: TypingDone) => {
     if (!card) return
     review(r.activeMs)
-    const ok = r.accuracy >= MIN_ACCURACY
+    const ok = r.accuracy >= tuning.ripasso.minAccuracy! / 100
     const outcome = await saveReview(card.id, { mode, wpm: r.wpm, score: r.accuracy, wrongChars: r.wrongChars, ok }, today)
     setSaved(describe(ok, outcome.boxAfter, outcome.early, outcome.state.due))
   }
@@ -149,7 +150,7 @@ export default function RipassoPage() {
 
   return (
     <Page className="ripasso" labelledBy="titolo-ripasso">
-      {subject ? <SubjectChalk courseId={subject.id} className="ripasso__chalk" /> : null}
+      {subject ? <SubjectChalk deckId={subject.sampleDeck ?? subject.id} className="ripasso__chalk" /> : null}
 
       <div className="ripasso__subjects">
         <div className="choices" role="group" aria-label={tr.subjects}>

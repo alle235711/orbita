@@ -6,15 +6,17 @@ import { toast } from '../../app/toast'
 import { useMinuteClock, useToday } from '../../app/useToday'
 import { SpiralGalaxy } from '../../art/SpiralGalaxy'
 import { db } from '../../db/db'
-import { useCourses } from '../../db/hooks'
+import { useCourses, useModules, useTuning } from '../../db/hooks'
 import { useDayPlan } from '../../db/plan-context'
 import { alive, patch, remove, save } from '../../db/repo'
 import type { CalendarEvent, EventType, Task } from '../../db/schema'
 import { addDays, isISODate, todayISO, toMinutes, weekday, weekDays, type ISODate } from '../../lib/dates'
 import { renderMsg } from '../../i18n/messages'
 import { useI18n } from '../../i18n/store'
+import { workSessionTypes } from '../../modules/registry'
+import { DEFAULT_MODULES } from '../../modules/types'
 import { scheduleDay, type SuggestedBlock } from '../../rules/schedule'
-import { AGENDA_END, AGENDA_START, eventsByDay, layoutDay, weekHours } from './agenda'
+import { agendaWindow, eventsByDay, layoutDay, weekHours } from './agenda'
 import { EventSheet, type EventDraft } from './EventSheet'
 import './AgendaPage.css'
 
@@ -35,6 +37,9 @@ export default function AgendaPage() {
   const week = useMemo(() => weekDays(day), [day])
   const courses = useCourses()
   const plan = useDayPlan(today)
+  const tuning = useTuning()
+  const modules = useModules() ?? DEFAULT_MODULES
+  const span = agendaWindow(tuning)
   const [draft, setDraft] = useState<EventDraft | null>(null)
 
   const data = useLiveQuery(async () => {
@@ -50,10 +55,10 @@ export default function AgendaPage() {
     navigate('agenda', { giorno: next.giorno ?? day, ...(next.vista ?? view) === 'settimana' ? { vista: 'settimana' } : {} })
 
   const byDay = useMemo(() => eventsByDay(data?.events ?? [], week), [data, week])
-  const hours = useMemo(() => weekHours(day, today, data?.sessions ?? [], data?.events ?? []), [day, today, data])
+  const hours = useMemo(() => weekHours(day, today, data?.sessions ?? [], data?.events ?? [], workSessionTypes(modules)), [day, today, data, modules])
   const suggestions = useMemo(
-    () => (plan ? scheduleDay(plan.plan.items, plan.context.events, { from: plan.now }) : []),
-    [plan],
+    () => (plan ? scheduleDay(plan.plan.items, plan.context.events, { from: plan.now, tuning }) : []),
+    [plan, tuning],
   )
 
   const confirm = async (b: SuggestedBlock) => {
@@ -149,6 +154,7 @@ export default function AgendaPage() {
       {view === 'giorno' ? (
         <div className="agenda__main">
           <DayTimeline
+            span={span}
             day={day}
             events={byDay.get(day) ?? []}
             suggestions={day === today ? suggestions : []}
@@ -160,7 +166,7 @@ export default function AgendaPage() {
           <TodoList day={day} today={today} tasks={data?.tasks ?? []} />
         </div>
       ) : (
-        <WeekGrid week={week} today={today} byDay={byDay} onOpen={(d) => go({ giorno: d, vista: 'giorno' })} onEdit={(e) => setDraft(e)} />
+        <WeekGrid span={span} week={week} today={today} byDay={byDay} onOpen={(d) => go({ giorno: d, vista: 'giorno' })} onEdit={(e) => setDraft(e)} />
       )}
 
       <EventSheet draft={draft} courses={courses} onClose={() => setDraft(null)} />
@@ -171,6 +177,7 @@ export default function AgendaPage() {
 // ——— giornata ———
 
 interface DayTimelineProps {
+  span: { start: number; end: number }
   day: ISODate
   events: CalendarEvent[]
   suggestions: SuggestedBlock[]
@@ -180,7 +187,7 @@ interface DayTimelineProps {
   onConfirm: (b: SuggestedBlock) => void
 }
 
-function DayTimeline({ day, events, suggestions, now, onEdit, onNew, onConfirm }: DayTimelineProps) {
+function DayTimeline({ day, events, suggestions, now, span, onEdit, onNew, onConfirm }: DayTimelineProps) {
   const i18n = useI18n()
   const { t, f } = i18n
   const ta = t.agenda
@@ -189,8 +196,8 @@ function DayTimeline({ day, events, suggestions, now, onEdit, onNew, onConfirm }
     ...events.map((event): Item => ({ kind: 'event', event, start: event.start, end: event.end })),
     ...suggestions.map((block): Item => ({ kind: 'suggestion', block, start: block.start, end: block.end })),
   ]
-  const from = Math.min(AGENDA_START, ...items.map((i) => Math.floor(toMinutes(i.start) / 60) * 60))
-  const to = Math.max(AGENDA_END, ...items.map((i) => Math.ceil(toMinutes(i.end) / 60) * 60))
+  const from = Math.min(span.start, ...items.map((i) => Math.floor(toMinutes(i.start) / 60) * 60))
+  const to = Math.max(span.end, ...items.map((i) => Math.ceil(toMinutes(i.end) / 60) * 60))
   const hours = Array.from({ length: (to - from) / 60 }, (_, i) => from / 60 + i)
   const placed = layoutDay(items)
   const pos = (start: number, end: number): CSSProperties => ({
@@ -333,6 +340,7 @@ function TaskItems({ tasks, day, empty }: { tasks: Task[]; day: ISODate; empty: 
 // ——— settimana ———
 
 interface WeekGridProps {
+  span: { start: number; end: number }
   week: ISODate[]
   today: ISODate
   byDay: Map<ISODate, CalendarEvent[]>
@@ -340,11 +348,11 @@ interface WeekGridProps {
   onEdit: (e: CalendarEvent) => void
 }
 
-function WeekGrid({ week, today, byDay, onOpen, onEdit }: WeekGridProps) {
+function WeekGrid({ week, today, byDay, span, onOpen, onEdit }: WeekGridProps) {
   const { t, f } = useI18n()
   const all = week.flatMap((d) => byDay.get(d) ?? [])
-  const from = Math.min(AGENDA_START, ...all.map((e) => Math.floor(toMinutes(e.start) / 60) * 60))
-  const to = Math.max(AGENDA_END, ...all.map((e) => Math.ceil(toMinutes(e.end) / 60) * 60))
+  const from = Math.min(span.start, ...all.map((e) => Math.floor(toMinutes(e.start) / 60) * 60))
+  const to = Math.max(span.end, ...all.map((e) => Math.ceil(toMinutes(e.end) / 60) * 60))
   const hours = Array.from({ length: (to - from) / 60 }, (_, i) => from / 60 + i)
   return (
     <section className="week" aria-label={t.agenda.viewWeek} style={{ ['--rows' as string]: hours.length }}>

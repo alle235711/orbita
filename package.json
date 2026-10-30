@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Orbita, l'app personale per le giornate fino alla laurea. PWA local-first.",
+  "description": "Orbita, la PWA local-first per organizzare le giornate di studio.",
   "engines": {
     "node": ">=22.12.0"
   },

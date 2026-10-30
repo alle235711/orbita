@@ -1,16 +1,16 @@
-import type { SessionType } from '../../../db/schema'
+import type { SessionType, WorkoutType } from '../../../db/schema'
 import type { Period } from '../../../stats/aggregate'
 import type { Format } from '../../format/types'
-import { legacy } from './legacy'
+import { sport } from './sport'
 
-const periods: Record<Period, string> = { '7': '7 giorni', '14': '14 giorni', settembre: 'Da settembre' }
+const periods: Record<Period, string> = { '7': '7 giorni', '14': '14 giorni', anno: 'Anno accademico' }
 
 const typeLabel: Record<SessionType, string> = {
   studio: 'Studio senza corso',
   ripasso: 'Ripasso senza corso',
-  lavoro: legacy.tutoring,
-  lean: legacy.leanItem,
-  inglese: 'Inglese',
+  lavoro: 'Lavoro',
+  abilita: 'Abilità personale',
+  lingua: 'Lingua straniera',
   lettura: 'Lettura',
   dattilografia: 'Dattilografia',
 }
@@ -29,14 +29,14 @@ export const stats = {
   kpiHoursOf: (p: { target: number }, f: Format) => ` h su ${f.number(p.target)}`,
   kpiAverage: 'Media al giorno nel periodo',
   hUnit: ' h',
-  kpiClimbs: (p: { month: string }, f: Format) => `Arrampicate ${f.inMonth(p.month)}`,
-  kpiClimbsOf: (p: { target: number }) => ` su ${p.target}`,
+  kpiSport: (p: { sport: WorkoutType; month: string }, f: Format) => `${sport.label[p.sport]} ${f.inMonth(p.month)}`,
+  kpiSportOf: (p: { target: number }) => ` su ${p.target}`,
   kpiTyping: 'Velocità di scrittura',
   wpmShort: ' parole/min',
 
   hoursPerDay: 'Ore al giorno',
-  hoursNote: (p: { target: number; over: number; days: number }, f: Format) =>
-    `Studio e lavoro insieme; sopra le ${f.number(p.target)} ore in ${f.count(p.over, 'giorno', 'giorni')} su ${p.days}.`,
+  hoursNote: (p: { target: number; over: number; days: number; work: boolean }, f: Format) =>
+    `${p.work ? 'Studio e lavoro insieme' : 'Ore di studio'}; sopra le ${f.number(p.target)} ore in ${f.count(p.over, 'giorno', 'giorni')} su ${p.days}.`,
   lollipopTitle: (p: { date: string; total: number; study: number; work: number }, f: Format) =>
     `${f.date(p.date)}: ${h(f, p.total)}${p.work ? ` (studio ${h(f, p.study)}, lavoro ${h(f, p.work)})` : ''}`,
   colDay: 'Giorno',
@@ -49,7 +49,7 @@ export const stats = {
   priorityNote: 'In evidenza la priorità di oggi.',
   hours: (p: { n: number }, f: Format) => h(f, p.n),
 
-  sportTitle: 'Arrampicata, corsa e palestra',
+  sportTitle: 'Sport',
   workoutsCaption: 'Allenamenti',
   colType: 'Tipo',
   colSessions: 'Sessioni',
@@ -85,18 +85,19 @@ export const stats = {
   wpmChart: 'Parole al minuto per giorno',
   accuracyChart: 'Precisione per giorno',
 
-  english: `Inglese con ${legacy.elsa}`,
-  englishMinutes: (p: { n: number }, f: Format) => `${f.count(p.n, 'minuto', 'minuti')} nel periodo.`,
+  languageTitle: (p: { name: string }) => p.name,
+  abilityTitle: (p: { name: string }) => p.name,
+  languageMinutes: (p: { n: number }, f: Format) => `${f.count(p.n, 'minuto', 'minuti')} nel periodo.`,
   minutesPerDay: 'Minuti al giorno',
   minutesPoint: (p: { date: string; n: number }, f: Format) => `${f.dateShort(p.date)}: ${f.count(p.n, 'minuto', 'minuti')}`,
   minutesFmt: (p: { v: number }) => `${Math.round(p.v)} min`,
-  englishChart: `Minuti di ${legacy.elsa} al giorno`,
+  languageChart: (p: { name: string }) => `Minuti di ${p.name} al giorno`,
   score: 'Punteggio',
   scorePoint: (p: { date: string; score: number }, f: Format) => `${f.dateShort(p.date)}: ${p.score}`,
-  scoreChart: `Punteggio ${legacy.elsa}`,
+  scoreChart: (p: { name: string }) => `Punteggio ${p.name}`,
 
   watch: 'Dati dell’orologio',
-  watchFuture: legacy.watchFuture,
+  watchFuture: 'Passi, sonno e battito arriveranno in una fase successiva.',
 
   // grafici
   todayTick: 'oggi',

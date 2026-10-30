@@ -10,5 +10,6 @@ export const errors = {
   cardMissingFieldByIndex: (p: { n: number; field: string }) => `La scheda numero ${p.n} non ha il campo "${p.field}".`,
   cardDuplicateId: (p: { id: string }) => `L’id ${p.id} compare due volte.`,
   invalidJson: (p: { name: string }) => `${p.name} non è un file JSON valido.`,
+  courseMissing: () => 'Il corso non esiste più.',
   generic: () => 'Qualcosa non ha funzionato.',
 }

@@ -2,6 +2,8 @@ import type { CalendarEvent, Course, Deadline, RuleConfig, RuleId, Session, Sess
 import type { ISODate } from '../lib/dates'
 import type { Energy } from '../lib/energy'
 import type { PlanMsg } from '../i18n/messages'
+import type { Profile } from '../db/profile'
+import type { ModulesSettings, StudyBlockSettings } from '../modules/types'
 
 /** Tutto quello che serve al motore di regole, già caricato dal database. */
 export interface RuleContext {
@@ -22,6 +24,10 @@ export interface RuleContext {
   cards: { due: Record<string, number>; fresh: Record<string, number> }
   /** Configurazione salvata; per le regole mancanti valgono i predefiniti. */
   rules: RuleConfig[]
+  profile: Profile | null
+  /** Già normalizzati. */
+  modules: ModulesSettings
+  studyBlock: StudyBlockSettings
 }
 
 export interface ResolvedRule {
@@ -79,13 +85,16 @@ export interface HoursStatus {
 }
 
 export interface SportStatus {
-  /** 'arrampicata' di solito, 'palestra' durante il tirocinio. */
-  main: WorkoutType
-  mainDone: number
-  mainTarget: number
-  runsDone: number
-  runsTarget: number
+  /** Solo i tipi attivi, nell'ordine di WORKOUT_ORDER. */
+  types: { type: WorkoutType; done: number; target: number }[]
   deadline: number
+}
+
+export interface ActivePeriod {
+  id: string
+  name: string
+  start: string
+  end: string
 }
 
 export interface DayPlan {
@@ -100,7 +109,8 @@ export interface DayPlan {
   priority?: Priority
   hours: HoursStatus
   sport: SportStatus
-  /** Giorni dall'ultima sessione di Lean (Infinity se mai). */
-  leanGap: number
-  tirocinio: boolean
+  /** Giorni dall'ultima sessione dell'abilità (Infinity se mai). */
+  abilityGap: number
+  /** Il periodo speciale in corso, se c'è. */
+  period?: ActivePeriod
 }

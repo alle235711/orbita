@@ -2,7 +2,6 @@ import { AppError } from '../i18n/errors'
 import { todayISO } from '../lib/dates'
 import type { OrbitaDB } from './db'
 import type { Card, Course } from './schema'
-import { SEED_COURSES } from './seed'
 
 // Schede di ripasso nel formato di content/schede-2026-27.json.
 
@@ -153,14 +152,10 @@ export async function importCards(
 export async function exportCards(db: OrbitaDB): Promise<ContentFile> {
   const cards = (await db.cards.toArray()).filter((c) => !c.deletedAt)
   const courseIds = new Set(cards.map((c) => c.courseId))
-  // I corsi nell'ordine della SPEC, quelli aggiunti dopo in coda.
-  const rank = (id: string) => {
-    const i = SEED_COURSES.findIndex((c) => c.id === id)
-    return i < 0 ? SEED_COURSES.length : i
-  }
+  // I corsi in ordine alfabetico per nome.
   const courses = (await db.courses.toArray())
     .filter((c) => courseIds.has(c.id))
-    .sort((a, b) => rank(a.id) - rank(b.id) || a.id.localeCompare(b.id))
+    .sort((a, b) => a.name.localeCompare(b.name, 'it') || a.id.localeCompare(b.id))
   const order = new Map(courses.map((c, i) => [c.id, i]))
   cards.sort((a, b) => (order.get(a.courseId)! - order.get(b.courseId)!) || a.id.localeCompare(b.id, 'it', { numeric: true }))
 

@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useEffect, useId, useRef, type CSSProperties } from 'react'
 import { ENERGY, type Energy } from '../lib/energy'
 import './BlackHole.css'
 
@@ -15,14 +15,39 @@ const INNER = 'M706.6,205 a218.4,33.6 0 1,0 436.8,0 a218.4,33.6 0 1,0 -436.8,0 Z
 
 const disk = { stopColor: 'var(--disk)' }
 
-export function BlackHole({ level, className }: { level: Energy; className?: string }) {
+/** Le tappe in cui il buco nero si compone: ogni livello compare alla sua, in ordine. */
+export type BlackHoleStage = 0 | 1 | 2 | 3 | 4 | 5
+const FULL: BlackHoleStage = 5
+/** Quanto dopo il livello precedente compare il successivo, dentro un'unica tappa. */
+const STAGGER_MS = 120
+
+/**
+ * `stage` compone il buco nero a livelli: 0 solo l'ombra, 1 anello di fotoni,
+ * 2 alone, 3 disco di fondo e bagliore interno, 4 disco davanti, archi di lente
+ * e striature, 5 getti (se il livello li ha). Senza `stage` vale 5: il disegno
+ * completo di sempre. Salendo di tappa i livelli nuovi compaiono in sequenza;
+ * scendendo si spengono insieme. Con il movimento ridotto restano senza transizione.
+ */
+export function BlackHole({ level, className, stage }: { level: Energy; className?: string; stage?: BlackHoleStage }) {
   const s = ENERGY[level]
+  const current = stage ?? FULL
+  const previous = useRef(current)
+  // La tappa di partenza è quella dell'ultimo disegno confermato (non della prima passata di StrictMode).
+  const from = previous.current
+  useEffect(() => {
+    previous.current = current
+  })
+  /** Opacità e ritardo di un livello della tappa `n`. */
+  const lvl = (n: number, target: number): CSSProperties => ({
+    opacity: current >= n ? target : 0,
+    transitionDelay: current > from && n > from && n <= current ? `${(n - from - 1) * STAGGER_MS}ms` : '0ms',
+  })
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, '')
   const id = (name: string) => `${uid}-${name}`
   const url = (name: string) => `url(#${id(name)})`
 
   return (
-    <div className={`bh${className ? ` ${className}` : ''}`} aria-hidden="true">
+    <div className={`bh${className ? ` ${className}` : ''}`} aria-hidden="true" data-stage={current}>
       <svg className="bh__layer" viewBox={VIEW} preserveAspectRatio="xMidYMid meet">
         <defs>
           <radialGradient id={id('glow')} cx="925" cy="205" r="300" gradientUnits="userSpaceOnUse">
@@ -48,8 +73,8 @@ export function BlackHole({ level, className }: { level: Energy; className?: str
           </filter>
         </defs>
         <g transform="rotate(-9 925 205)">
-          <circle className="bh__lvl" cx="925" cy="205" r="300" fill={url('glow')} filter={url('soft')} style={{ opacity: s.glow }} />
-          <g className="bh__lvl" style={{ opacity: s.jet }}>
+          <circle className="bh__lvl" cx="925" cy="205" r="300" fill={url('glow')} filter={url('soft')} style={lvl(2, s.glow)} />
+          <g className="bh__lvl" style={lvl(5, s.jet)}>
             <polygon points="921,205 929,205 952,-330 898,-330" fill={url('jetUp')} filter={url('haze')} />
             <polygon points="921,205 929,205 952,740 898,740" fill={url('jetDn')} filter={url('haze')} />
             <polygon points="923,205 927,205 932,-330 918,-330" fill="#FFFFFF" opacity="0.55" />
@@ -75,15 +100,17 @@ export function BlackHole({ level, className }: { level: Energy; className?: str
           </clipPath>
         </defs>
         <g transform="rotate(-9 925 205)">
-          <g className="bh__lvl" style={{ opacity: s.disk }}>
+          <g className="bh__lvl" style={lvl(3, s.disk)}>
             <path d={DISK} fill={url('dop')} fillRule="evenodd" />
             <path d={INNER} fill="#FFFFFF" fillOpacity="0.32" fillRule="evenodd" />
+          </g>
+          <g className="bh__lvl" style={lvl(4, s.disk)}>
             <ellipse className="bh__flow" cx="925" cy="205" rx="252" ry="38" fill="none" stroke="#FFFFFF" strokeOpacity="0.5" strokeWidth="2" strokeDasharray="3 31" strokeLinecap="round" />
             <path d="M776,205 A149,149 0 0,1 1074,205" fill="none" stroke={url('lens')} strokeWidth="40" strokeLinecap="round" />
           </g>
           <circle cx="925" cy="205" r="112" fill="#000000" />
-          <circle className="bh__lvl" cx="925" cy="205" r="116.5" fill="none" stroke="#FFFFFF" strokeWidth="2" style={{ opacity: s.ring }} />
-          <g className="bh__lvl" style={{ opacity: s.disk }}>
+          <circle className="bh__lvl" cx="925" cy="205" r="116.5" fill="none" stroke="#FFFFFF" strokeWidth="2" style={lvl(1, s.ring)} />
+          <g className="bh__lvl" style={lvl(4, s.disk)}>
             <path d="M799.6,205 A125.4,125.4 0 0,0 1050.4,205" fill="none" stroke={url('lens')} strokeWidth="7" />
             <g clipPath={url('front')}>
               <path d={DISK} fill={url('dop')} fillRule="evenodd" />

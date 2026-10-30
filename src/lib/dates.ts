@@ -26,6 +26,13 @@ export function resolveDate(s: string): ISODate {
   return isMonthOnly(s) ? `${s}-01` : s
 }
 
+/** Ultimo giorno del mese di una data ('YYYY-MM' o 'YYYY-MM-DD'). */
+export function lastDayOfMonth(iso: string): ISODate {
+  const [y, m] = iso.split('-').map(Number) as [number, number]
+  const next = m === 12 ? `${y + 1}-01-01` : `${y}-${String(m + 1).padStart(2, '0')}-01`
+  return addDays(next, -1)
+}
+
 function parts(iso: ISODate): [number, number, number] {
   const [y, m, d] = resolveDate(iso).split('-').map(Number)
   return [y!, m!, d!]

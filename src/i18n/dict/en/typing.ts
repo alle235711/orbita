@@ -25,6 +25,8 @@ const fingerOne: Record<Finger, string> = { mignolo: 'pinky', anulare: 'ring fin
 const handWord: Record<Hand, string> = { sinistra: 'left', destra: 'right' }
 
 export const typing = {
+  keyboardRecall: 'Italian keyboard: the keys you mistyped are in red.',
+  keyboardTyping: (p: { hint: string }) => `Italian keyboard with the keys coloured by finger. ${p.hint}`,
   lessons,
   fingers,
   legendLabel: 'Finger colours',

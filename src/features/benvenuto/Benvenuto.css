@@ -1,0 +1,323 @@
+/* Il percorso guidato: stessa ricetta della Copertina. Contenitore isolato con
+   sfondo opaco (le fusioni stanno qui dentro), cielo, buco nero che si compone
+   passo dopo passo, titolo enorme in "difference", pannello di vetro. */
+
+.welcome {
+  --sky-w: 760px;
+  position: relative;
+  isolation: isolate;
+  background: var(--bg);
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+/* ——— buco nero: piccolo in alto a destra sul telefono, grande da tablet in su ——— */
+
+.welcome__bh {
+  z-index: 1;
+  --bhu: calc(0.28px + 0.0512vw);
+  width: calc(780 * var(--bhu));
+  right: calc(23vw - 375 * var(--bhu));
+  top: calc(env(safe-area-inset-top) + 96px - 345 * var(--bhu));
+}
+
+@media (min-width: 900px) {
+  .welcome__bh {
+    --bhu: calc(100vw / 1180);
+    right: calc(-120 * var(--bhu));
+    top: calc(-140 * var(--bhu));
+  }
+}
+
+/* ——— colonna del testo ——— */
+
+.welcome__main {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  max-width: 700px;
+  padding: calc(env(safe-area-inset-top) + 20px) max(var(--gutter), env(safe-area-inset-right)) 0 max(var(--gutter), env(safe-area-inset-left));
+}
+
+@media (min-width: 900px) {
+  .welcome__main {
+    max-width: none;
+    width: min(54vw, 760px);
+    padding-left: max(var(--gutter), 56px);
+    padding-top: 40px;
+  }
+}
+
+.welcome__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: var(--tap);
+}
+
+.welcome__eyebrow {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--text-rule);
+}
+
+.welcome__close {
+  min-height: var(--tap);
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--text-rule);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.welcome__title {
+  margin-top: 14px;
+  font-size: clamp(2.5rem, 11.4vw, 5.25rem);
+  font-weight: 900;
+  letter-spacing: -0.055em;
+  line-height: 0.86;
+  color: var(--text);
+  mix-blend-mode: difference;
+  text-wrap: balance;
+}
+
+.welcome__title:focus {
+  outline: none;
+}
+
+.welcome__title:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 6px;
+}
+
+@media (min-width: 900px) {
+  .welcome__title {
+    font-size: clamp(4rem, 8.8vw, 6.75rem);
+    margin-top: 28px;
+  }
+}
+
+.welcome__title-text {
+  display: block;
+}
+
+.welcome__lead {
+  max-width: 38ch;
+  margin-top: 18px;
+  font-size: 1rem;
+  line-height: 1.45;
+  color: var(--text-rule);
+}
+
+/* ——— pannello di vetro ——— */
+
+.welcome__panel {
+  position: relative;
+  margin-top: 22px;
+  padding: 18px 18px 20px;
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--text);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--bg) 62%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+.welcome__fields {
+  display: grid;
+  gap: 16px;
+}
+
+.welcome__field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.welcome__field--grow {
+  flex: 1 1 14rem;
+}
+
+.welcome__label {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-rule);
+}
+
+.welcome__hint {
+  font-size: var(--fs-small);
+  line-height: 1.4;
+  color: var(--text-2);
+}
+
+.welcome__error {
+  min-height: 0;
+  font-size: var(--fs-small);
+  color: var(--error-text);
+}
+
+.welcome__error:empty {
+  display: none;
+}
+
+.welcome__pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 16px;
+}
+
+.welcome__restore {
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  justify-items: start;
+}
+
+/* ——— esami ——— */
+
+.welcome__exams {
+  display: grid;
+  gap: 0;
+}
+
+.welcome__field .field {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+}
+
+.welcome__pair > * {
+  min-width: 0;
+}
+
+/* Una riga d'esame: il nome per intero, poi data o mese e crediti, poi la difficoltà e il pulsante. */
+.welcome__exam {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(5.5rem, 7rem);
+  align-items: start;
+  gap: 12px 14px;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+}
+
+.welcome__exam:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.welcome__exam > .welcome__field--grow {
+  grid-column: 1 / -1;
+}
+
+.welcome__exam > .welcome__field[role='radiogroup'],
+.welcome__exam > .welcome__remove {
+  grid-column: 1 / -1;
+}
+
+.welcome__remove {
+  justify-self: start;
+}
+
+.welcome__offer {
+  display: grid;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.welcome__offer h2 {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.welcome__offer ul {
+  display: grid;
+}
+
+.welcome__check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: var(--tap);
+  padding: 8px 0;
+  font-size: 0.9375rem;
+  line-height: 1.35;
+}
+
+.welcome__check input {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  accent-color: var(--disk);
+}
+
+.welcome__check small {
+  display: block;
+  color: var(--text-2);
+}
+
+/* ——— piede: avanzamento e pulsanti ——— */
+
+.welcome__foot {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: auto calc(-1 * max(var(--gutter), env(safe-area-inset-left))) 0;
+  padding: 18px max(var(--gutter), env(safe-area-inset-right)) calc(18px + env(safe-area-inset-bottom)) max(var(--gutter), env(safe-area-inset-left));
+  background: linear-gradient(180deg, transparent, var(--bg) 38%);
+}
+
+@media (min-width: 900px) {
+  .welcome__foot {
+    margin-left: -56px;
+    padding-left: 56px;
+  }
+}
+
+.welcome__main > .welcome__panel {
+  margin-bottom: 28px;
+}
+
+.welcome__dots {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.welcome__dots li {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px var(--line-3);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.welcome__dots li[data-on='true'] {
+  background: var(--disk);
+  box-shadow: none;
+}
+
+.welcome__actions {
+  display: flex;
+  gap: 10px;
+}
+
+.welcome__actions .btn {
+  min-width: 96px;
+  min-height: var(--tap);
+}
