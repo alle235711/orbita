@@ -135,6 +135,26 @@ export interface ExamResult extends Syncable {
   lode?: boolean
 }
 
+/** Un appello (data possibile) di un esame. id = uuid. */
+export interface Appello extends Syncable {
+  courseId: string
+  /** 'YYYY-MM-DD' (giorno reale) oppure 'YYYY-MM' (solo il mese). */
+  date: string
+  /** Tagliata, al massimo 80 caratteri, assente se vuota. */
+  note?: string
+}
+
+/** Un futuro possibile. id = uuid. `name` '' = etichetta predefinita "Universo n". */
+export interface Universe extends Syncable {
+  name: string
+  /** courseId -> appelloId scelto in questo universo. Le chiavi possono essere vecchie (si ignorano). */
+  picks: Record<string, string>
+  /** courseId -> voto atteso (finito, 18..30). Chiave assente = voto atteso predefinito. */
+  grades: Record<string, number>
+  /** Ordine di visualizzazione, intero crescente. */
+  order: number
+}
+
 /** id = id della scheda. */
 export interface CardState extends Syncable {
   box: LeitnerBox
@@ -212,6 +232,8 @@ export interface Tables {
   rules: RuleConfig
   settings: Setting
   results: ExamResult
+  appelli: Appello
+  universes: Universe
 }
 
 export type TableName = keyof Tables
@@ -232,4 +254,6 @@ export const TABLE_NAMES: TableName[] = [
   'rules',
   'settings',
   'results',
+  'appelli',
+  'universes',
 ]

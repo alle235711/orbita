@@ -7,10 +7,11 @@ describe('parseHash', () => {
     expect(parseHash('#/Ripasso').id).toBe('ripasso')
     expect(parseHash('#/regole').id).toBe('regole')
     expect(parseHash('#/libretto').id).toBe('libretto')
+    expect(parseHash('#/multiverso').id).toBe('multiverso')
   })
 
   it('l’elenco delle sezioni è in ordine', () => {
-    expect([...ROUTES]).toEqual(['oggi', 'agenda', 'briefing', 'libretto', 'statistiche', 'ripasso', 'dattilografia', 'dati', 'regole'])
+    expect([...ROUTES]).toEqual(['oggi', 'agenda', 'briefing', 'libretto', 'statistiche', 'ripasso', 'dattilografia', 'dati', 'regole', 'multiverso'])
   })
 
   it('torna a Oggi per hash vuoti o sconosciuti', () => {

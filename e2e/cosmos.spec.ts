@@ -82,7 +82,7 @@ test('gli elenchi per i lettori di schermo ci sono tutti', async ({ page }, test
   await expect(page.locator('[data-moon][data-lode="true"]')).toHaveCount(1)
 })
 
-test('toccare una cometa porta al libretto (per ora), con un\'area di almeno 44 px', async ({ page }, testInfo) => {
+test('toccare una cometa porta al Multiverso, con un\'area di almeno 44 px', async ({ page }, testInfo) => {
   await importDemo(page, testInfo, today)
   await page.goto('/#/oggi')
   const hit = page.locator('[data-comet] .cosmos__hit').first()
@@ -90,7 +90,7 @@ test('toccare una cometa porta al libretto (per ora), con un\'area di almeno 44 
   // l'ingresso della copertina scala il buco nero: si misura a entrata finita
   await expect.poll(async () => (await hit.boundingBox())?.width ?? 0, { timeout: 5000 }).toBeGreaterThanOrEqual(43.5)
   await hit.dispatchEvent('click')
-  await expect(page).toHaveURL(/#\/libretto/)
+  await expect(page).toHaveURL(/#\/multiverso/)
 })
 
 test('la cattura si anima una volta sola e poi la voce sparisce', async ({ page }, testInfo) => {
@@ -180,22 +180,28 @@ for (const vp of [
       expect(hits.outside).toEqual([])
     })
 
-    test('le etichette dell’orbita non si sovrappongono', async ({ page }, testInfo) => {
+    test('le etichette dell’orbita non si sovrappongono, a ogni ora', async ({ page }, testInfo) => {
       await importDemo(page, testInfo, today)
-      await page.goto('/#/oggi')
-      await page.waitForTimeout(1500)
-      const overlaps = await page.evaluate(() => {
-        const els = [...document.querySelectorAll('.orbit--planets text')].map((e) => ({ t: e.textContent, r: e.getBoundingClientRect() }))
-        const out: string[] = []
-        for (let i = 0; i < els.length; i++)
-          for (let j = i + 1; j < els.length; j++) {
-            const a = els[i]!.r
-            const b = els[j]!.r
-            if (a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top) out.push(`${els[i]!.t} / ${els[j]!.t}`)
-          }
-        return out
-      })
-      expect(overlaps).toEqual([])
+      for (const [h, m] of [[8, 30], [10, 22], [12, 45], [15, 50], [18, 40]] as const) {
+        const at = new Date()
+        at.setHours(h, m, 0, 0)
+        await page.clock.setFixedTime(at)
+        await page.goto('/#/oggi')
+        await page.reload()
+        await page.waitForTimeout(1500)
+        const overlaps = await page.evaluate(() => {
+          const els = [...document.querySelectorAll('.orbit--planets text')].map((e) => ({ t: e.textContent, r: e.getBoundingClientRect() }))
+          const out: string[] = []
+          for (let i = 0; i < els.length; i++)
+            for (let j = i + 1; j < els.length; j++) {
+              const a = els[i]!.r
+              const b = els[j]!.r
+              if (a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top) out.push(`${els[i]!.t} / ${els[j]!.t}`)
+            }
+          return out
+        })
+        expect(overlaps, `alle ${h}:${m}`).toEqual([])
+      }
     })
   })
 }

@@ -24,6 +24,15 @@ export interface GraduationSettings {
   formula: GraduationFormula
 }
 
+/** Soglie del Multiverso. Passare da normalizeMultiverse (src/multiverse/scenario.ts). */
+export interface MultiverseParams {
+  /** Due esami a meno di (o esattamente) questi giorni l'uno dall'altro sono troppo vicini. */
+  closeDays: number
+  /** Giorni tra l'ultimo esame e la laurea possibile. */
+  finalGapDays: number
+}
+export const DEFAULT_MULTIVERSE: MultiverseParams = { closeDays: 5, finalGapDays: 60 }
+
 /** Le impostazioni conosciute, con il loro tipo e il valore predefinito. */
 export interface SettingValues {
   newCardsPerDay: number
@@ -42,6 +51,7 @@ export interface SettingValues {
   graduation: GraduationSettings
   /** Voti appena presi in attesa dell'animazione di cattura. Passare da normalizePendingCaptures. */
   pendingCaptures: PendingCapture[]
+  multiverse: MultiverseParams
 }
 
 export const SETTING_DEFAULTS: SettingValues = {
@@ -55,6 +65,7 @@ export const SETTING_DEFAULTS: SettingValues = {
   studyBlock: DEFAULT_STUDY_BLOCK,
   graduation: DEFAULT_GRADUATION,
   pendingCaptures: [],
+  multiverse: DEFAULT_MULTIVERSE,
 }
 
 export async function getSetting<K extends keyof SettingValues>(db: OrbitaDB, key: K): Promise<SettingValues[K]> {

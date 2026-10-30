@@ -19,7 +19,7 @@ export const NAV_ITEMS: { id: RouteId }[] = [
 ]
 
 // La schermata Regole si apre dal Briefing: in barra resta acceso Briefing.
-const PARENT: Partial<Record<RouteId, RouteId>> = { regole: 'briefing' }
+const PARENT: Partial<Record<RouteId, RouteId>> = { regole: 'briefing', multiverso: 'libretto' }
 
 interface NavProps {
   current: RouteId

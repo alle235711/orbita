@@ -179,7 +179,7 @@
     align-items: start;
   }
 
-  .lib__main > .lib__sim {
+  .lib__main > .lib__aside {
     grid-column: 2;
     grid-row: 1 / span 3;
     position: sticky;
@@ -198,6 +198,59 @@
   .lib__add-wide {
     display: block;
   }
+}
+
+.lib__aside {
+  display: grid;
+  gap: 16px;
+}
+
+/* ——— link al Multiverso ——— */
+
+.lib__multi {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  min-height: var(--tap);
+  padding: 16px 18px;
+  background: var(--panel);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-xl);
+  color: var(--text);
+  text-decoration: none;
+  transition:
+    border-color 0.2s ease,
+    transform 160ms var(--ease-ui);
+}
+
+.lib__multi:active {
+  transform: scale(0.985);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .lib__multi:hover {
+    border-color: var(--line-3);
+  }
+}
+
+.lib__multi-text {
+  display: grid;
+  gap: 2px;
+}
+
+.lib__multi-text strong {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.lib__multi-text span {
+  font-size: var(--fs-small);
+  color: var(--text-2);
+}
+
+.lib__multi-go {
+  color: var(--text-2);
 }
 
 /* ——— simulatore ——— */

@@ -228,7 +228,35 @@ export function demoBackup(today, { deckIds = [] } = {}) {
       deadlineDay: 4,
       updatedAt: stamp,
     },
+    // Per il Multiverso: un secondo periodo, più lontano.
+    { id: 'demo-periodo-mv', title: 'Stage Fittizio', kind: 'periodo', date: shift(today, 55), endDate: shift(today, 70), updatedAt: stamp },
   ]
+
+  // Il Multiverso: gli appelli possibili dei cinque esami aperti e tre universi già composti.
+  // Le date sono offset da oggi (mai creati dall'app da sola); un esame ha solo i mesi.
+  const month = (n) => shift(today, n).slice(0, 7)
+  const sittings = {
+    [courses[0].id]: [shift(today, 9), shift(today, 30)],
+    [courses[1].id]: [shift(today, 24), shift(today, 45)],
+    [courses[4].id]: [shift(today, 26), shift(today, 38), shift(today, 60)],
+    [courses[2].id]: [shift(today, 52), shift(today, 66)],
+    [courses[3].id]: [month(75), month(110)],
+  }
+  const appelli = []
+  const sittingId = {}
+  courses.forEach((c, ci) =>
+    (sittings[c.id] ?? []).forEach((date, k) => {
+      const ap = { id: `demo-ap-${ci + 1}-${k + 1}`, courseId: c.id, date, updatedAt: stamp }
+      sittingId[`${c.id}@${date}`] = ap.id
+      appelli.push(ap)
+    }),
+  )
+  const pick = (spec) => Object.fromEntries(Object.entries(spec).map(([ci, date]) => [courses[ci].id, sittingId[`${courses[ci].id}@${date}`]]))
+  const universes = [
+    { id: 'demo-uni-1', name: 'Subito', order: 0, grades: {}, picks: pick({ 0: shift(today, 9), 1: shift(today, 24), 4: shift(today, 26), 2: shift(today, 52), 3: month(75) }) },
+    { id: 'demo-uni-2', name: 'Equilibrato', order: 1, grades: { [courses[1].id]: 30 }, picks: pick({ 0: shift(today, 9), 1: shift(today, 24), 4: shift(today, 38), 2: shift(today, 52), 3: month(110) }) },
+    { id: 'demo-uni-3', name: 'Tranquillo', order: 2, grades: {}, picks: pick({ 0: shift(today, 30), 1: shift(today, 45), 4: shift(today, 60), 2: shift(today, 66), 3: month(110) }) },
+  ].map((u) => ({ ...u, updatedAt: stamp }))
 
   const modules = {
     sport: {
@@ -259,6 +287,6 @@ export function demoBackup(today, { deckIds = [] } = {}) {
     app: 'orbita',
     format: 2,
     exportedAt: new Date().toISOString(),
-    tables: { days, sessions, workouts, weights, events, tasks, courses: [...courses, ...passedCourses], results, deadlines, cards, cardState, cardReviews, typingRuns, settings },
+    tables: { days, sessions, workouts, weights, events, tasks, courses: [...courses, ...passedCourses], results, appelli, universes, deadlines, cards, cardState, cardReviews, typingRuns, settings },
   }
 }

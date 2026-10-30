@@ -36,8 +36,8 @@ let introPlayed = false
 
 const WIDE = 860
 
-/** Dove porta il tocco su una cometa (il Multiverso arriva con la sezione E: per ora il Libretto). */
-const COMET_TARGET = '#/libretto'
+/** Dove porta il tocco su una cometa: il Multiverso degli appelli. */
+const COMET_TARGET = '#/multiverso'
 /** Lato minimo dell'area di tocco di una testa, in pixel. */
 const HIT_SIZE = 44
 

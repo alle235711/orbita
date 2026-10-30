@@ -7,6 +7,7 @@ const titles: Record<RouteId, string> = {
   briefing: 'Briefing',
   libretto: 'Libretto',
   regole: 'Regole',
+  multiverso: 'Multiverso',
   statistiche: 'Statistiche',
   ripasso: 'Ripasso',
   dattilografia: 'Dattilografia',

@@ -6,7 +6,7 @@ export type OrbitaDB = Dexie & { [K in TableName]: EntityTable<Tables[K], 'id'> 
 
 // Indici: solo i campi su cui si filtra. I booleani non sono chiavi valide
 // in IndexedDB, quindi `done`, `suggested` e simili non sono indicizzati.
-export const SCHEMA_V1: Record<Exclude<TableName, 'results'>, string> = {
+export const SCHEMA_V1: Record<Exclude<TableName, 'results' | 'appelli' | 'universes'>, string> = {
   days: 'id, updatedAt',
   sessions: 'id, date, type, courseId, updatedAt',
   workouts: 'id, date, type, updatedAt',
@@ -26,6 +26,12 @@ export const SCHEMA_V1: Record<Exclude<TableName, 'results'>, string> = {
 /** Versione 3: solo la tabella dei risultati d'esame; non c'è nulla da trasformare. */
 export const SCHEMA_V3_DELTA = { results: 'id, courseId, date, updatedAt' } as const
 
+/** Versione 4: appelli e universi del Multiverso; nuove tabelle, niente da trasformare. */
+export const SCHEMA_V4_DELTA = {
+  appelli: 'id, courseId, date, updatedAt',
+  universes: 'id, order, updatedAt',
+} as const
+
 export function createDb(name = 'orbita'): OrbitaDB {
   const db = new Dexie(name) as OrbitaDB
   db.version(1).stores(SCHEMA_V1)
@@ -44,6 +50,7 @@ export function createDb(name = 'orbita'): OrbitaDB {
       }
     })
   db.version(3).stores(SCHEMA_V3_DELTA)
+  db.version(4).stores(SCHEMA_V4_DELTA)
   // Una scheda rimasta aperta con la versione vecchia deve lasciare la
   // connessione, altrimenti un'altra scheda non può aggiornare il database.
   db.on('versionchange', () => {

@@ -34,6 +34,8 @@ const SCREENS: Screen[] = [
   { name: 'briefing', hash: '#/briefing', full: true },
   { name: 'libretto', hash: '#/libretto', full: true },
   { name: 'libretto-voto', hash: '#/libretto', click: /registra un voto|record a result/i },
+  { name: 'multiverso', hash: '#/multiverso', full: true },
+  { name: 'multiverso-appelli', hash: '#/multiverso', click: /gli appelli|sittings/i },
   { name: 'regole', hash: '#/regole', full: true },
   { name: 'statistiche', hash: '#/statistiche', full: true },
   { name: 'ripasso', hash: '#/ripasso?materia=demo-c-1', type: 'Il periodo di un pendolo semplice dipende dalla lunghezza' },

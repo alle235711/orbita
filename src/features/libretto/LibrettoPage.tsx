@@ -1,7 +1,9 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Page } from '../../app/Page'
+import { href } from '../../app/router'
 import { BlackHole } from '../../art/BlackHole'
+import { starPoints } from '../../multiverse/sky'
 import { Grain, Sky } from '../../art/Sky'
 import { db } from '../../db/db'
 import { useCourses, useGraduation, useProfile, useResults, useTargetAverage } from '../../db/hooks'
@@ -52,7 +54,10 @@ export default function LibrettoPage() {
 
       <div className="lib__body">
         <div className="lib__main">
-          <Simulator book={book} target={target} />
+          <div className="lib__aside">
+            <Simulator book={book} target={target} />
+            <MultiverseLink />
+          </div>
           <div className="lib__add-mobile">{addButton}</div>
           <PassedList rows={book?.passed ?? []} onEdit={(r) => setSheet({ editing: r })} header={<div className="lib__add-wide">{addButton}</div>} />
           <AttemptList rows={book?.attempts ?? []} onEdit={(r) => setSheet({ editing: r })} />
@@ -62,6 +67,30 @@ export default function LibrettoPage() {
       <ResultSheet open={!!sheet} editing={sheet?.editing} onClose={() => setSheet(null)} />
       <FormulaSheet open={formulaOpen} book={book} onClose={() => setFormulaOpen(false)} />
     </Page>
+  )
+}
+
+/** Porta al Multiverso degli appelli: il confronto dei futuri possibili. */
+function MultiverseLink() {
+  const { t } = useI18n()
+  const tm = t.libretto.multiverse
+  return (
+    <a className="lib__multi" href={href('multiverso')}>
+      <svg className="lib__multi-art" width="64" height="44" viewBox="0 0 64 44" aria-hidden="true" focusable="false">
+        <path d="M6 36 Q20 6 40 18" fill="none" stroke="var(--error)" strokeWidth="1.6" strokeLinecap="round" strokeDasharray="3 3" />
+        <path d="M4 30 L22 24 L22 28 Z" fill="var(--disk)" fillOpacity="0.7" />
+        <circle cx="24" cy="26" r="3.4" fill="#fff" />
+        <circle cx="40" cy="18" r="3" fill="#fff" />
+        <polygon points={starPoints(54, 12, 6)} fill="var(--cue)" />
+      </svg>
+      <span className="lib__multi-text">
+        <strong>{tm.title}</strong>
+        <span>{tm.hint}</span>
+      </span>
+      <svg className="lib__multi-go" width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
+        <path d="M5 2.5L9.5 7 5 11.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </a>
   )
 }
 

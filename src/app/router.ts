@@ -13,6 +13,7 @@ export const ROUTES = [
   'dattilografia',
   'dati',
   'regole',
+  'multiverso',
 ] as const
 
 export type RouteId = (typeof ROUTES)[number]

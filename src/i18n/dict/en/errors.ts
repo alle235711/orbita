@@ -24,5 +24,19 @@ export const errors = {
     }
     return m[`${p.field}.${p.code}`] ?? 'Check the data you entered.'
   },
+  backupAppelloRow: () => 'A sitting in the backup is not valid.',
+  backupUniverseRow: () => 'A universe in the backup is not valid.',
+  appelloInvalid: (p: { field: string; code: string }) => {
+    const m: Record<string, string> = {
+      'course.required': 'Choose the exam.',
+      'course.invalid': 'That exam no longer exists.',
+      'date.required': 'Enter the date or the month.',
+      'date.invalid': 'The date is not valid.',
+      'date.duplicate': 'This sitting already exists.',
+    }
+    return m[`${p.field}.${p.code}`] ?? 'Check the data you entered.'
+  },
+  universeLimit: () => 'At most four universes.',
+  universeMin: () => 'You need at least two to compare them.',
   generic: () => 'Something went wrong.',
 }

@@ -101,5 +101,6 @@ export const libretto = {
     max: (p: { n: number }) => `At most ${p.n} bonuses.`,
     invalid: (p: { min: number; max: number }) => `Enter a number from ${p.min} to ${p.max}.`,
   },
+  multiverse: { title: 'Exam multiverse', hint: 'Compare the possible sittings, exam by exam.' },
   toast: { saved: 'Grade saved.', deleted: 'Result deleted.' },
 }

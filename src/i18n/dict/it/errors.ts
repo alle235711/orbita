@@ -24,5 +24,19 @@ export const errors = {
     }
     return m[`${p.field}.${p.code}`] ?? 'Controlla i dati inseriti.'
   },
+  backupAppelloRow: () => 'Un appello del backup non è valido.',
+  backupUniverseRow: () => 'Un universo del backup non è valido.',
+  appelloInvalid: (p: { field: string; code: string }) => {
+    const m: Record<string, string> = {
+      'course.required': 'Scegli l’esame.',
+      'course.invalid': 'Questo esame non c’è più.',
+      'date.required': 'Inserisci la data o il mese.',
+      'date.invalid': 'La data non è valida.',
+      'date.duplicate': 'Questo appello c’è già.',
+    }
+    return m[`${p.field}.${p.code}`] ?? 'Controlla i dati inseriti.'
+  },
+  universeLimit: () => 'Al massimo quattro universi.',
+  universeMin: () => 'Ne servono almeno due per confrontarli.',
   generic: () => 'Qualcosa non ha funzionato.',
 }

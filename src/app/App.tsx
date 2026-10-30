@@ -19,6 +19,7 @@ const PAGES: Record<RouteId, LazyExoticComponent<ComponentType>> = {
   briefing: lazy(() => import('../features/briefing/BriefingPage')),
   libretto: lazy(() => import('../features/libretto/LibrettoPage')),
   regole: lazy(() => import('../features/regole/RegolePage')),
+  multiverso: lazy(() => import('../features/multiverso/MultiversoPage')),
   statistiche: lazy(() => import('../features/statistiche/StatistichePage')),
   ripasso: lazy(() => import('../features/ripasso/RipassoPage')),
   dattilografia: lazy(() => import('../features/dattilografia/DattilografiaPage')),

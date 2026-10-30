@@ -3,13 +3,14 @@ import { useMemo } from 'react'
 import type { ISODate } from '../lib/dates'
 import { db } from './db'
 import { alive } from './repo'
-import type { Course, DayRecord, Deadline, ExamResult, RuleConfig } from './schema'
+import type { Appello, Course, DayRecord, Deadline, ExamResult, RuleConfig, Universe } from './schema'
+import { normalizeMultiverse } from '../multiverse/scenario'
 import { activeCourses, normalizeGraduation, normalizeTargetAverage } from '../libretto/grades'
 import { normalizeModules, normalizeStudyBlock, type ModulesSettings, type StudyBlockSettings } from '../modules/types'
 import { DEFAULT_TUNING, resolveGroups, type Tuning } from '../rules/defaults'
 import { normalizeProfile, type Profile } from './profile'
 import { normalizePendingCaptures } from './result-actions'
-import { getSetting, type GraduationSettings, type PendingCapture, type SettingValues } from './settings'
+import { getSetting, type GraduationSettings, type MultiverseParams, type PendingCapture, type SettingValues } from './settings'
 
 const EMPTY: never[] = []
 
@@ -74,4 +75,18 @@ export function useTuning(): Tuning {
 /** Voti appena presi in attesa dell'animazione di cattura; undefined mentre carica. */
 export function usePendingCaptures(): PendingCapture[] | undefined {
   return useLiveQuery(async () => normalizePendingCaptures(await getSetting(db, 'pendingCaptures')), [])
+}
+
+export function useAppelli(): Appello[] {
+  return useLiveQuery(() => db.appelli.toArray().then(alive), [], EMPTY)
+}
+
+/** Gli universi vivi, per `order` e poi per id. */
+export function useUniverses(): Universe[] {
+  return useLiveQuery(() => db.universes.toArray().then((rows) => alive(rows).sort((a, b) => a.order - b.order || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))), [], EMPTY)
+}
+
+/** undefined mentre carica. */
+export function useMultiverseParams(): MultiverseParams | undefined {
+  return useLiveQuery(async () => normalizeMultiverse(await getSetting(db, 'multiverse')), [])
 }

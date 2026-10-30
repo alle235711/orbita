@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { useSvgIds, type SvgIds } from '../lib/useSvgIds'
 import { capturePath, captureFrame, orbitArc, polylineToPath, returnOrbit, hash01, type CaptureFrame, type CaptureSpec, type CosmosLayout, type Point } from './celestial'
 import type { CaptureItem, CometItem, CosmosModel, MoonItem } from './cosmos-model'
+import { CometGlyph } from './CometGlyph'
 import './Cosmos.css'
 
 // Comete e lune, nel sistema di coordinate dell'SVG del buco nero (figlie di
@@ -31,7 +32,7 @@ const CAPTURE_EASE: [number, number, number, number] = [0.3, 0, 0.2, 1]
 const REDUCED_FADE_SECONDS = 0.3
 
 const TAIL_MIN = 0.5
-const ORBIT_LINE = '#B9C7EE'
+const ORBIT_LINE ='#B9C7EE'
 const SWING_PERIOD_MIN = 50
 const SWING_PERIOD_SPAN = 40
 
@@ -66,31 +67,11 @@ function Defs({ ids }: { ids: SvgIds }) {
   )
 }
 
-/** Coda e nucleo, con la punta lontana dal buco lungo `angle`. */
-export function Tail({ ids, width, length, angle }: { ids: SvgIds; width: number; length: number; angle: number }) {
-  if (length <= TAIL_MIN) return null
-  return (
-    <g transform={`rotate(${angle})`}>
-      <polygon points={`0,${-width} 1,0 0,${width}`} transform={`scale(${length} 1)`} fill={ids.url('tail')} />
-      <polygon points={`0,${-width / 3} 1,0 0,${width / 3}`} transform={`scale(${length * 0.8} 1)`} fill={ids.url('core')} />
-    </g>
-  )
-}
-
 function Comet({ c, ids, layout, hitRadius, onTap }: { c: CometItem; ids: SvgIds; layout: CosmosLayout; hitRadius: number; onTap?: (id: string) => void }) {
   const h = layout.comets.headRadius
   return (
     <g data-comet={c.courseId} data-periodic={c.periodic ? 'true' : undefined} transform={`translate(${c.x} ${c.y})`}>
-      <Tail ids={ids} width={layout.comets.tailWidth} length={c.tail} angle={c.angle} />
-      <circle r={h * 2.4} fill={ids.url('halo')} />
-      {c.periodic ? (
-        <>
-          <circle r={h} fill="none" stroke="#FFFFFF" strokeWidth="1.6" />
-          <circle r={h * 0.35} fill="#FFFFFF" />
-        </>
-      ) : (
-        <circle r={h} fill="#FFFFFF" opacity="0.95" />
-      )}
+      <CometGlyph ids={ids} angle={c.angle} tail={c.tail} headRadius={h} tailWidth={layout.comets.tailWidth} periodic={c.periodic} />
       {onTap ? <circle className="cosmos__hit" r={hitRadius} onClick={() => onTap(c.courseId)} /> : null}
     </g>
   )

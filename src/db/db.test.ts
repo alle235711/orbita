@@ -6,7 +6,7 @@ import { renderError } from '../i18n/errors'
 import { i18nFor } from '../i18n'
 import { exportAll, importBackup, parseBackup, BackupError } from './backup'
 import { exportCards, importCards, parseContentFile, ImportError } from './cards-io'
-import { createDb, SCHEMA_V1, type OrbitaDB } from './db'
+import { createDb, SCHEMA_V1, SCHEMA_V3_DELTA, type OrbitaDB } from './db'
 import { migrateToV2, V2_INPUT_TABLES, type RawTables } from './migrations/v2'
 import { v1Fixture } from '../test/fixtures'
 import { ensureCards, initDb } from './init'
@@ -206,8 +206,9 @@ describe('aggiornamento di Dexie dalla versione 1 alla 2', () => {
     const upgraded = createDb(name)
     try {
       await upgraded.open()
-      expect(upgraded.verno).toBe(3)
+      expect(upgraded.verno).toBe(4)
       expect(await upgraded.results.count()).toBe(0)
+      expect(await upgraded.appelli.count()).toBe(0)
       const expected = migrateToV2(fixture)
       for (const t of V2_INPUT_TABLES) expect(sorted(await upgraded.table(t).toArray()), t).toEqual(sorted(expected[t]!))
       expect(await upgraded.table('rules').get('lean')).toBeUndefined()
@@ -244,7 +245,7 @@ describe('aggiornamento di Dexie dalla versione 1 alla 2', () => {
     const upgraded = createDb(name)
     try {
       await upgraded.open()
-      expect(upgraded.verno).toBe(3)
+      expect(upgraded.verno).toBe(4)
       expect(await getSetting(upgraded, 'newCardsPerDay')).toBe(7)
       expect(upgraded.results.schema.idxByName.courseId).toBeDefined()
       expect(upgraded.results.schema.idxByName.date).toBeDefined()
@@ -254,10 +255,37 @@ describe('aggiornamento di Dexie dalla versione 1 alla 2', () => {
     }
   })
 
-  it('un database nuovo parte direttamente dalla versione 3, vuoto', async () => {
+  it('da v3 a v4 aggiunge appelli e universi e lascia intatti i dati', async () => {
+    const name = `upgrade-${crypto.randomUUID()}`
+    const old = new Dexie(name)
+    old.version(1).stores(SCHEMA_V1)
+    old.version(2).stores(SCHEMA_V1)
+    old.version(3).stores(SCHEMA_V3_DELTA)
+    await old.table('settings').bulkPut([{ id: 'newCardsPerDay', value: 9, updatedAt: 5 }])
+    await old.table('results').bulkPut([{ id: 'r1', courseId: 'c', date: '2026-06-01', outcome: 'superato', grade: 27, updatedAt: 1 }])
+    old.close()
+    const upgraded = createDb(name)
+    try {
+      await upgraded.open()
+      expect(upgraded.verno).toBe(4)
+      expect(await getSetting(upgraded, 'newCardsPerDay')).toBe(9)
+      expect((await upgraded.results.get('r1'))?.grade).toBe(27)
+      expect(upgraded.appelli.schema.idxByName.courseId).toBeDefined()
+      expect(upgraded.appelli.schema.idxByName.date).toBeDefined()
+      expect(upgraded.universes.schema.idxByName.order).toBeDefined()
+      expect(await upgraded.appelli.count()).toBe(0)
+      expect(await upgraded.universes.count()).toBe(0)
+    } finally {
+      await upgraded.delete()
+    }
+  })
+
+  it('un database nuovo parte direttamente dalla versione 4, vuoto', async () => {
     await db.open()
-    expect(db.verno).toBe(3)
+    expect(db.verno).toBe(4)
     expect(await db.results.count()).toBe(0)
+    expect(await db.appelli.count()).toBe(0)
+    expect(await db.universes.count()).toBe(0)
     expect(await db.rules.count()).toBe(0)
     expect(await db.settings.count()).toBe(0)
   })

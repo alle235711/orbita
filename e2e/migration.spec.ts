@@ -10,10 +10,10 @@ test('un database della fase 1 si aggiorna e conserva i dati', async ({ page }) 
   await page.goto('/')
   await expect(page.getByRole('heading', { name: 'Completa il profilo' })).toBeVisible({ timeout: 20_000 })
 
-  // La versione è salita a 30 e le righe sono nel formato nuovo.
+  // La versione è salita a 40 e le righe sono nel formato nuovo.
   const state = await page.evaluate(
     () =>
-      new Promise<{ version: number; sessionTypes: Record<string, string>; ruleIds: string[]; deadlineIds: string[]; profile: unknown; resultsIndexes: string[] }>((resolve, reject) => {
+      new Promise<{ version: number; sessionTypes: Record<string, string>; ruleIds: string[]; deadlineIds: string[]; profile: unknown; resultsIndexes: string[]; appelliIndexes: string[]; universesIndexes: string[] }>((resolve, reject) => {
         const open = indexedDB.open('orbita')
         open.onerror = () => reject(open.error)
         open.onsuccess = () => {
@@ -27,8 +27,13 @@ test('un database della fase 1 si aggiorna e conserva i dati', async ({ page }) 
           void Promise.all([all('sessions'), all('rules'), all('deadlines'), all('settings')]).then(([sessions, rules, deadlines, settings]) => {
             const version = db.version
             const resultsIndexes = db.objectStoreNames.contains('results') ? [...db.transaction('results', 'readonly').objectStore('results').indexNames] : []
+            const indexesOf = (name: string) => (db.objectStoreNames.contains(name) ? [...db.transaction(name, 'readonly').objectStore(name).indexNames] : [])
+            const appelliIndexes = indexesOf('appelli')
+            const universesIndexes = indexesOf('universes')
             db.close()
             resolve({
+              appelliIndexes,
+              universesIndexes,
               version,
               resultsIndexes,
               sessionTypes: Object.fromEntries(sessions.map((s) => [s.id, s.type ?? ''])),
@@ -40,7 +45,9 @@ test('un database della fase 1 si aggiorna e conserva i dati', async ({ page }) 
         }
       }),
   )
-  expect(state.version).toBe(30)
+  expect(state.version).toBe(40)
+  expect(state.appelliIndexes).toEqual(expect.arrayContaining(['courseId', 'date', 'updatedAt']))
+  expect(state.universesIndexes).toEqual(expect.arrayContaining(['order', 'updatedAt']))
   expect(state.resultsIndexes).toEqual(expect.arrayContaining(['courseId', 'date', 'updatedAt']))
   expect(state.sessionTypes).toMatchObject({ s1: 'abilita', s2: 'lingua', s3: 'studio' })
   expect(state.ruleIds).toEqual(expect.arrayContaining(['abilita', 'periodo']))

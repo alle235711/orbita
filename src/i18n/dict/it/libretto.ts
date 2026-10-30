@@ -101,5 +101,6 @@ export const libretto = {
     max: (p: { n: number }) => `Al massimo ${p.n} bonus.`,
     invalid: (p: { min: number; max: number }) => `Scrivi un numero da ${p.min} a ${p.max}.`,
   },
+  multiverse: { title: 'Multiverso degli appelli', hint: 'Confronta gli appelli possibili, esame per esame.' },
   toast: { saved: 'Voto salvato.', deleted: 'Risultato eliminato.' },
 }

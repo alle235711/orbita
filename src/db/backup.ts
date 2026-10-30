@@ -1,6 +1,7 @@
 import { AppError } from '../i18n/errors'
 import { isISODate, isMonthOnly } from '../lib/dates'
 import { isRealDay, MAX_GRADE, MIN_GRADE } from '../libretto/grades'
+import { isUsableDate } from '../multiverse/scenario'
 import type { OrbitaDB } from './db'
 import { migrateToV2, V2_INPUT_TABLES, type RawRow, type RawTables } from './migrations/v2'
 import { TABLE_NAMES, type Syncable, type TableName } from './schema'
@@ -52,6 +53,8 @@ export function parseBackup(json: unknown): Backup {
         throw new BackupError('backupRecordNoId', { name })
       }
       if (name === 'results' && !validResultRow(row as unknown as Record<string, unknown>)) throw new BackupError('backupResultRow')
+      if (name === 'appelli' && !validAppelloRow(row as unknown as Record<string, unknown>)) throw new BackupError('backupAppelloRow')
+      if (name === 'universes' && !validUniverseRow(row as unknown as Record<string, unknown>)) throw new BackupError('backupUniverseRow')
     }
   }
   if (b.format <= 1) return upgradeV1(b as Backup)
@@ -68,6 +71,21 @@ function validResultRow(r: Record<string, unknown>): boolean {
   if (r.grade !== undefined && !(typeof r.grade === 'number' && Number.isInteger(r.grade) && r.grade >= MIN_GRADE && r.grade <= MAX_GRADE)) return false
   if (r.lode !== undefined && typeof r.lode !== 'boolean') return false
   return true
+}
+
+const isPlainObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v)
+
+function validAppelloRow(r: Record<string, unknown>): boolean {
+  if (typeof r.courseId !== 'string' || !r.courseId) return false
+  if (!isUsableDate(r.date)) return false
+  return r.note === undefined || typeof r.note === 'string'
+}
+
+function validUniverseRow(r: Record<string, unknown>): boolean {
+  if (typeof r.name !== 'string') return false
+  if (!isPlainObject(r.picks) || !Object.values(r.picks).every((v) => typeof v === 'string')) return false
+  if (!isPlainObject(r.grades) || !Object.values(r.grades).every((v) => typeof v === 'number' && Number.isFinite(v))) return false
+  return typeof r.order === 'number' && Number.isFinite(r.order)
 }
 
 /** Un backup di formato 1 passa dalla stessa trasformazione dell'aggiornamento di Dexie. */
