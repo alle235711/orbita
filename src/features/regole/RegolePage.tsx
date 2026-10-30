@@ -9,6 +9,7 @@ import type { RuleConfig, RuleId } from '../../db/schema'
 import { clampThreshold } from '../../rules/briefing'
 import { RULES, defaultThresholds, type RuleDefinition, type ThresholdSpec } from '../../rules/defaults'
 import '../briefing/BriefingPage.css'
+import { useFmt, useT } from '../../i18n/store'
 import './RegolePage.css'
 
 async function saveRule(id: RuleId, change: Partial<Pick<RuleConfig, 'enabled' | 'thresholds'>>) {
@@ -22,6 +23,7 @@ async function saveRule(id: RuleId, change: Partial<Pick<RuleConfig, 'enabled' |
 }
 
 export default function RegolePage() {
+  const t = useT()
   const saved = useRules()
   const byId = new Map(saved.map((r) => [r.id, r]))
   const tirocinio = useDeadlines().find((d) => d.id === 'tirocinio')
@@ -36,7 +38,7 @@ export default function RegolePage() {
     }
     await db.rules.bulkPut(RULES.map((r) => ({ id: r.id, enabled: true, thresholds: defaultThresholds(r.id), updatedAt: Date.now() })))
     setConfirmReset(false)
-    toast('Regole riportate ai valori iniziali.')
+    toast(t.regole.resetDone)
   }
 
   return (
@@ -44,13 +46,13 @@ export default function RegolePage() {
       <Sky nebula="briefing" />
       <header className="brief__head">
         <p className="brief__date">
-          <a href={href('briefing')}>Briefing</a>
+          <a href={href('briefing')}>{t.regole.back}</a>
         </p>
         <h1 id="titolo-regole" className="page__title">
-          Regole
+          {t.regole.title}
         </h1>
         <p className="page__lead">
-          Il piano di Oggi e il briefing nascono da queste nove regole. Spegnile o cambiane le soglie: valgono subito e restano su questo dispositivo.
+          {t.regole.lead}
         </p>
       </header>
 
@@ -62,7 +64,7 @@ export default function RegolePage() {
 
       <div className="rules__footer">
         <button type="button" className={`btn${confirmReset ? ' btn--danger' : ''}`} onClick={() => void reset()}>
-          {confirmReset ? 'Tocca ancora per ripristinare tutto' : 'Ripristina i valori iniziali'}
+          {confirmReset ? t.regole.resetConfirm : t.regole.reset}
         </button>
       </div>
     </Page>
@@ -70,6 +72,7 @@ export default function RegolePage() {
 }
 
 function RuleRow({ def, config, tirocinioDated }: { def: RuleDefinition; config?: RuleConfig; tirocinioDated: boolean }) {
+  const t = useT()
   const enabled = config?.enabled ?? true
   const values = { ...defaultThresholds(def.id), ...config?.thresholds }
   return (
@@ -79,7 +82,7 @@ function RuleRow({ def, config, tirocinioDated }: { def: RuleDefinition; config?
       </span>
       <div className="rule__body">
         <div className="rule__head">
-          <h2 id={`rule-${def.id}`}>{def.title}</h2>
+          <h2 id={`rule-${def.id}`}>{t.regole.rules[def.id].title}</h2>
           <button
             type="button"
             role="switch"
@@ -89,19 +92,19 @@ function RuleRow({ def, config, tirocinioDated }: { def: RuleDefinition; config?
             onClick={() => void saveRule(def.id, { enabled: !enabled })}
           >
             <span className="switch__thumb" />
-            <span className="switch__text">{enabled ? 'Attiva' : 'Spenta'}</span>
+            <span className="switch__text">{enabled ? t.regole.on : t.regole.off}</span>
           </button>
         </div>
-        <p className="rule__summary">{def.summary}</p>
+        <p className="rule__summary">{t.regole.rules[def.id].summary}</p>
         <div className="rule__thresholds">
           {Object.entries(def.thresholds).map(([key, spec]) => (
-            <Threshold key={key} spec={spec} value={values[key] ?? spec.value} disabled={!enabled} onCommit={(v) => void saveRule(def.id, { thresholds: { [key]: v } })} />
+            <Threshold key={key} label={t.regole.rules[def.id].thresholds[key] ?? key} spec={spec} value={values[key] ?? spec.value} disabled={!enabled} onCommit={(v) => void saveRule(def.id, { thresholds: { [key]: v } })} />
           ))}
         </div>
         {def.id === 'tirocinio' ? (
           <p className="rule__note">
-            {tirocinioDated ? 'Le date del tirocinio si cambiano in ' : 'Mancano le date del tirocinio: inseriscile in '}
-            <a href={href('dati')}>Dati</a>.
+            {tirocinioDated ? t.regole.periodDatesSet : t.regole.periodDatesMissing}
+            <a href={href('dati')}>{t.regole.datiLink}</a>.
           </p>
         ) : null}
       </div>
@@ -109,7 +112,9 @@ function RuleRow({ def, config, tirocinioDated }: { def: RuleDefinition; config?
   )
 }
 
-function Threshold({ spec, value, disabled, onCommit }: { spec: ThresholdSpec; value: number; disabled: boolean; onCommit: (v: number) => void }) {
+function Threshold({ label, spec, value, disabled, onCommit }: { label: string; spec: ThresholdSpec; value: number; disabled: boolean; onCommit: (v: number) => void }) {
+  const t = useT()
+  const f = useFmt()
   const [text, setText] = useState(String(value).replace('.', ','))
   useEffect(() => setText(String(value).replace('.', ',')), [value])
   const commit = () => {
@@ -119,7 +124,7 @@ function Threshold({ spec, value, disabled, onCommit }: { spec: ThresholdSpec; v
   }
   return (
     <label className="threshold">
-      <span className="threshold__label">{spec.label}</span>
+      <span className="threshold__label">{label}</span>
       <span className="threshold__input">
         <input
           className="field"
@@ -130,10 +135,10 @@ function Threshold({ spec, value, disabled, onCommit }: { spec: ThresholdSpec; v
           onBlur={commit}
           onKeyDown={(e) => e.key === 'Enter' && commit()}
         />
-        {spec.unit ? <span className="threshold__unit">{spec.unit}</span> : null}
+        {spec.unit ? <span className="threshold__unit">{t.regole.units[spec.unit]}</span> : null}
       </span>
       <span className="threshold__range">
-        da {String(spec.min).replace('.', ',')} a {String(spec.max).replace('.', ',')}
+        {t.regole.range({ min: spec.min, max: spec.max }, f)}
       </span>
     </label>
   )

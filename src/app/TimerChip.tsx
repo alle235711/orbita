@@ -1,8 +1,10 @@
+import { useT } from '../i18n/store'
 import { formatElapsed, stopTimer, useActiveTimer, useElapsed } from './timer'
 import './TimerChip.css'
 
 /** Il timer in corso, visibile in barra da tutte le schermate. */
 export function TimerChip() {
+  const t = useT()
   const timer = useActiveTimer()
   const elapsed = useElapsed(timer?.startedAt)
   if (!timer) return null
@@ -11,7 +13,7 @@ export function TimerChip() {
       type="button"
       className="timer-chip press"
       onClick={() => void stopTimer()}
-      aria-label={`${timer.title}, in corso da ${formatElapsed(elapsed)}. Ferma e salva.`}
+      aria-label={t.app.timerChip({ title: timer.title, elapsed: formatElapsed(elapsed) })}
     >
       <span className="timer-chip__dot" aria-hidden="true" />
       <span className="timer-chip__title">{timer.title}</span>

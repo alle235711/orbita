@@ -3,10 +3,9 @@
 // ogni segno nel suo <title> e i numeri tutti nella tabella sotto.
 
 import type { ReactNode } from 'react'
-import { formatDecimal, formatShort, type ISODate } from '../../lib/dates'
+import { useI18n, useT } from '../../i18n/store'
+import type { ISODate } from '../../lib/dates'
 import { useElementWidth } from '../../lib/useElementWidth'
-
-const h = (n: number) => `${formatDecimal(n)} h`
 
 // ——— ore al giorno: lecca-lecca con la linea delle 8 ore ———
 
@@ -17,6 +16,8 @@ export interface LollipopDatum {
 }
 
 export function Lollipops({ data, today, target, height = 170 }: { data: LollipopDatum[]; today: ISODate; target: number; height?: number }) {
+  const { t, f } = useI18n()
+  const h = (n: number) => t.stats.hours({ n }, f)
   const [ref, width] = useElementWidth<HTMLDivElement>()
   const max = Math.max(target * 1.25, ...data.map((d) => d.value), 1)
   const top = 12
@@ -26,7 +27,7 @@ export function Lollipops({ data, today, target, height = 170 }: { data: Lollipo
   return (
     <div ref={ref} className="chart">
       {width ? (
-        <svg width={width} height={height + 22} viewBox={`0 0 ${width} ${height + 22}`} role="img" aria-label={`Ore al giorno, ${data.length} giorni, obiettivo ${h(target)}.`}>
+        <svg width={width} height={height + 22} viewBox={`0 0 ${width} ${height + 22}`} role="img" aria-label={t.stats.lollipopsAria({ days: data.length, target }, f)}>
           <line x1="0" x2={width} y1={height} y2={height} className="chart__axis" />
           <line x1="0" x2={width - 34} y1={y(target)} y2={y(target)} className="chart__target" />
           <text x={width} y={y(target) + 4} textAnchor="end" className="chart__target-label">
@@ -45,7 +46,7 @@ export function Lollipops({ data, today, target, height = 170 }: { data: Lollipo
                 <circle cx={cx} cy={y(d.value)} r={isToday ? 4 : 5} className="lollipop__dot" />
                 {i % every === 0 || isToday ? (
                   <text x={cx} y={height + 17} textAnchor="middle" className={`chart__tick${isToday ? ' chart__tick--today' : ''}`}>
-                    {isToday ? 'oggi' : Number(d.date.slice(8))}
+                    {isToday ? t.stats.todayTick : Number(d.date.slice(8))}
                   </text>
                 ) : null}
               </g>
@@ -94,6 +95,7 @@ export interface StripRow {
 }
 
 export function Strips({ rows, days }: { rows: StripRow[]; days: ISODate[] }) {
+  const { t, f } = useI18n()
   const [ref, width] = useElementWidth<HTMLDivElement>()
   const index = new Map(days.map((d, i) => [d, i]))
   const slot = width / Math.max(1, days.length)
@@ -108,7 +110,7 @@ export function Strips({ rows, days }: { rows: StripRow[]; days: ISODate[] }) {
                 <line x1="0" x2={width} y1="12" y2="12" className="chart__axis" />
                 {row.dates.map((d, i) => (
                   <circle key={`${d}-${i}`} cx={slot * (index.get(d) ?? 0) + slot / 2} cy="12" r="5" className={`strips__dot strips__dot--${row.id}`}>
-                    <title>{`${row.label}, ${formatShort(d)}`}</title>
+                    <title>{t.stats.stripPoint({ label: row.label, date: d }, f)}</title>
                   </circle>
                 ))}
               </svg>
@@ -141,6 +143,7 @@ interface LineChartProps {
 }
 
 export function LineChart({ points, days, format, label, height = 120, minSpan = 1, domain }: LineChartProps) {
+  const { t, f } = useI18n()
   const [ref, width] = useElementWidth<HTMLDivElement>()
   const index = new Map(days.map((d, i) => [d, i]))
   const values = points.map((p) => p.value)
@@ -177,14 +180,14 @@ export function LineChart({ points, days, format, label, height = 120, minSpan =
             </circle>
           ))}
           <text x={0} y={height + 16} className="chart__tick">
-            {formatShort(days[0]!)}
+            {f.dateShort(days[0]!)}
           </text>
           <text x={width - padR} y={height + 16} textAnchor="end" className="chart__tick">
-            {formatShort(days.at(-1)!)}
+            {f.dateShort(days.at(-1)!)}
           </text>
         </svg>
       ) : (
-        <p className="chart__empty">{points.length ? '' : 'Nessun dato nel periodo.'}</p>
+        <p className="chart__empty">{points.length ? '' : t.stats.noData}</p>
       )}
     </div>
   )
@@ -193,6 +196,7 @@ export function LineChart({ points, days, format, label, height = 120, minSpan =
 // ——— colonne sottili ———
 
 export function Columns({ data, days, format, label, height = 90 }: { data: LinePoint[]; days: ISODate[]; format: (v: number) => string; label: string; height?: number }) {
+  const f = useI18n().f
   const [ref, width] = useElementWidth<HTMLDivElement>()
   const index = new Map(days.map((d, i) => [d, i]))
   const max = Math.max(1, ...data.map((d) => d.value))
@@ -223,10 +227,10 @@ export function Columns({ data, days, format, label, height = 90 }: { data: Line
             {format(max)}
           </text>
           <text x={0} y={height + 16} className="chart__tick">
-            {formatShort(days[0]!)}
+            {f.dateShort(days[0]!)}
           </text>
           <text x={width} y={height + 16} textAnchor="end" className="chart__tick">
-            {formatShort(days.at(-1)!)}
+            {f.dateShort(days.at(-1)!)}
           </text>
         </svg>
       ) : null}
@@ -236,10 +240,11 @@ export function Columns({ data, days, format, label, height = 90 }: { data: Line
 
 /** La tabella con tutti i numeri, chiusa di predefinito. */
 export function DataTable({ caption, head, rows }: { caption: string; head: string[]; rows: ReactNode[][] }) {
+  const t = useT()
   if (!rows.length) return null
   return (
     <details className="datatable">
-      <summary>Vedi i dati</summary>
+      <summary>{t.stats.seeData}</summary>
       <table>
         <caption className="sr-only">{caption}</caption>
         <thead>

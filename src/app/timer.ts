@@ -4,8 +4,9 @@ import { db } from '../db/db'
 import { useSetting } from '../db/hooks'
 import { getSetting, setSetting, type ActiveTimer } from '../db/settings'
 import type { SessionType, WorkoutType } from '../db/schema'
-import { formatMinutes, todayISO, toHHMM } from '../lib/dates'
-import type { PlanItem } from '../rules/types'
+import { getI18n } from '../i18n/store'
+import { todayISO, toHHMM } from '../lib/dates'
+import type { RenderedItem } from '../i18n/render'
 import { toast } from './toast'
 
 // Il timer di sessione avviato dal sommario di Oggi. Sta nelle impostazioni,
@@ -13,7 +14,7 @@ import { toast } from './toast'
 
 const WORKOUTS: string[] = ['arrampicata', 'corsa', 'palestra']
 
-export function timerFor(item: PlanItem): ActiveTimer {
+export function timerFor(item: RenderedItem): ActiveTimer {
   return {
     key: item.key,
     title: item.title,
@@ -28,28 +29,29 @@ export function timerFor(item: PlanItem): ActiveTimer {
 export async function stopTimer(): Promise<void> {
   const timer = await getSetting(db, 'activeTimer')
   if (!timer) return
+  const { t, f } = getI18n()
   await setSetting(db, 'activeTimer', null)
   const minutes = Math.round((Date.now() - timer.startedAt) / 60_000)
   if (minutes < 1) {
-    toast(`${timer.title}: meno di un minuto, non l’ho salvata.`)
+    toast(t.app.timer.tooShort({ title: timer.title }))
     return
   }
   const started = new Date(timer.startedAt)
   const date = todayISO(started)
   const start = toHHMM(started.getHours() * 60 + started.getMinutes())
   if (timer.type === 'camminata') {
-    toast(`Camminata di ${formatMinutes(minutes)} finita.`)
+    toast(t.app.timer.walkDone({ minutes }, f))
   } else if (timer.kind === 'workout') {
     await logWorkout({ date, start, minutes, type: timer.type as WorkoutType })
-    toast(`Salvati ${formatMinutes(minutes)} di ${timer.title.toLowerCase()}.`)
+    toast(t.app.timer.savedWorkout({ minutes, title: timer.title }, f))
   } else {
     await logSession({ date, start, minutes, type: timer.type as SessionType, courseId: timer.courseId })
-    toast(`Salvati ${formatMinutes(minutes)}: ${timer.title}.`)
+    toast(t.app.timer.savedSession({ minutes, title: timer.title }, f))
   }
 }
 
 /** Avvia una voce del piano; se ne stava andando un'altra, prima la salva. */
-export async function startTimer(item: PlanItem): Promise<void> {
+export async function startTimer(item: RenderedItem): Promise<void> {
   const current = await getSetting(db, 'activeTimer')
   if (current?.key === item.key) return stopTimer()
   if (current) await stopTimer()

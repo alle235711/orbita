@@ -1,6 +1,8 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useRef, type ComponentType, type LazyExoticComponent } from 'react'
 import { MotionConfig } from 'motion/react'
 import { useDay } from '../db/hooks'
+import { LangSync } from '../i18n/LangSync'
+import { useLang, useT } from '../i18n/store'
 import { DEFAULT_ENERGY } from '../lib/energy'
 import { applyDisk } from './disk'
 import { Nav } from './Nav'
@@ -20,22 +22,13 @@ const PAGES: Record<RouteId, LazyExoticComponent<ComponentType>> = {
   dati: lazy(() => import('../features/dati/DatiPage')),
 }
 
-const TITLES: Record<RouteId, string> = {
-  oggi: 'Oggi',
-  agenda: 'Agenda',
-  briefing: 'Briefing',
-  regole: 'Regole',
-  statistiche: 'Statistiche',
-  ripasso: 'Ripasso',
-  dattilografia: 'Dattilografia',
-  dati: 'Dati',
-}
-
 /** Ripasso e Dattilografia stanno sulla lavagna; il resto nello spazio. */
 const SLATE: RouteId[] = ['ripasso', 'dattilografia']
 
 export function App() {
   const route = useRoute()
+  const t = useT()
+  const lang = useLang()
   const Current = PAGES[route.id]
   const first = useRef(true)
   const today = useDay(useToday())
@@ -45,8 +38,8 @@ export function App() {
 
   useLayoutEffect(() => {
     document.documentElement.dataset.surface = SLATE.includes(route.id) ? 'slate' : 'space'
-    document.title = route.id === 'oggi' ? 'Orbita' : `${TITLES[route.id]} · Orbita`
-  }, [route.id])
+    document.title = route.id === 'oggi' ? 'Orbita' : `${t.app.titles[route.id]} · Orbita`
+  }, [route.id, lang, t])
 
   // Cambiando sezione si riparte dall'alto e il focus va al contenuto.
   useEffect(() => {
@@ -60,11 +53,12 @@ export function App() {
 
   return (
     <MotionConfig reducedMotion="user">
+      <LangSync />
       <a className="skip-link" href="#main" onClick={(e) => {
         e.preventDefault()
         document.getElementById('main')?.focus()
       }}>
-        Vai al contenuto
+        {t.app.skip}
       </a>
       <Nav current={route.id} bordered={route.id !== 'oggi'} />
       <Suspense fallback={null}>

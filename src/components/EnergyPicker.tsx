@@ -1,5 +1,6 @@
 import { useRef, type KeyboardEvent } from 'react'
 import { DiskGlyph } from '../art/BlackHole'
+import { useT } from '../i18n/store'
 import { DEFAULT_ENERGY, ENERGY, ENERGY_LEVELS, type Energy } from '../lib/energy'
 import './EnergyPicker.css'
 
@@ -11,6 +12,7 @@ interface EnergyPickerProps {
 
 /** "Quanto mangia il tuo buco nero oggi?": radiogroup a cinque stati. */
 export function EnergyPicker({ value, onChange, labelledBy }: EnergyPickerProps) {
+  const t = useT()
   const refs = useRef<(HTMLButtonElement | null)[]>([])
   // Senza scelta, il tasto Tab porta sul livello mostrato di predefinito.
   const focusable = value ?? DEFAULT_ENERGY
@@ -39,7 +41,7 @@ export function EnergyPicker({ value, onChange, labelledBy }: EnergyPickerProps)
             type="button"
             role="radio"
             aria-checked={on}
-            aria-label={`${s.name}, ${s.word}`}
+            aria-label={`${s.name}, ${t.energy.word[level]}`}
             tabIndex={level === focusable ? 0 : -1}
             className="energy__option"
             style={{ ['--c' as string]: s.color }}
@@ -47,7 +49,7 @@ export function EnergyPicker({ value, onChange, labelledBy }: EnergyPickerProps)
           >
             <DiskGlyph level={level} color={on ? '#070A16' : s.color} />
             <span className="energy__name">{s.name}</span>
-            <span className="energy__word">{s.word}</span>
+            <span className="energy__word">{t.energy.word[level]}</span>
           </button>
         )
       })}

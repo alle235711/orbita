@@ -4,16 +4,10 @@ import { Sheet } from '../../components/Sheet'
 import { db } from '../../db/db'
 import { remove, save } from '../../db/repo'
 import type { CalendarEvent, Course, EventType } from '../../db/schema'
-import { formatDate, toHHMM, toMinutes, toTimeInput, withDate, type ISODate } from '../../lib/dates'
+import { useI18n } from '../../i18n/store'
+import { toHHMM, toMinutes, toTimeInput, type ISODate } from '../../lib/dates'
 
-export const EVENT_TYPES: { id: EventType; label: string }[] = [
-  { id: 'lezione', label: 'Lezione' },
-  { id: 'studio', label: 'Studio' },
-  { id: 'lavoro', label: 'Lavoro' },
-  { id: 'sport', label: 'Sport' },
-  { id: 'esame', label: 'Esame' },
-  { id: 'altro', label: 'Altro' },
-]
+export const EVENT_TYPES: EventType[] = ['lezione', 'studio', 'lavoro', 'sport', 'esame', 'altro']
 
 export type EventDraft = Partial<CalendarEvent> & { date: ISODate }
 
@@ -24,6 +18,8 @@ interface EventSheetProps {
 }
 
 export function EventSheet({ draft, courses, onClose }: EventSheetProps) {
+  const { t, f } = useI18n()
+  const ta = t.agenda
   const [title, setTitle] = useState('')
   const [date, setDate] = useState('')
   const [start, setStart] = useState('09:00')
@@ -49,8 +45,8 @@ export function EventSheet({ draft, courses, onClose }: EventSheetProps) {
     if (!draft) return
     const s = toMinutes(start)
     const en = toMinutes(end)
-    if (!title.trim()) return setError('Dai un titolo all’impegno.')
-    if (en <= s) return setError('La fine deve venire dopo l’inizio.')
+    if (!title.trim()) return setError(ta.sheet.errTitle)
+    if (en <= s) return setError(ta.sheet.errEnd)
     await save<CalendarEvent>(db.events, {
       ...draft,
       id: draft.id,
@@ -63,49 +59,49 @@ export function EventSheet({ draft, courses, onClose }: EventSheetProps) {
       suggested: draft.suggested ?? false,
       confirmed: true,
     })
-    toast(editing ? 'Impegno aggiornato.' : `Impegno aggiunto ${withDate('il', formatDate(date))}.`)
+    toast(editing ? ta.sheet.updated : ta.sheet.added({ date }, f))
     onClose()
   }
 
   const del = async () => {
     if (!draft?.id) return
     await remove(db.events, draft.id)
-    toast('Impegno tolto dall’agenda.')
+    toast(ta.sheet.removed)
     onClose()
   }
 
   return (
-    <Sheet open={!!draft} title={editing ? 'Modifica impegno' : 'Nuovo impegno'} onClose={onClose}>
+    <Sheet open={!!draft} title={editing ? ta.sheet.edit : ta.newEvent} onClose={onClose}>
       <form className="form" onSubmit={(e) => void submit(e)}>
         <label className="form-field">
-          <span>Titolo</span>
-          <input className="field" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Topologia Algebrica" autoFocus />
+          <span>{ta.sheet.title}</span>
+          <input className="field" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={ta.sheet.titlePlaceholder} autoFocus />
         </label>
-        <div className="choices" role="radiogroup" aria-label="Tipo">
-          {EVENT_TYPES.map((t) => (
-            <button key={t.id} type="button" role="radio" aria-checked={type === t.id} className="chip" onClick={() => setType(t.id)}>
-              {t.label}
+        <div className="choices" role="radiogroup" aria-label={ta.sheet.type}>
+          {EVENT_TYPES.map((id) => (
+            <button key={id} type="button" role="radio" aria-checked={type === id} className="chip" onClick={() => setType(id)}>
+              {ta.eventType[id]}
             </button>
           ))}
         </div>
         <div className="form-grid">
           <label className="form-field form-field--wide">
-            <span>Giorno</span>
+            <span>{ta.sheet.day}</span>
             <input className="field" type="date" value={date} onChange={(e) => e.target.value && setDate(e.target.value)} required />
           </label>
           <label className="form-field">
-            <span>Inizio</span>
+            <span>{ta.sheet.start}</span>
             <input className="field" type="time" step={300} value={start} onChange={(e) => setStart(e.target.value)} required />
           </label>
           <label className="form-field">
-            <span>Fine</span>
+            <span>{ta.sheet.end}</span>
             <input className="field" type="time" step={300} value={end} onChange={(e) => setEnd(e.target.value)} required />
           </label>
           {type === 'lezione' || type === 'studio' || type === 'esame' ? (
             <label className="form-field form-field--wide">
-              <span>Corso</span>
+              <span>{ta.sheet.course}</span>
               <select className="field" value={courseId} onChange={(e) => setCourseId(e.target.value)}>
-                <option value="">Nessuno</option>
+                <option value="">{ta.sheet.noCourse}</option>
                 {courses.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -121,15 +117,15 @@ export function EventSheet({ draft, courses, onClose }: EventSheetProps) {
         <div className="sheet-actions">
           {editing ? (
             <button type="button" className="btn btn--danger" onClick={() => void del()}>
-              Elimina
+              {ta.sheet.delete}
             </button>
           ) : null}
           <span className="sheet-actions__spacer" />
           <button type="button" className="btn" onClick={onClose}>
-            Annulla
+            {t.common.cancel}
           </button>
           <button type="submit" className="btn btn--primary">
-            {editing ? 'Salva' : 'Aggiungi'}
+            {editing ? ta.sheet.save : ta.add}
           </button>
         </div>
       </form>

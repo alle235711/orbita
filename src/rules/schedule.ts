@@ -9,7 +9,6 @@ export interface SuggestedBlock {
   /** `${item.key}#${n}`: n parte da 1. */
   key: string
   item: PlanItem
-  title: string
   start: string
   end: string
   part: number
@@ -79,7 +78,6 @@ export function scheduleDay(items: PlanItem[], events: CalendarEvent[], options:
       blocks.push({
         key,
         item,
-        title: item.title,
         start: toHHMM(at),
         end: toHHMM(end),
         part: n,

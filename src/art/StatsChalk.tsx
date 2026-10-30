@@ -2,9 +2,11 @@
 // Lavagna-Statistiche in coordinate 1180×820: serie di Fourier col fenomeno
 // di Gibbs, ritratto di fase di un fuoco stabile, gaussiana.
 
+import { useT } from '../i18n/store'
 import './Chalk.css'
 
 export function StatsChalk({ className }: { className?: string }) {
+  const art = useT().art
   return (
     <svg className={`chalk chalk--stats ${className ?? ''}`} viewBox="0 0 1180 820" aria-hidden="true">
       <path className="chf" d="M640,92 L643,89 L646,86 L649,84 L652,81 L655,78 L658,76 L661,73 L664,71 L667,68 L670,66 L673,64 L676,62 L679,61 L682,59 L685,58 L688,57 L691,56 L694,55 L697,54 L700,54 L703,54 L706,54 L709,54 L712,55 L715,55 L718,56 L721,57 L724,58 L727,60 L730,62 L733,63 L736,65 L739,67 L742,70 L745,72 L748,74 L751,77 L754,80 L757,82 L760,85 L763,88 L766,91 L769,93 L772,96 L775,99 L778,102 L781,104 L784,107 L787,110 L790,112 L793,114 L796,117 L799,119 L802,121 L805,122 L808,124 L811,126 L814,127 L817,128 L820,129 L823,129 L826,130 L829,130 L832,130 L835,130 L838,130 L841,129 L844,128 L847,127 L850,126 L853,125 L856,123 L859,122 L862,120 L865,118 L868,116 L871,113 L874,111 L877,108 L880,106 L883,103 L886,100 L889,98 L892,95 L895,92 L898,89 L901,86 L904,84 L907,81 L910,78 L913,76 L916,73 L919,71 L922,68 L925,66 L928,64 L931,62 L934,61 L937,59 L940,58 L943,57 L946,56 L949,55 L952,54 L955,54 L958,54 L961,54 L964,54 L967,55 L970,55 L973,56 L976,57 L979,58 L982,60 L985,62 L988,63 L991,65 L994,67 L997,70 L1000,72 L1003,74 L1006,77 L1009,80 L1012,82 L1015,85 L1018,88 L1021,91 L1024,93 L1027,96 L1030,99 L1033,102 L1036,104 L1039,107 L1042,110 L1045,112 L1048,114 L1051,117 L1054,119 L1057,121 L1060,122 L1063,124 L1066,126 L1069,127 L1072,128 L1075,129 L1078,129 L1081,130 L1084,130 L1087,130 L1090,130 L1093,130 L1096,129 L1099,128 L1102,127 L1105,126 L1108,125 L1111,123 L1114,122 L1117,120 L1120,118 L1123,116 L1126,113 L1129,111 L1132,108 L1135,106 L1138,103 L1141,100 L1144,98 L1147,95 L1150,92"/>
@@ -18,7 +20,7 @@ export function StatsChalk({ className }: { className?: string }) {
           <path className="chf" d="M960,350 l8.3,-5.2 M960,384 l6.2,-6.5 M960,418 l2.7,-7.7 M960,452 l-1.5,-7.8 M960,486 l-5.0,-7.1 M1000,350 l9.6,-3.9 M1000,384 l7.8,-5.6 M1000,418 l3.4,-7.5 M1000,452 l-2.8,-7.7 M1000,486 l-6.8,-6.2 M1040,350 l10.7,-1.8 M1040,384 l9.9,-3.4 M1040,418 l5.3,-6.9 M1040,452 l-5.7,-6.8 M1040,486 l-9.2,-4.4 M1080,350 l10.9,0.9 M1080,384 l10.9,0.9 M1120,350 l9.9,3.5 M1120,384 l8.6,4.9 M1120,452 l-7.6,5.7 M1120,486 l-10.3,2.8 M1160,350 l8.2,5.3 M1160,384 l5.9,6.7 M1160,418 l1.1,7.9 M1160,452 l-5.0,7.0 M1160,486 l-8.5,5.0"/>
           <circle cx="1076" cy="436" r="3" fill="#B9C7EE" fillOpacity="0.4"/>
           <text className="cht" x="880" y="534" fontSize="19" style={{ animationDelay: '1.6s' }}>ẋ = −x⁄10 − y ,   ẏ = x − y⁄10</text>
-          <text className="cht" x="932" y="322" fontSize="16" style={{ animationDelay: '1.7s' }}>fuoco stabile</text>
+          <text className="cht" x="932" y="322" fontSize="16" style={{ animationDelay: '1.7s' }}>{art.stableFocus}</text>
       
           <path className="ch" pathLength={1} d="M28,768 C70,766 92,742 104,706 C112,682 116,650 120,650 C124,650 128,682 136,706 C148,742 170,766 212,768" style={{ animationDelay: '0.6s' }}/>
           <line className="ch" pathLength={1} x1="20" y1="770" x2="220" y2="770" style={{ animationDelay: '0.3s' }}/>

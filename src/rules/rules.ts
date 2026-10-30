@@ -2,9 +2,11 @@
 // contesto e le proprie soglie e dice se scatta, con il perché.
 
 import type { Course, RuleConfig, Session, Workout, WorkoutType } from '../db/schema'
-import { addDays, diffDays, formatDate, isBetween, withDate, resolveDate, weekday, weekStart, type ISODate } from '../lib/dates'
-import { ENERGY, type Energy } from '../lib/energy'
+import { m } from '../i18n/messages'
+import { addDays, diffDays, isBetween, resolveDate, weekday, weekStart, type ISODate } from '../lib/dates'
+import type { Energy } from '../lib/energy'
 import { RULES, defaultThresholds } from './defaults'
+import { ABILITY_ITEM_TITLE, ABILITY_NAME, PERIOD_NAME } from './legacy-names'
 import type { BriefingNote, HoursStatus, PlanItem, Priority, ResolvedRule, RuleContext, Rules, SportStatus, Tier } from './types'
 
 // ——— configurazione ———
@@ -54,17 +56,7 @@ function countThisWeek(workouts: Workout[], type: WorkoutType, today: ISODate): 
 const didToday = (workouts: Workout[], type: WorkoutType, today: ISODate) =>
   workouts.some((w) => !w.deletedAt && w.type === type && w.date === today)
 
-const NUMBERS = ['zero', 'una', 'due', 'tre', 'quattro', 'cinque', 'sei', 'sette']
-const ORDINALS = ['', 'prima', 'seconda', 'terza', 'quarta', 'quinta', 'sesta', 'settima']
-const num = (n: number) => NUMBERS[n] ?? String(n)
-const ordinal = (n: number) => ORDINALS[n] ?? `${n}ª`
-const WEEKDAY_NAMES = ['', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato', 'domenica']
-
 export const roundHalf = (h: number) => Math.round(h * 2) / 2
-
-export function formatHours(h: number): string {
-  return `${roundHalf(h).toLocaleString('it-IT')} h`
-}
 
 // ——— regola 9: tirocinio ———
 
@@ -100,8 +92,8 @@ export function ruleTirocinio(ctx: RuleContext, rules: Rules): Profile {
     runsTarget: r.t.runs!,
     note: {
       ruleId: 'tirocinio',
-      title: 'Periodo di tirocinio',
-      text: `Fino ${withDate('al', formatDate(period.endDate))}: obiettivo di ${formatHours(r.t.hoursPerDay!)} al giorno, palestra e corsa al posto dell’arrampicata.`,
+      title: m('periodTitle', { period: PERIOD_NAME }),
+      text: m('periodText', { end: period.endDate, hoursPerDay: r.t.hoursPerDay! }),
       level: 'info',
     },
   }
@@ -112,13 +104,12 @@ export function ruleTirocinio(ctx: RuleContext, rules: Rules): Profile {
 export function ruleExam(ctx: RuleContext, rule: ResolvedRule): { priority?: Priority; note?: BriefingNote } {
   const next = examsAhead(ctx.courses, ctx.today)[0]
   if (!rule.enabled || !next || next.days > rule.t.days!) return {}
-  const when = next.days === 0 ? 'è oggi' : next.days === 1 ? 'è domani' : `è tra ${next.days} giorni`
   return {
     priority: { courseId: next.course.id, name: next.course.name, examDate: next.course.examDate!, days: next.days, fromRule: true },
     note: {
       ruleId: 'esame-vicino',
-      title: `${next.course.name} è la priorità 1`,
-      text: `L’esame ${when} (${formatDate(next.course.examDate!)}), entro la soglia di ${rule.t.days} giorni.`,
+      title: m('examTitle', { name: next.course.name }),
+      text: m('examText', { days: next.days, date: next.course.examDate!, threshold: rule.t.days! }),
       level: next.days <= 7 ? 'avviso' : 'info',
     },
   }
@@ -130,8 +121,8 @@ export function ruleLowEnergy(energy: Energy, rule: ResolvedRule): BriefingNote 
   if (!rule.enabled || energy > rule.t.maxEnergy!) return undefined
   return {
     ruleId: 'energia-bassa',
-    title: 'Niente teoria nuova',
-    text: `Disco da ${ENERGY[energy].name}: blocchi da ${rule.t.block} minuti, ripasso attivo e schede.`,
+    title: m('lowTitle'),
+    text: m('lowText', { energy, block: rule.t.block! }),
     level: 'info',
   }
 }
@@ -140,8 +131,8 @@ export function ruleMidEnergy(energy: Energy, rule: ResolvedRule, low: boolean, 
   if (!rule.enabled || low || high) return undefined
   return {
     ruleId: 'energia-media',
-    title: 'L’esame più vicino per primo',
-    text: `Disco da ${ENERGY[energy].name}: blocchi da ${rule.t.block} minuti con ${rule.t.pause} di pausa.`,
+    title: m('midTitle'),
+    text: m('midText', { energy, block: rule.t.block!, pause: rule.t.pause! }),
     level: 'info',
   }
 }
@@ -150,8 +141,8 @@ export function ruleHighEnergy(energy: Energy, rule: ResolvedRule): BriefingNote
   if (!rule.enabled || energy < rule.t.minEnergy!) return undefined
   return {
     ruleId: 'energia-alta',
-    title: 'Teoria difficile nelle prime ore',
-    text: `Disco da ${ENERGY[energy].name}: la teoria più impegnativa va al mattino, quando la testa regge.`,
+    title: m('highTitle'),
+    text: m('highText', { energy }),
     level: 'info',
   }
 }
@@ -183,7 +174,6 @@ export function ruleSport(ctx: RuleContext, rule: ResolvedRule, profile: Profile
   const mainMissing = Math.max(0, profile.mainTarget - mainDone)
   const runsMissing = Math.max(0, profile.runsTarget - runsDone)
   const daysLeft = 8 - day // oggi compreso, fino a domenica
-  const label = profile.main === 'arrampicata' ? 'Arrampicata' : 'Palestra'
 
   const fixed = (word: RegExp) =>
     ctx.events.find((e) => !e.deletedAt && e.date === ctx.today && e.type === 'sport' && word.test(e.title))
@@ -194,8 +184,8 @@ export function ruleSport(ctx: RuleContext, rule: ResolvedRule, profile: Profile
     const event = fixed(profile.main === 'arrampicata' ? /arramp|boulder|falesia/i : /palestr|pesi/i)
     items.push({
       key: `sport:${profile.main}`,
-      title: label,
-      detail: `La ${ordinal(mainDone + 1)} delle ${num(profile.mainTarget)} di questa settimana.`,
+      title: m('sportTitle', { sport: profile.main }),
+      detail: m('sportMainDetail', { n: mainDone + 1, total: profile.mainTarget }),
       minutes: profile.main === 'arrampicata' ? 120 : 60,
       blocks: { count: 1, minutes: profile.main === 'arrampicata' ? 120 : 60, pause: 0 },
       at: event?.start,
@@ -206,11 +196,10 @@ export function ruleSport(ctx: RuleContext, rule: ResolvedRule, profile: Profile
   }
   if (mainMissing > 0) {
     const late = day >= profile.deadline
-    const by = day <= profile.deadline ? ` entro ${WEEKDAY_NAMES[profile.deadline]}` : ' questa settimana'
     notes.push({
       ruleId: 'sport',
-      title: `${label}: ${mainDone} su ${profile.mainTarget}`,
-      text: `Ne mancano ${mainMissing}${by}${mainToday ? ': una è nel piano di oggi' : ''}.`,
+      title: m('sportProgress', { sport: profile.main, done: mainDone, target: profile.mainTarget }),
+      text: m('sportMissing', { missing: mainMissing, byDay: day <= profile.deadline ? profile.deadline : null, inPlanToday: mainToday }),
       level: late ? 'avviso' : 'info',
     })
   }
@@ -222,8 +211,8 @@ export function ruleSport(ctx: RuleContext, rule: ResolvedRule, profile: Profile
       const event = fixed(/cors/i)
       items.push({
         key: 'sport:corsa',
-        title: 'Corsa',
-        detail: runsDone === 0 ? 'Nessuna corsa ancora questa settimana.' : `La ${ordinal(runsDone + 1)} corsa della settimana.`,
+        title: m('sportTitle', { sport: 'corsa' }),
+        detail: runsDone === 0 ? m('runDetailFirst') : m('runDetailNth', { n: runsDone + 1 }),
         minutes: rule.t.minutes!,
         blocks: { count: 1, minutes: rule.t.minutes!, pause: 0 },
         at: event?.start,
@@ -234,8 +223,8 @@ export function ruleSport(ctx: RuleContext, rule: ResolvedRule, profile: Profile
     }
     notes.push({
       ruleId: 'sport',
-      title: `Corsa: ${runsDone} su ${profile.runsTarget}`,
-      text: crowded ? `Ne mancano ${runsMissing}: oggi c’è già ${label.toLowerCase()}, la corsa va nei prossimi giorni.` : `Ne mancano ${runsMissing}: una corsa da ${rule.t.minutes} minuti è nel piano.`,
+      title: m('sportProgress', { sport: 'corsa', done: runsDone, target: profile.runsTarget }),
+      text: crowded ? m('runsCrowded', { missing: runsMissing, sport: profile.main }) : m('runsPlanned', { missing: runsMissing, minutes: rule.t.minutes! }),
       level: 'info',
     })
   }
@@ -256,8 +245,8 @@ export function ruleLean(ctx: RuleContext, rule: ResolvedRule): { today?: PlanIt
   if (!rule.enabled || gap === 0) return { gap }
   const item = (days: number): PlanItem => ({
     key: 'lean',
-    title: 'Lean 4',
-    detail: Number.isFinite(days) ? `Fermo da ${days} giorni: esercizi del capitolo in corso.` : 'Riprendi dal capitolo in corso.',
+    title: m('abilityItemTitle', { name: ABILITY_ITEM_TITLE }),
+    detail: Number.isFinite(days) ? m('abilityItemDetail', { days }) : m('abilityItemDetailNever'),
     minutes: rule.t.minutes!,
     blocks: { count: 1, minutes: rule.t.minutes!, pause: 0 },
     kind: 'lean',
@@ -270,8 +259,8 @@ export function ruleLean(ctx: RuleContext, rule: ResolvedRule): { today?: PlanIt
     out.tomorrow = item(gap + 1)
     out.note = {
       ruleId: 'lean',
-      title: Number.isFinite(gap) ? `Lean fermo da ${gap} giorni` : 'Lean non ancora iniziato',
-      text: `Oltre la soglia di ${rule.t.days}: ${rule.t.minutes} minuti nel piano di domani${out.today ? ' e già in quello di oggi' : ''}.`,
+      title: Number.isFinite(gap) ? m('abilityIdleTitle', { name: ABILITY_NAME, days: gap }) : m('abilityNeverTitle', { name: ABILITY_NAME }),
+      text: m('abilityText', { threshold: rule.t.days!, minutes: rule.t.minutes!, alsoToday: !!out.today }),
       level: out.today ? 'avviso' : 'info',
     }
   }
@@ -292,8 +281,8 @@ export function ruleHours(ctx: RuleContext, rule: ResolvedRule, hoursPerDay: num
     status,
     note: {
       ruleId: 'ore-settimana',
-      title: `${formatHours(last7)} su ${formatHours(target7)} negli ultimi 7 giorni`,
-      text: `${formatHours(deficit)} sotto il ritmo di ${formatHours(hoursPerDay)} al giorno: l’obiettivo di domani sale a ${formatHours(status.tomorrow)}.`,
+      title: m('hoursTitle', { last7, target7 }),
+      text: m('hoursText', { deficit, perDay: hoursPerDay, tomorrow: status.tomorrow }),
       level: deficit >= hoursPerDay ? 'avviso' : 'info',
     },
   }
@@ -321,12 +310,11 @@ export function ruleCards(ctx: RuleContext, rule: ResolvedRule): { item?: PlanIt
 
   const minutes = Math.max(rule.t.minMinutes!, Math.min(rule.t.maxMinutes!, dueTotal + freshTotal))
   const first = (due[0] ?? fresh[0])![0]
-  const detail = dueTotal
-    ? `${dueTotal} ${dueTotal === 1 ? 'scheda scaduta' : 'schede scadute'}, prima ${names.get(first) ?? first}.`
-    : `${freshTotal} schede nuove di ${names.get(first) ?? first}.`
+  const course = names.get(first) ?? first
+  const detail = dueTotal ? m('cardsDueDetail', { due: dueTotal, course }) : m('cardsFreshDetail', { fresh: freshTotal, course })
   const item: PlanItem = {
     key: 'ripasso',
-    title: 'Ripasso a 10 dita',
+    title: m('cardsItemTitle'),
     detail,
     minutes,
     blocks: { count: 1, minutes, pause: 0 },
@@ -339,8 +327,8 @@ export function ruleCards(ctx: RuleContext, rule: ResolvedRule): { item?: PlanIt
     item,
     note: {
       ruleId: 'schede-scadute',
-      title: `${dueTotal} ${dueTotal === 1 ? 'scheda scaduta' : 'schede scadute'}`,
-      text: `Nel piano ${minutes} minuti di ripasso a 10 dita, a partire da ${names.get(first) ?? first}.`,
+      title: m('cardsNoteTitle', { due: dueTotal }),
+      text: m('cardsNoteText', { minutes, course }),
       level: dueTotal > 40 ? 'avviso' : 'info',
     },
   }

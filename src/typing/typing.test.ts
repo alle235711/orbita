@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import content from '../../content/schede-2026-27.json'
 import type { TypingRun } from '../db/schema'
+import { it as itDict } from '../i18n/dict/it'
 import { corpusWords, generateDrill, generateTargeted, LESSONS, LESSON_BY_ID } from './lessons'
 import { isPassed, keyRates, lessonProgress, recommendedLesson, worstKeys } from './stats'
 
@@ -21,7 +22,7 @@ const run = (lesson: string, wpm: number, accuracy: number, keyErrors: Record<st
 
 describe('lezioni', () => {
   it('seguono il percorso della SPEC', () => {
-    expect(LESSONS.map((l) => l.title)).toEqual(['Riga di base', 'Riga superiore', 'Riga inferiore', 'Accenti e maiuscole', 'Numeri e simboli', 'Testi'])
+    expect(LESSONS.map((l) => itDict.typing.lessons[l.id].title)).toEqual(['Riga di base', 'Riga superiore', 'Riga inferiore', 'Accenti e maiuscole', 'Numeri e simboli', 'Testi'])
   })
 
   it('usano solo i tasti ammessi, spazi a parte', () => {

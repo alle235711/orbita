@@ -1,7 +1,7 @@
 // Aggregazioni per le Statistiche (SPEC §3.4), tutte pure: ricevono i
 // record e un intervallo di giorni, restituiscono serie pronte da disegnare.
 
-import type { Course, DayRecord, Session, TypingRun, Weight, Workout, WorkoutType } from '../db/schema'
+import type { Course, DayRecord, Session, SessionType, TypingRun, Weight, Workout, WorkoutType } from '../db/schema'
 import { addDays, diffDays, isBetween, rangeDays, toMinutes, type ISODate } from '../lib/dates'
 import { ENERGY_LEVELS, type Energy } from '../lib/energy'
 
@@ -55,25 +55,15 @@ export interface SubjectHours {
   courseId?: string
 }
 
-const TYPE_LABEL: Record<Session['type'], string> = {
-  studio: 'Studio senza corso',
-  ripasso: 'Ripasso senza corso',
-  lavoro: 'Ripetizioni',
-  lean: 'Lean 4',
-  inglese: 'Inglese',
-  lettura: 'Lettura',
-  dattilografia: 'Dattilografia',
-}
-
 /** Dove sono andate le ore: per corso lo studio e il ripasso, il resto per tipo. */
-export function hoursBySubject(sessions: Session[], courses: Course[], range: Range): SubjectHours[] {
+export function hoursBySubject(sessions: Session[], courses: Course[], range: Range, typeLabel: (type: SessionType) => string): SubjectHours[] {
   const names = new Map(courses.map((c) => [c.id, c.name]))
   const map = new Map<string, SubjectHours>()
   for (const s of live(sessions)) {
     if (!isBetween(s.date, range.from, range.to)) continue
     const byCourse = (s.type === 'studio' || s.type === 'ripasso') && s.courseId && names.has(s.courseId)
     const id = byCourse ? `corso:${s.courseId}` : `tipo:${s.type}`
-    const row = map.get(id) ?? { id, label: byCourse ? names.get(s.courseId!)! : TYPE_LABEL[s.type], hours: 0, courseId: byCourse ? s.courseId : undefined }
+    const row = map.get(id) ?? { id, label: byCourse ? names.get(s.courseId!)! : typeLabel(s.type), hours: 0, courseId: byCourse ? s.courseId : undefined }
     row.hours += s.minutes / 60
     map.set(id, row)
   }

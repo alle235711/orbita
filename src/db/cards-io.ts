@@ -1,3 +1,4 @@
+import { AppError } from '../i18n/errors'
 import { todayISO } from '../lib/dates'
 import type { OrbitaDB } from './db'
 import type { Card, Course } from './schema'
@@ -39,29 +40,31 @@ export interface ContentFile {
   schede: ContentCard[]
 }
 
-export class ImportError extends Error {}
+export class ImportError extends AppError {}
 
 const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v)
 const isString = (v: unknown): v is string => typeof v === 'string'
 
 export function parseContentFile(json: unknown): ContentFile {
   if (!isObject(json) || !Array.isArray(json.schede)) {
-    throw new ImportError('Il file non contiene un elenco "schede": non sembra un file di schede di Orbita.')
+    throw new ImportError('cardsNoList')
   }
   const corsi = Array.isArray(json.corsi) ? json.corsi : []
   for (const c of corsi) {
-    if (!isObject(c) || !isString(c.id) || !isString(c.nome)) throw new ImportError('Un corso del file non ha "id" e "nome".')
+    if (!isObject(c) || !isString(c.id) || !isString(c.nome)) throw new ImportError('cardsCourseNoId')
   }
   const fields = ['id', 'corso', 'sezione', 'tipo', 'titolo', 'testo', 'chiave'] as const
   json.schede.forEach((s, i) => {
-    if (!isObject(s)) throw new ImportError(`La scheda numero ${i + 1} non è un oggetto.`)
+    if (!isObject(s)) throw new ImportError('cardNotObject', { n: i + 1 })
     for (const f of fields) {
-      if (!isString(s[f])) throw new ImportError(`La scheda ${isString(s.id) ? s.id : `numero ${i + 1}`} non ha il campo "${f}".`)
+      if (!isString(s[f])) {
+        throw isString(s.id) ? new ImportError('cardMissingFieldById', { id: s.id, field: f }) : new ImportError('cardMissingFieldByIndex', { n: i + 1, field: f })
+      }
     }
   })
   const ids = new Set<string>()
   for (const s of json.schede as ContentCard[]) {
-    if (ids.has(s.id)) throw new ImportError(`L’id ${s.id} compare due volte.`)
+    if (ids.has(s.id)) throw new ImportError('cardDuplicateId', { id: s.id })
     ids.add(s.id)
   }
   return {

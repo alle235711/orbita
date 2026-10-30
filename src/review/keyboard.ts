@@ -2,6 +2,8 @@
 // delle dita del mockup Rivista-Ripasso. Le larghezze sono quelle del mockup
 // in pixel (tasto normale 50, spazio fra i tasti 6): ogni riga fa 840.
 
+import { typing } from '../i18n/dict/it/typing'
+
 export type Finger = 'mignolo' | 'anulare' | 'medio' | 'indice' | 'pollice'
 export type Hand = 'sinistra' | 'destra'
 
@@ -132,24 +134,14 @@ export function strokeFor(char: string): Stroke | null {
   return { key, shift: KEYS.get(key.hand === 'sinistra' ? 'rshift' : 'lshift')! }
 }
 
-const FINGER_LABEL: Record<Finger, string> = {
-  mignolo: 'mignolo',
-  anulare: 'anulare',
-  medio: 'medio',
-  indice: 'indice',
-  pollice: 'pollice',
-}
-
 /** «e», medio sinistro · «E», medio sinistro con lo Shift destro · Spazio, col pollice */
-export function strokeHint(char: string): string {
-  if (char === ' ') return 'Spazio, col pollice'
+export function strokeHint(char: string, h: typeof typing.hint = typing.hint): string {
+  if (char === ' ') return h.space
   const stroke = strokeFor(char)
-  if (!stroke) return `«${char}»: carattere speciale`
+  if (!stroke) return h.special({ char })
   const { key, shift } = stroke
-  if (!key.finger) return `«${char}», tasto in basso a destra accanto ad alt gr${shift ? ', con lo Shift sinistro' : ''}`
-  const hand = key.hand === 'sinistra' ? 'sinistro' : 'destro'
-  const base = `«${char}», ${FINGER_LABEL[key.finger]} ${hand}`
-  return shift ? `${base} con lo Shift ${shift.id === 'rshift' ? 'destro' : 'sinistro'}` : base
+  if (!key.finger) return h.altGr({ char, shift: !!shift })
+  return h.finger({ char, finger: key.finger, hand: key.hand, shift: shift ? (shift.id === 'rshift' ? 'destra' : 'sinistra') : undefined })
 }
 
 /** Il tasto da premere per un carattere (per le statistiche di errore). */

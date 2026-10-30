@@ -1,3 +1,5 @@
+import { AppError } from '../i18n/errors'
+
 /** Salva un oggetto come file JSON (su iPad apre il foglio di condivisione). */
 export function downloadJson(fileName: string, data: unknown): void {
   const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' })
@@ -16,6 +18,6 @@ export async function readJsonFile(file: File): Promise<unknown> {
   try {
     return JSON.parse(text)
   } catch {
-    throw new Error(`${file.name} non è un file JSON valido.`)
+    throw new AppError('invalidJson', { name: file.name })
   }
 }

@@ -1,4 +1,5 @@
 import { useId } from 'react'
+import { useT } from '../i18n/store'
 import { isMonthOnly, resolveDate } from '../lib/dates'
 import './DateField.css'
 
@@ -13,6 +14,7 @@ interface DateFieldProps {
 
 export function DateField({ label, value, onChange, allowMonthOnly = false }: DateFieldProps) {
   const id = useId()
+  const t = useT()
   const monthOnly = !!value && isMonthOnly(value)
 
   const change = (next: string, keepMonthOnly = monthOnly) => {
@@ -41,7 +43,7 @@ export function DateField({ label, value, onChange, allowMonthOnly = false }: Da
               disabled={!value}
               onChange={(e) => value && change(resolveDate(value), e.target.checked)}
             />
-            Giorno da fissare
+            {t.common.dayTbd}
           </label>
         ) : null}
       </div>

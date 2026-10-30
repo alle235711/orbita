@@ -1,6 +1,8 @@
 import 'fake-indexeddb/auto'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import content from '../../content/schede-2026-27.json'
+import { renderError } from '../i18n/errors'
+import { i18nFor } from '../i18n'
 import { exportAll, importBackup, parseBackup, BackupError } from './backup'
 import { exportCards, importCards, parseContentFile, ImportError } from './cards-io'
 import { createDb, type OrbitaDB } from './db'
@@ -9,6 +11,16 @@ import { patch, remove, save } from './repo'
 import type { Session } from './schema'
 import { ensureSeed, SEED_COURSES } from './seed'
 import { getSetting, setSetting } from './settings'
+
+/** Il messaggio italiano di un errore lanciato da `fn`. */
+const message = (fn: () => unknown): string => {
+  try {
+    fn()
+  } catch (e) {
+    return renderError(e, i18nFor('it'))
+  }
+  return ''
+}
 
 let db: OrbitaDB
 const loader = async () => structuredClone(content)
@@ -92,10 +104,10 @@ describe('schede', () => {
 
   it('segnala i file non validi', () => {
     expect(() => parseContentFile({ foo: 1 })).toThrow(ImportError)
-    expect(() => parseContentFile({ schede: [{ id: 'x', corso: 'sdm' }] })).toThrow(/campo "sezione"/)
+    expect(message(() => parseContentFile({ schede: [{ id: 'x', corso: 'sdm' }] }))).toMatch(/campo "sezione"/)
     const dup = structuredClone(content)
     dup.schede.push(dup.schede[0]!)
-    expect(() => parseContentFile(dup)).toThrow(/due volte/)
+    expect(message(() => parseContentFile(dup))).toMatch(/due volte/)
   })
 })
 
@@ -154,8 +166,8 @@ describe('backup', () => {
 
   it('rifiuta file che non sono backup', () => {
     expect(() => parseBackup({ app: 'altro', tables: {} })).toThrow(BackupError)
-    expect(() => parseBackup({ app: 'orbita', format: 99, tables: {} })).toThrow(/più recente/)
-    expect(() => parseBackup({ app: 'orbita', format: 1, tables: { sessions: [{ id: 1 }] } })).toThrow(/id o updatedAt/)
+    expect(message(() => parseBackup({ app: 'orbita', format: 99, tables: {} }))).toMatch(/più recente/)
+    expect(message(() => parseBackup({ app: 'orbita', format: 1, tables: { sessions: [{ id: 1 }] } }))).toMatch(/id o updatedAt/)
   })
 })
 

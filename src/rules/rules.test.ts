@@ -3,10 +3,15 @@ import type { CalendarEvent, Course, RuleConfig, RuleId, Session, Workout } from
 import { SEED_COURSES, SEED_DEADLINES, seedRules } from '../db/seed'
 import { addDays } from '../lib/dates'
 import type { Energy } from '../lib/energy'
-import { evaluate, hardestCourse, itemDuration } from './plan'
+import { i18nFor } from '../i18n'
+import { renderPlan } from '../i18n/render'
+import { evaluate as evaluateRaw, hardestCourse, itemDuration } from './plan'
 import { examsAhead, leanGap } from './rules'
 import { scheduleDay } from './schedule'
 import type { RuleContext } from './types'
+
+const IT = i18nFor('it')
+const evaluate = (c: RuleContext) => renderPlan(evaluateRaw(c), IT)
 
 // Martedì 27 ottobre 2026: Struttura della Materia tra 17 giorni.
 const TODAY = '2026-10-27'
@@ -109,7 +114,7 @@ describe('regole 2–4: energia', () => {
     const plan = evaluate(ctx({ energy: 3 }))
     expect(plan.headline[1]).toBe('da esercizi')
     expect(plan.items[0]).toMatchObject({ title: 'Esercizi di Struttura della Materia', blocks: { count: 2, minutes: 90, pause: 15 } })
-    expect(itemDuration(plan.items[0]!)).toBe('2 × 90 min')
+    expect(itemDuration(plan.items[0]!, IT.f)).toBe('2 × 90 min')
     expect(plan.items[1]?.title).toBe('Esercizi di Calcolo per l’Astronomia')
     const custom = evaluate(ctx({ rules: withRule('energia-media', { thresholds: { block: 60, pause: 10 } }) }))
     expect(custom.items[0]?.blocks).toEqual({ count: 2, minutes: 60, pause: 10 })
@@ -353,7 +358,7 @@ describe('agenda: collocazione dei blocchi', () => {
   ]
 
   it('mette i blocchi negli spazi liberi con la pausa', () => {
-    const plan = evaluate(ctx())
+    const plan = evaluateRaw(ctx())
     const blocks = scheduleDay(plan.items, lessons, { from: 8 * 60 })
     const ex = blocks.filter((b) => b.item.key === 'studio:sdm:esercizi')
     expect(ex.map((b) => [b.start, b.end])).toEqual([
@@ -364,13 +369,13 @@ describe('agenda: collocazione dei blocchi', () => {
   })
 
   it('parte da adesso, arrotondato al quarto d’ora', () => {
-    const plan = evaluate(ctx())
+    const plan = evaluateRaw(ctx())
     const blocks = scheduleDay(plan.items, [], { from: 10 * 60 + 7 })
     expect(blocks[0]?.start).toBe('10:15')
   })
 
   it('non ripropone i blocchi già confermati', () => {
-    const plan = evaluate(ctx())
+    const plan = evaluateRaw(ctx())
     const confirmed = event(TODAY, '13:00', '14:30', 'Esercizi di Struttura della Materia', 'studio', 'studio:sdm:esercizi#1')
     const blocks = scheduleDay(plan.items, [...lessons, confirmed], { from: 8 * 60 })
     expect(blocks.map((b) => b.key)).not.toContain('studio:sdm:esercizi#1')
@@ -378,16 +383,16 @@ describe('agenda: collocazione dei blocchi', () => {
   })
 
   it('le attività serali vanno dopo le 17:30, quelle con orario restano dove sono', () => {
-    const plan = evaluate(ctx({ energy: 1, events: [] }))
+    const plan = evaluateRaw(ctx({ energy: 1, events: [] }))
     const blocks = scheduleDay(plan.items, [], { from: 8 * 60 })
     const walk = blocks.find((b) => b.item.kind === 'camminata')
     expect(walk && walk.start >= '17:30').toBe(true)
-    const fixed = evaluate(ctx({ events: [event(TODAY, '18:30', '20:30', 'Arrampicata', 'sport')] }))
+    const fixed = evaluateRaw(ctx({ events: [event(TODAY, '18:30', '20:30', 'Arrampicata', 'sport')] }))
     expect(scheduleDay(fixed.items, [], { from: 8 * 60 }).some((b) => b.item.kind === 'arrampicata')).toBe(false)
   })
 
   it('lascia fuori quello che non ci sta', () => {
-    const plan = evaluate(ctx())
+    const plan = evaluateRaw(ctx())
     const blocks = scheduleDay(plan.items, [], { from: 20 * 60 })
     expect(blocks.every((b) => b.end <= '21:00')).toBe(true)
     expect(blocks.length).toBeLessThan(plan.items.reduce((n, i) => n + i.blocks.count, 0))

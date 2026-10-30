@@ -2,6 +2,8 @@
 // e note del briefing, a partire dalle nove regole.
 
 import type { Course } from '../db/schema'
+import type { Format } from '../i18n/format/types'
+import { m as msg, type PlanMsg } from '../i18n/messages'
 import { DEFAULT_ENERGY, type Energy } from '../lib/energy'
 import {
   examsAhead,
@@ -19,26 +21,24 @@ import {
 } from './rules'
 import type { BriefingNote, DayPlan, PlanItem, RuleContext, Rules, Tier } from './types'
 
-const HEADLINES: Record<Tier, [string, string]> = {
-  low: ['Una giornata', 'per ricaricarsi'],
-  mid: ['Una giornata', 'da esercizi'],
-  high: ['Una giornata', 'da teoria nuova'],
+const HEADLINES: Record<Tier, [PlanMsg, PlanMsg]> = {
+  low: [msg('headlineLowA'), msg('headlineLowB')],
+  mid: [msg('headlineMidA'), msg('headlineMidB')],
+  high: [msg('headlineHighA'), msg('headlineHighB')],
 }
 
-function ruleSentence(tier: Tier, energy: Energy, rules: Rules, hasExam: boolean): string {
+function ruleSentence(tier: Tier, energy: Energy, rules: Rules, hasExam: boolean): PlanMsg {
   switch (tier) {
     case 'low':
-      return `Disco quasi spento: niente teoria nuova, blocchi da ${rules['energia-bassa'].t.block} minuti e tanto ripasso attivo.`
+      return msg('ruleLow', { block: rules['energia-bassa'].t.block! })
     case 'high':
-      return `Regime da ${energy === 5 ? 'blazar' : 'quasar'}: la teoria più difficile nelle prime ore, quando la testa regge.`
+      return msg('ruleHigh', { energy })
     default:
       return hasExam
-        ? `Accrescimento regolare: l’esame più vicino va per primo, in blocchi da ${rules['energia-media'].t.block} minuti.`
-        : `Accrescimento regolare: blocchi da ${rules['energia-media'].t.block} minuti con ${rules['energia-media'].t.pause} di pausa.`
+        ? msg('ruleMidExam', { block: rules['energia-media'].t.block! })
+        : msg('ruleMid', { block: rules['energia-media'].t.block!, pause: rules['energia-media'].t.pause! })
   }
 }
-
-const toExam = (days: number) => (days === 0 ? 'L’esame è oggi.' : days === 1 ? 'L’esame è domani.' : `${days} giorni all’esame.`)
 
 /** La teoria più difficile: difficoltà più alta, a pari merito l'esame più vicino. */
 export function hardestCourse(exams: Exam[]): Course | undefined {
@@ -61,8 +61,8 @@ function studyItems(tier: Tier, rules: Rules, exams: Exam[], priority: Exam | un
     return [
       {
         key: 'studio',
-        title: 'Studio',
-        detail: 'Nessun esame in calendario: scegli tu la materia.',
+        title: msg('studyFreeTitle'),
+        detail: msg('studyFreeDetail'),
         minutes,
         blocks: block(1, minutes, 0),
         kind: 'studio',
@@ -76,8 +76,8 @@ function studyItems(tier: Tier, rules: Rules, exams: Exam[], priority: Exam | un
     return [
       {
         key: `studio:${first.course.id}:ripasso-attivo`,
-        title: `Ripasso attivo di ${first.course.name}`,
-        detail: 'Spiega a voce i risultati principali: niente teoria nuova.',
+        title: msg('activeReviewTitle', { course: first.course.name }),
+        detail: msg('activeReviewDetail'),
         minutes: m,
         blocks: block(1, m, 10),
         kind: 'studio',
@@ -92,8 +92,8 @@ function studyItems(tier: Tier, rules: Rules, exams: Exam[], priority: Exam | un
     const items: PlanItem[] = [
       {
         key: `studio:${first.course.id}:esercizi`,
-        title: `Esercizi di ${first.course.name}`,
-        detail: `Esercizi d’esame. ${toExam(first.days)}`,
+        title: msg('exercisesTitle', { course: first.course.name }),
+        detail: msg('exercisesFirstDetail', { days: first.days }),
         minutes: 2 * m!,
         blocks: block(2, m!, pause!),
         kind: 'studio',
@@ -105,8 +105,8 @@ function studyItems(tier: Tier, rules: Rules, exams: Exam[], priority: Exam | un
     if (second) {
       items.push({
         key: `studio:${second.course.id}:esercizi`,
-        title: `Esercizi di ${second.course.name}`,
-        detail: 'Un esercizio completo, dall’inizio alla fine.',
+        title: msg('exercisesTitle', { course: second.course.name }),
+        detail: msg('exercisesSecondDetail'),
         minutes: 60,
         blocks: block(1, 60, pause!),
         kind: 'studio',
@@ -123,8 +123,8 @@ function studyItems(tier: Tier, rules: Rules, exams: Exam[], priority: Exam | un
   const items: PlanItem[] = [
     {
       key: `studio:${theory.id}:teoria`,
-      title: `Teoria nuova di ${theory.name}`,
-      detail: 'Ricostruisci le dimostrazioni senza appunti.',
+      title: msg('theoryTitle', { course: theory.name }),
+      detail: msg('theoryDetail'),
       minutes: 2 * m,
       blocks: block(2, m, 15),
       kind: 'studio',
@@ -137,8 +137,8 @@ function studyItems(tier: Tier, rules: Rules, exams: Exam[], priority: Exam | un
   if (next) {
     items.push({
       key: `studio:${next.course.id}:esercizi`,
-      title: `Esercizi di ${next.course.name}`,
-      detail: toExam(next.days),
+      title: msg('exercisesTitle', { course: next.course.name }),
+      detail: msg('exercisesHighDetail', { days: next.days }),
       minutes: m,
       blocks: block(1, m, 15),
       kind: 'studio',
@@ -178,8 +178,8 @@ export function evaluate(ctx: RuleContext): DayPlan {
       : [
           {
             key: 'camminata',
-            title: 'Camminata',
-            detail: 'Recupero attivo, lo sport aspetta.',
+            title: msg('walkTitle'),
+            detail: msg('walkDetail'),
             minutes: 30,
             blocks: block(1, 30, 0),
             kind: 'camminata',
@@ -197,8 +197,8 @@ export function evaluate(ctx: RuleContext): DayPlan {
   if (tier === 'low' && items.length < 4) {
     items.push({
       key: 'lettura',
-      title: 'Lettura',
-      detail: 'Un capitolo, senza telefono.',
+      title: msg('readingTitle'),
+      detail: msg('readingDetail'),
       minutes: 30,
       blocks: block(1, 30, 0),
       kind: 'lettura',
@@ -228,7 +228,7 @@ export function evaluate(ctx: RuleContext): DayPlan {
 }
 
 /** "2 × 90 min", "45 min" oppure l'orario fissato. */
-export function itemDuration(item: PlanItem): string {
+export function itemDuration(item: Pick<PlanItem, 'at' | 'blocks' | 'minutes'>, _f: Format): string {
   if (item.at) return item.at
   if (item.blocks.count > 1) return `${item.blocks.count} × ${item.blocks.minutes} min`
   return `${item.minutes} min`

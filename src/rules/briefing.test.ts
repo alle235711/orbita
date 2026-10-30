@@ -3,7 +3,10 @@ import type { Session, TypingRun } from '../db/schema'
 import { SEED_COURSES, SEED_DEADLINES, seedRules } from '../db/seed'
 import { RULE_BY_ID } from './defaults'
 import { clampThreshold, englishStatus, priorityReason, typingStatus } from './briefing'
+import { i18nFor } from '../i18n'
 import { evaluate } from './plan'
+
+const IT = i18nFor('it')
 
 const TODAY = '2026-10-28'
 const elsa = (date: string, score?: number): Session => ({ id: `${date}-${score}`, date, minutes: 15, type: 'inglese', score, updatedAt: 1 })
@@ -48,11 +51,11 @@ describe('briefing: priorità e soglie', () => {
       cards: { due: {}, fresh: {} },
       rules: seedRules(),
     })
-    expect(priorityReason(plan, 6.5)).toBe('È l’esame più vicino: tra 16 giorni, il 13 novembre. Negli ultimi 7 giorni ci hai dedicato 6,5 h.')
+    expect(priorityReason(plan, 6.5, IT)).toBe('È l’esame più vicino: tra 16 giorni, il 13 novembre. Negli ultimi 7 giorni ci hai dedicato 6,5 h.')
     const on11 = SEED_COURSES.map((c) => (c.examDate === '2026-11-13' ? { ...c, examDate: '2026-11-11' } : c))
     const plan11 = evaluate({ today: TODAY, now: 420, energy: 3, courses: on11, deadlines: SEED_DEADLINES, events: [], sessions: [], workouts: [], cards: { due: {}, fresh: {} }, rules: seedRules() })
-    expect(priorityReason(plan11, 6.5)).toContain('tra 14 giorni, l’11 novembre.')
-    expect(priorityReason(plan, 0)).toMatch(/non ci hai ancora lavorato/)
+    expect(priorityReason(plan11, 6.5, IT)).toContain('tra 14 giorni, l’11 novembre.')
+    expect(priorityReason(plan, 0, IT)).toMatch(/non ci hai ancora lavorato/)
   })
 
   it('riporta le soglie dentro i limiti e sul passo', () => {

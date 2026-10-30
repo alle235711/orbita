@@ -1,10 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { SEED_COURSES, SEED_DEADLINES } from '../db/seed'
+import { i18nFor } from '../i18n'
 import { layoutRuler, shortName } from './ruler'
 
 // Date finte: nel seed il tirocinio non ne ha, si inseriscono in Dati.
 const DEADLINES = SEED_DEADLINES.map((d) => (d.id === 'tirocinio' ? { ...d, date: '2027-03-15', endDate: '2027-04-24' } : d))
-const layout = (width: number, today = '2026-10-27', deadlines = DEADLINES) => layoutRuler(today, SEED_COURSES, deadlines, width)
+const layout = (width: number, today = '2026-10-27', deadlines = DEADLINES) => layoutRuler(today, SEED_COURSES, deadlines, width, i18nFor('it'))
 
 describe('righello fino alla laurea', () => {
   it('ricalca le posizioni del mockup a 1100 px', () => {
@@ -47,7 +48,7 @@ describe('righello fino alla laurea', () => {
   it('elide l’articolo davanti a 8 e 11 nella descrizione', () => {
     const deadlines = SEED_DEADLINES.map((d) => (d.id === 'tirocinio' ? { ...d, date: '2027-03-11', endDate: '2027-04-08' } : d))
     const courses = SEED_COURSES.map((c, i) => (i === 0 ? { ...c, examDate: '2026-11-08' } : c))
-    const r = layoutRuler('2026-10-27', courses, deadlines, 1100)
+    const r = layoutRuler('2026-10-27', courses, deadlines, 1100, i18nFor('it'))
     expect(r.description).toContain(`${courses[0]!.name} l’8 novembre`)
     expect(r.description).toContain('dall’11 marzo all’8 aprile')
   })

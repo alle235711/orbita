@@ -1,3 +1,4 @@
+import { AppError } from '../i18n/errors'
 import type { OrbitaDB } from './db'
 import { TABLE_NAMES, type Syncable, type TableName } from './schema'
 
@@ -19,7 +20,7 @@ export interface MergeResult {
   skipped: number
 }
 
-export class BackupError extends Error {}
+export class BackupError extends AppError {}
 
 export async function exportAll(db: OrbitaDB): Promise<Backup> {
   const tables: Backup['tables'] = {}
@@ -30,20 +31,20 @@ export async function exportAll(db: OrbitaDB): Promise<Backup> {
 }
 
 export function parseBackup(json: unknown): Backup {
-  if (typeof json !== 'object' || json === null) throw new BackupError('Il file non è un backup di Orbita.')
+  if (typeof json !== 'object' || json === null) throw new BackupError('notBackup')
   const b = json as Partial<Backup>
   if (b.app !== 'orbita' || typeof b.tables !== 'object' || b.tables === null) {
-    throw new BackupError('Il file non è un backup di Orbita.')
+    throw new BackupError('notBackup')
   }
   if (typeof b.format !== 'number' || b.format > BACKUP_FORMAT) {
-    throw new BackupError('Il backup viene da una versione di Orbita più recente: aggiorna l’app e riprova.')
+    throw new BackupError('backupTooNew')
   }
   for (const [name, rows] of Object.entries(b.tables)) {
     if (!(TABLE_NAMES as string[]).includes(name)) continue
-    if (!Array.isArray(rows)) throw new BackupError(`La tabella ${name} del backup non è un elenco.`)
+    if (!Array.isArray(rows)) throw new BackupError('backupTableNotList', { name })
     for (const row of rows) {
       if (typeof row !== 'object' || row === null || typeof (row as Syncable).id !== 'string' || typeof (row as Syncable).updatedAt !== 'number') {
-        throw new BackupError(`Un record della tabella ${name} non ha id o updatedAt.`)
+        throw new BackupError('backupRecordNoId', { name })
       }
     }
   }

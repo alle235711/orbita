@@ -10,20 +10,23 @@ import { useCourses } from '../../db/hooks'
 import { useDayPlan } from '../../db/plan-context'
 import { alive, patch, remove, save } from '../../db/repo'
 import type { CalendarEvent, EventType, Task } from '../../db/schema'
-import { addDays, capitalize, formatDate, formatLong, formatShort, isISODate, todayISO, toMinutes, weekDays, weekdayShort, withDate, type ISODate } from '../../lib/dates'
+import { addDays, isISODate, todayISO, toMinutes, weekday, weekDays, type ISODate } from '../../lib/dates'
+import { renderMsg } from '../../i18n/messages'
+import { useI18n } from '../../i18n/store'
 import { scheduleDay, type SuggestedBlock } from '../../rules/schedule'
 import { AGENDA_END, AGENDA_START, eventsByDay, layoutDay, weekHours } from './agenda'
-import { EVENT_TYPES, EventSheet, type EventDraft } from './EventSheet'
+import { EventSheet, type EventDraft } from './EventSheet'
 import './AgendaPage.css'
 
 type View = 'giorno' | 'settimana'
-
-const TYPE_LABEL = Object.fromEntries(EVENT_TYPES.map((t) => [t.id, t.label.toLowerCase()])) as Record<EventType, string>
 
 const blockType = (b: SuggestedBlock): EventType =>
   ['arrampicata', 'corsa', 'palestra', 'camminata'].includes(b.item.kind) ? 'sport' : 'studio'
 
 export default function AgendaPage() {
+  const i18n = useI18n()
+  const { t, f } = i18n
+  const ta = t.agenda
   const route = useRoute()
   const today = useToday()
   const now = useMinuteClock()
@@ -54,18 +57,19 @@ export default function AgendaPage() {
   )
 
   const confirm = async (b: SuggestedBlock) => {
+    const title = renderMsg(b.item.title, i18n)
     await save<CalendarEvent>(db.events, {
       date: today,
       start: b.start,
       end: b.end,
-      title: b.title,
+      title,
       type: blockType(b),
       courseId: b.item.courseId,
       suggested: true,
       confirmed: true,
       planKey: b.key,
     })
-    toast(`In agenda: ${b.title}, ${b.start}–${b.end}.`)
+    toast(ta.confirmed({ title, start: b.start, end: b.end }))
   }
 
   const todayIndex = week.indexOf(today)
@@ -83,38 +87,36 @@ export default function AgendaPage() {
 
       <header className="agenda__head">
         <h1 id="titolo-agenda" className="page__title">
-          Agenda
+          {ta.title}
         </h1>
         <p className="page__lead">
-          {view === 'giorno'
-            ? `${capitalize(formatLong(day))}${day === today ? ', oggi' : ''}`
-            : `Settimana ${withDate('dal', formatShort(week[0]!))} ${withDate('al', formatShort(week[6]!))}`}
+          {view === 'giorno' ? ta.dayLead({ date: day, isToday: day === today }, f) : ta.weekLead({ from: week[0]!, to: week[6]! }, f)}
         </p>
         <div className="agenda__tools">
-          <div className="segmented" role="group" aria-label="Vista">
+          <div className="segmented" role="group" aria-label={ta.view}>
             <button type="button" className="segmented__item" aria-pressed={view === 'giorno'} onClick={() => go({ vista: 'giorno' })}>
-              Giorno
+              {ta.viewDay}
             </button>
             <button type="button" className="segmented__item" aria-pressed={view === 'settimana'} onClick={() => go({ vista: 'settimana' })}>
-              Settimana
+              {ta.viewWeek}
             </button>
           </div>
           <button type="button" className="btn btn--primary" onClick={() => setDraft({ date: day, start: '9:00', end: '10:00' })}>
             <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
               <path d="M7 2v10M2 7h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
             </svg>
-            Nuovo impegno
+            {ta.newEvent}
           </button>
         </div>
       </header>
 
-      <nav className="days" aria-label="Giorni della settimana">
-        <button type="button" className="days__step" onClick={() => go({ giorno: addDays(day, -7) })} aria-label="Settimana prima">
+      <nav className="days" aria-label={ta.daysNav}>
+        <button type="button" className="days__step" onClick={() => go({ giorno: addDays(day, -7) })} aria-label={ta.prevWeek}>
           <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
             <path d="M10 3L5 8l5 5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        {view === 'settimana' ? <span className="days__label">{`${formatShort(week[0]!)} – ${formatShort(week[6]!)}`}</span> : null}
+        {view === 'settimana' ? <span className="days__label">{ta.weekRange({ from: week[0]!, to: week[6]! }, f)}</span> : null}
         <ol className="days__list" role="list" hidden={view === 'settimana'}>
           {week.map((d) => (
             <li key={d}>
@@ -122,24 +124,24 @@ export default function AgendaPage() {
                 type="button"
                 className="days__day"
                 aria-current={d === day && view === 'giorno' ? 'date' : undefined}
-                aria-label={`${capitalize(formatLong(d))}${d === today ? ', oggi' : ''}`}
+                aria-label={ta.dayLead({ date: d, isToday: d === today }, f)}
                 onClick={() => go({ giorno: d, vista: 'giorno' })}
               >
-                <span className="days__name">{weekdayShort(d)}</span>
+                <span className="days__name">{f.weekdayShort(weekday(d))}</span>
                 <span className="days__num">{Number(d.slice(8))}</span>
                 {d === today ? <span className="days__today" aria-hidden="true" /> : null}
               </button>
             </li>
           ))}
         </ol>
-        <button type="button" className="days__step" onClick={() => go({ giorno: addDays(day, 7) })} aria-label="Settimana dopo">
+        <button type="button" className="days__step" onClick={() => go({ giorno: addDays(day, 7) })} aria-label={ta.nextWeek}>
           <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
             <path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
         {day !== today ? (
           <button type="button" className="btn days__back" onClick={() => go({ giorno: today })}>
-            Oggi
+            {ta.today}
           </button>
         ) : null}
       </nav>
@@ -179,6 +181,9 @@ interface DayTimelineProps {
 }
 
 function DayTimeline({ day, events, suggestions, now, onEdit, onNew, onConfirm }: DayTimelineProps) {
+  const i18n = useI18n()
+  const { t, f } = i18n
+  const ta = t.agenda
   type Item = { kind: 'event'; event: CalendarEvent; start: string; end: string } | { kind: 'suggestion'; block: SuggestedBlock; start: string; end: string }
   const items: Item[] = [
     ...events.map((event): Item => ({ kind: 'event', event, start: event.start, end: event.end })),
@@ -196,11 +201,11 @@ function DayTimeline({ day, events, suggestions, now, onEdit, onNew, onConfirm }
   return (
     <section className="timeline" aria-labelledby="h-giornata" style={{ ['--rows' as string]: hours.length }}>
       <h2 id="h-giornata" className="sr-only">
-        Impegni {withDate('del', formatDate(day))}
+        {ta.eventsOf({ date: day }, f)}
       </h2>
       <div className="timeline__grid">
         {hours.map((h) => (
-          <button key={h} type="button" className="timeline__hour" onClick={() => onNew(`${h}:00`)} aria-label={`Nuovo impegno alle ${h}:00`}>
+          <button key={h} type="button" className="timeline__hour" onClick={() => onNew(`${h}:00`)} aria-label={ta.newAt({ hour: h })}>
             <span>{`${h}:00`}</span>
           </button>
         ))}
@@ -220,22 +225,23 @@ function DayTimeline({ day, events, suggestions, now, onEdit, onNew, onConfirm }
                   <button type="button" className="block__button" onClick={() => onEdit(e)}>
                     <span className="block__title">{e.title}</span>
                     <span className="block__meta">
-                      {e.start}–{e.end}, {TYPE_LABEL[e.type]}
+                      {ta.eventMeta({ start: e.start, end: e.end, type: e.type })}
                     </span>
                   </button>
                 </li>
               )
             }
             const b = p.item.block
+            const bTitle = renderMsg(b.item.title, i18n)
             return (
               <li key={b.key} className={`block block--suggested${short ? ' block--short' : ''}${tiny ? ' block--tiny' : ''}`} style={style}>
-                <button type="button" className="block__button" onClick={() => onConfirm(b)} aria-label={`${b.title}, ${b.start}–${b.end}. Suggerito dal piano: conferma.`}>
+                <button type="button" className="block__button" onClick={() => onConfirm(b)} aria-label={ta.suggestedAria({ title: bTitle, start: b.start, end: b.end })}>
                   <span className="block__title">
-                    {b.title}
-                    {b.parts > 1 ? `, ${b.part} di ${b.parts}` : ''}
+                    {bTitle}
+                    {b.parts > 1 ? ta.partOf({ part: b.part, parts: b.parts }) : ''}
                   </span>
                   <span className="block__meta">
-                    {b.start}–{b.end}, suggerito: tocca per confermare
+                    {ta.suggestedMeta({ start: b.start, end: b.end })}
                   </span>
                 </button>
               </li>
@@ -246,7 +252,7 @@ function DayTimeline({ day, events, suggestions, now, onEdit, onNew, onConfirm }
           <div className="timeline__now" style={{ top: `calc(${(now - from) / 60} * var(--hour))` }} aria-hidden="true" />
         ) : null}
       </div>
-      {!events.length && !suggestions.length ? <p className="timeline__empty">Niente in agenda. Tocca un’ora per aggiungere un impegno.</p> : null}
+      {!events.length && !suggestions.length ? <p className="timeline__empty">{ta.empty}</p> : null}
     </section>
   )
 }
@@ -254,6 +260,8 @@ function DayTimeline({ day, events, suggestions, now, onEdit, onNew, onConfirm }
 // ——— attività ———
 
 function TodoList({ day, today, tasks }: { day: ISODate; today: ISODate; tasks: Task[] }) {
+  const { t: dict, f } = useI18n()
+  const ta = dict.agenda
   const [title, setTitle] = useState('')
   const [dated, setDated] = useState(true)
   const isToday = day === today
@@ -273,20 +281,20 @@ function TodoList({ day, today, tasks }: { day: ISODate; today: ISODate; tasks: 
 
   return (
     <section className="todo" aria-labelledby="h-todo">
-      <h2 id="h-todo">{isToday ? 'Da fare oggi' : `Da fare ${withDate('il', formatDate(day))}`}</h2>
-      <TaskItems tasks={dueList} day={day} empty="Niente in scadenza." />
-      <h2>Senza data</h2>
-      <TaskItems tasks={undated} day={day} empty="Nessuna attività senza data." />
+      <h2 id="h-todo">{isToday ? ta.todoToday : ta.todoOn({ date: day }, f)}</h2>
+      <TaskItems tasks={dueList} day={day} empty={ta.noDue} />
+      <h2>{ta.undated}</h2>
+      <TaskItems tasks={undated} day={day} empty={ta.noUndated} />
       <form className="todo__add" onSubmit={(e) => void add(e)}>
         <label className="sr-only" htmlFor="new-task">
-          Nuova attività
+          {ta.newTask}
         </label>
-        <input id="new-task" className="field" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Aggiungi un’attività" />
+        <input id="new-task" className="field" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={ta.taskPlaceholder} />
         <button type="button" className="chip" aria-pressed={dated} onClick={() => setDated((v) => !v)}>
-          {dated ? (isToday ? 'Per oggi' : `Per ${withDate('il', formatShort(day))}`) : 'Senza data'}
+          {dated ? (isToday ? ta.forToday : ta.forDay({ date: day }, f)) : ta.undated}
         </button>
         <button type="submit" className="btn">
-          Aggiungi
+          {ta.add}
         </button>
       </form>
     </section>
@@ -294,6 +302,7 @@ function TodoList({ day, today, tasks }: { day: ISODate; today: ISODate; tasks: 
 }
 
 function TaskItems({ tasks, day, empty }: { tasks: Task[]; day: ISODate; empty: string }) {
+  const { t: dict, f } = useI18n()
   if (!tasks.length) return <p className="todo__empty">{empty}</p>
   return (
     <ul className="todo__list" role="list">
@@ -308,9 +317,9 @@ function TaskItems({ tasks, day, empty }: { tasks: Task[]; day: ISODate; empty: 
               onChange={(e) => void patch(db.tasks, t.id, { done: e.target.checked, doneAt: e.target.checked ? Date.now() : undefined })}
             />
             <span>{t.title}</span>
-            {t.due && t.due < day && !t.done ? <span className="task__late">{withDate('dal', formatShort(t.due))}</span> : null}
+            {t.due && t.due < day && !t.done ? <span className="task__late">{dict.agenda.since({ date: t.due }, f)}</span> : null}
           </label>
-          <button type="button" className="task__remove" onClick={() => void remove(db.tasks, t.id)} aria-label={`Elimina ${t.title}`}>
+          <button type="button" className="task__remove" onClick={() => void remove(db.tasks, t.id)} aria-label={dict.agenda.removeTask({ title: t.title })}>
             <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
               <path d="M3 4.5h10M6.5 4.5V3h3v1.5M5 4.5l.6 8.5h4.8l.6-8.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -332,12 +341,13 @@ interface WeekGridProps {
 }
 
 function WeekGrid({ week, today, byDay, onOpen, onEdit }: WeekGridProps) {
+  const { t, f } = useI18n()
   const all = week.flatMap((d) => byDay.get(d) ?? [])
   const from = Math.min(AGENDA_START, ...all.map((e) => Math.floor(toMinutes(e.start) / 60) * 60))
   const to = Math.max(AGENDA_END, ...all.map((e) => Math.ceil(toMinutes(e.end) / 60) * 60))
   const hours = Array.from({ length: (to - from) / 60 }, (_, i) => from / 60 + i)
   return (
-    <section className="week" aria-label="Settimana" style={{ ['--rows' as string]: hours.length }}>
+    <section className="week" aria-label={t.agenda.viewWeek} style={{ ['--rows' as string]: hours.length }}>
       <div className="week__hours" aria-hidden="true">
         {hours.map((h) => (
           <span key={h}>
@@ -347,12 +357,12 @@ function WeekGrid({ week, today, byDay, onOpen, onEdit }: WeekGridProps) {
       </div>
       {week.map((d) => (
         <div key={d} className={`week__day${d === today ? ' week__day--today' : ''}`}>
-          <button type="button" className="week__head" onClick={() => onOpen(d)} aria-label={`Apri ${formatLong(d)}`}>
-            <span>{weekdayShort(d)}</span>
+          <button type="button" className="week__head" onClick={() => onOpen(d)} aria-label={t.agenda.openDay({ date: d }, f)}>
+            <span>{f.weekdayShort(weekday(d))}</span>
             <strong>{Number(d.slice(8))}</strong>
           </button>
-          <ul className="week__items" role="list" aria-label={capitalize(formatLong(d))}>
-            {(byDay.get(d) ?? []).length === 0 ? <li className="week__none">Libero</li> : null}
+          <ul className="week__items" role="list" aria-label={t.agenda.dayLead({ date: d, isToday: false }, f)}>
+            {(byDay.get(d) ?? []).length === 0 ? <li className="week__none">{t.agenda.free}</li> : null}
             {layoutDay(byDay.get(d) ?? []).map((p) => (
               <li
                 key={p.item.id}

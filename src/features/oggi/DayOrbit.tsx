@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useT } from '../../i18n/store'
 import { dayArcPath, fullOrbitPath, placePlanets, travelledPath, DAY_END, DAY_START, type Mapping, type PlanetInput } from './orbit'
 
 interface OrbitProps {
@@ -36,11 +37,12 @@ export function OrbitArcs({ mapping, width, height, now, intro }: OrbitProps) {
 
 /** Livello sopra, in fusione "difference": i pianeti e le loro etichette. */
 export function OrbitPlanets({ mapping, width, height, now, intro, planets, fontSize }: OrbitProps & { planets: PlanetInput[]; fontSize: number }) {
+  const nowLabel = useT().oggi.now
   const all = useMemo(() => {
     const list = [...planets]
-    if (now >= DAY_START && now <= DAY_END) list.push({ id: 'adesso', minutes: now, label: 'adesso', time: '', kind: 'now' })
+    if (now >= DAY_START && now <= DAY_END) list.push({ id: 'adesso', minutes: now, label: nowLabel, time: '', kind: 'now' })
     return placePlanets(list, mapping, width, fontSize * 0.53, fontSize)
-  }, [planets, now, mapping, width, fontSize])
+  }, [planets, now, mapping, width, fontSize, nowLabel])
 
   return (
     <svg className="orbit orbit--planets" width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden="true">
@@ -51,7 +53,7 @@ export function OrbitPlanets({ mapping, width, height, now, intro, planets, font
               <circle cx={p.x} cy={p.y} r="9" />
               <circle cx={p.x} cy={p.y} r="18" fill="none" stroke="#EEF1FA" strokeOpacity="0.5" />
               <text x={p.labelX} y={p.labelY} fontSize={fontSize + 1} fontWeight="800" textAnchor={p.anchor}>
-                adesso
+                {nowLabel}
               </text>
             </g>
           ) : (

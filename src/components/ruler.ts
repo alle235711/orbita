@@ -2,7 +2,8 @@
 // Scala lineare nei giorni; le etichette che si toccano salgono di una riga.
 
 import type { Course, Deadline } from '../db/schema'
-import { addDays, diffDays, formatDate, formatShort, isMonthOnly, monthShort, resolveDate, withDate, type ISODate } from '../lib/dates'
+import type { I18n } from '../i18n'
+import { addDays, diffDays, isMonthOnly, resolveDate, type ISODate } from '../lib/dates'
 
 export interface RulerTick {
   x: number
@@ -40,7 +41,8 @@ type Dated = Deadline & { date: string }
 /** Le scadenze con una data: il tirocinio resta senza finché non lo compili in Dati. */
 const dated = (deadlines: Deadline[]): Dated[] => deadlines.filter((d): d is Dated => !!d.date && !d.deletedAt)
 
-export function layoutRuler(today: ISODate, courses: Course[], deadlines: Deadline[], width: number): RulerLayout {
+export function layoutRuler(today: ISODate, courses: Course[], deadlines: Deadline[], width: number, i18n: Pick<I18n, 't' | 'f'>): RulerLayout {
+  const { t, f } = i18n
   const laurea = dated(deadlines).find((d) => d.kind === 'laurea')
   const end = laurea ? (isMonthOnly(laurea.date) ? lastDayOfMonth(laurea.date) : addDays(laurea.date, 14)) : addDays(today, 270)
   const total = Math.max(1, diffDays(today, end))
@@ -55,7 +57,7 @@ export function layoutRuler(today: ISODate, courses: Course[], deadlines: Deadli
     const y = ty! + Math.floor((tm! - 1 + i) / 12)
     const first = `${y}-${String(m).padStart(2, '0')}-01`
     if (diffDays(first, end) < 0) break
-    ticks.push({ x: xOf(first), label: monthShort(m) })
+    ticks.push({ x: xOf(first), label: f.monthShort(m) })
   }
 
   const exams = courses
@@ -74,7 +76,7 @@ export function layoutRuler(today: ISODate, courses: Course[], deadlines: Deadli
   if (next) {
     const x = xOf(resolveDate(next.examDate!))
     const days = diffDays(today, next.examDate!)
-    const label = `${shortName(next.name)} ${days === 0 ? 'oggi' : days === 1 ? 'domani' : `tra ${days} giorni`}`
+    const label = `${shortName(next.name)} ${f.relativeDays(days)}`
     if (isMonthOnly(next.examDate!)) {
       // il più vicino è un gruppo di febbraio: lo evidenzia il gruppo stesso
     } else {
@@ -88,7 +90,7 @@ export function layoutRuler(today: ISODate, courses: Course[], deadlines: Deadli
   for (const [month, list] of byMonth) {
     const x = xOf(`${month}-01`)
     const x2 = xOf(`${month}-14`)
-    const label = list.length === 1 ? shortName(list[0]!.name) : `${list.length} esami`
+    const label = list.length === 1 ? shortName(list[0]!.name) : t.ruler.group({ n: list.length }, f)
     const mark: RulerMark = { kind: 'group', x, x2, label, labelX: x + 1, row: 0 }
     marks.push(mark)
     queue(mark.labelX, label, (row) => (mark.row = row))
@@ -98,7 +100,7 @@ export function layoutRuler(today: ISODate, courses: Course[], deadlines: Deadli
     if (diffDays(today, d.endDate!) < 0) continue
     const x = xOf(d.date)
     const x2 = xOf(d.endDate!)
-    const label = d.id === 'tirocinio' ? 'Maldive' : d.title
+    const label = d.id === 'tirocinio' ? t.legacy.periodShort : d.title
     const mark: RulerMark = { kind: 'period', x, x2, label, labelX: x + 4, row: 0 }
     marks.push(mark)
     queue(mark.labelX, label, (row) => (mark.row = row))
@@ -106,7 +108,7 @@ export function layoutRuler(today: ISODate, courses: Course[], deadlines: Deadli
 
   if (laurea && inRange(resolveDate(laurea.date))) {
     const x = xOf(isMonthOnly(laurea.date) ? `${laurea.date}-15` : laurea.date)
-    const label = 'Laurea'
+    const label = t.ruler.graduation
     const anchor = x + 10 + label.length * CHAR > width ? 'end' : 'start'
     const mark: RulerMark = { kind: 'laurea', x, label, labelX: anchor === 'start' ? x + 10 : x - 10, anchor, row: 0 }
     marks.push(mark)
@@ -123,25 +125,28 @@ export function layoutRuler(today: ISODate, courses: Course[], deadlines: Deadli
     l.set(row)
   }
 
-  return { width, rows: Math.max(1, rowEnds.length), ticks, marks, description: describe(today, exams, deadlines) }
+  return { width, rows: Math.max(1, rowEnds.length), ticks, marks, description: describe(today, exams, deadlines, i18n) }
 }
 
-function describe(today: ISODate, exams: Course[], deadlines: Deadline[]): string {
+function describe(today: ISODate, exams: Course[], deadlines: Deadline[], { t, f }: Pick<I18n, 't' | 'f'>): string {
   // in ordine di data: il tirocinio può cadere prima o dopo gli esami
   const parts: { at: ISODate; text: string }[] = []
-  for (const c of exams.filter((c) => !isMonthOnly(c.examDate!))) parts.push({ at: c.examDate!, text: `${c.name} ${withDate('il', formatDate(c.examDate!))}` })
+  for (const c of exams.filter((c) => !isMonthOnly(c.examDate!))) parts.push({ at: c.examDate!, text: t.ruler.partExam({ name: c.name, date: c.examDate! }, f) })
   const tir = dated(deadlines).find((d) => d.id === 'tirocinio')
   if (tir?.endDate && diffDays(today, tir.endDate) >= 0) {
-    parts.push({ at: resolveDate(tir.date), text: `tirocinio alle Maldive ${withDate('dal', formatDate(tir.date))} ${withDate('al', formatDate(tir.endDate))}` })
+    parts.push({ at: resolveDate(tir.date), text: t.ruler.partPeriod({ from: tir.date, to: tir.endDate }, f) })
   }
   const months = new Map<string, number>()
   for (const c of exams.filter((c) => isMonthOnly(c.examDate!))) months.set(c.examDate!, (months.get(c.examDate!) ?? 0) + 1)
-  for (const [m, n] of months) parts.push({ at: resolveDate(m), text: `${n === 1 ? 'un esame' : `${n} esami`} a ${formatDate(m).split(' ')[0]}` })
+  for (const [m, n] of months) parts.push({ at: resolveDate(m), text: t.ruler.partMonthExams({ n, month: m }, f) })
   const laurea = dated(deadlines).find((d) => d.kind === 'laurea')
   if (laurea) {
-    const at = isMonthOnly(laurea.date) ? lastDayOfMonth(laurea.date) : laurea.date
-    parts.push({ at, text: `laurea ${isMonthOnly(laurea.date) ? `a ${formatDate(laurea.date).split(' ')[0]}` : withDate('il', formatShort(laurea.date))}` })
+    const monthOnly = isMonthOnly(laurea.date)
+    parts.push({
+      at: monthOnly ? lastDayOfMonth(laurea.date) : laurea.date,
+      text: monthOnly ? t.ruler.partGraduationMonth({ month: laurea.date }, f) : t.ruler.partGraduation({ date: laurea.date }, f),
+    })
   }
   parts.sort((a, b) => a.at.localeCompare(b.at))
-  return `Da oggi alla laurea: ${parts.map((p) => p.text).join(', ')}.`
+  return t.ruler.description({ parts: parts.map((p) => p.text) })
 }

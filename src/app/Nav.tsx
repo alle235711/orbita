@@ -1,16 +1,17 @@
 import { useEffect, useRef } from 'react'
+import { useBaseLang, useLang, useT } from '../i18n/store'
 import { href, type RouteId } from './router'
 import { TimerChip } from './TimerChip'
 import './Nav.css'
 
-export const NAV_ITEMS: { id: RouteId; label: string }[] = [
-  { id: 'oggi', label: 'Oggi' },
-  { id: 'agenda', label: 'Agenda' },
-  { id: 'briefing', label: 'Briefing' },
-  { id: 'statistiche', label: 'Statistiche' },
-  { id: 'ripasso', label: 'Ripasso' },
-  { id: 'dattilografia', label: 'Dattilografia' },
-  { id: 'dati', label: 'Dati' },
+export const NAV_ITEMS: { id: RouteId }[] = [
+  { id: 'oggi' },
+  { id: 'agenda' },
+  { id: 'briefing' },
+  { id: 'statistiche' },
+  { id: 'ripasso' },
+  { id: 'dattilografia' },
+  { id: 'dati' },
 ]
 
 // La schermata Regole si apre dal Briefing: in barra resta acceso Briefing.
@@ -22,6 +23,9 @@ interface NavProps {
 }
 
 export function Nav({ current, bordered }: NavProps) {
+  const t = useT()
+  const lang = useLang()
+  const base = useBaseLang()
   const active = PARENT[current] ?? current
   const listRef = useRef<HTMLUListElement>(null)
 
@@ -33,10 +37,17 @@ export function Nav({ current, bordered }: NavProps) {
 
   return (
     <header className={`topbar${bordered ? ' topbar--bordered' : ''}`}>
-      <nav className="topbar__nav" aria-label="Sezioni">
-        <a className="topbar__mark" href={href('oggi')}>
-          Orbita
-        </a>
+      <nav className="topbar__nav" aria-label={t.nav.sections}>
+        <div className="topbar__brand">
+          <a className="topbar__mark" href={href('oggi')}>
+            Orbita
+          </a>
+          {lang !== base ? (
+            <span className="topbar__lang" role="img" aria-label={t.nav.langBadge[lang]}>
+              {lang.toUpperCase()}
+            </span>
+          ) : null}
+        </div>
         <ul className="topbar__list" role="list" ref={listRef}>
           {NAV_ITEMS.map((item) => (
             <li key={item.id}>
@@ -45,7 +56,7 @@ export function Nav({ current, bordered }: NavProps) {
                 href={href(item.id)}
                 aria-current={item.id === active ? 'page' : undefined}
               >
-                {item.label}
+                {t.nav.items[item.id]}
               </a>
             </li>
           ))}

@@ -18,6 +18,16 @@ const TODAY = '2026-10-28'
 let n = 0
 const s = (date: string, minutes: number, type: Session['type'], extra: Partial<Session> = {}): Session => ({ id: `s${++n}`, date, minutes, type, updatedAt: 1, ...extra })
 
+const TYPE_LABEL: Record<Session['type'], string> = {
+  studio: 'Studio senza corso',
+  ripasso: 'Ripasso senza corso',
+  lavoro: 'Ripetizioni',
+  lean: 'Lean 4',
+  inglese: 'Inglese',
+  lettura: 'Lettura',
+  dattilografia: 'Dattilografia',
+}
+
 describe('periodi', () => {
   it('7 e 14 giorni fino a oggi compreso', () => {
     expect(periodRange('7', TODAY)).toMatchObject({ from: '2026-10-22', to: TODAY })
@@ -41,7 +51,7 @@ describe('ore', () => {
   })
 
   it('ripartisce le ore per corso e per tipo', () => {
-    const rows = hoursBySubject(sessions, SEED_COURSES, periodRange('7', TODAY))
+    const rows = hoursBySubject(sessions, SEED_COURSES, periodRange('7', TODAY), (ty) => TYPE_LABEL[ty])
     expect(rows.map((r) => [r.label, r.hours])).toEqual([
       ['Struttura della Materia', 2.5],
       ['Ripetizioni', 1.5],

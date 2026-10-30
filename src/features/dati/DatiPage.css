@@ -125,8 +125,24 @@
   color: var(--text-2);
 }
 
-.course__difficulty {
+.course__difficulty,
+.dati__field {
   display: grid;
   gap: 6px;
+}
+
+.dati__field {
+  justify-items: start;
+}
+
+.dati__days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dati__days .chip {
+  min-width: var(--tap);
+  padding: 0 12px;
 }
 

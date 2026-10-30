@@ -1,0 +1,71 @@
+import type { EventType } from '../../../db/schema'
+import type { Format } from '../../format/types'
+import { capitalize } from '../../format/util'
+
+const eventType: Record<EventType, string> = {
+  lezione: 'Lezione',
+  studio: 'Studio',
+  lavoro: 'Lavoro',
+  sport: 'Sport',
+  esame: 'Esame',
+  altro: 'Altro',
+}
+
+export const agenda = {
+  title: 'Agenda',
+  eventType,
+  dayLead: (p: { date: string; isToday: boolean }, f: Format) => `${capitalize(f.dateLong(p.date))}${p.isToday ? ', oggi' : ''}`,
+  weekLead: (p: { from: string; to: string }, f: Format) => `Settimana ${f.from(p.from, { short: true })} ${f.to(p.to, { short: true })}`,
+  weekRange: (p: { from: string; to: string }, f: Format) => `${f.dateShort(p.from)} – ${f.dateShort(p.to)}`,
+  view: 'Vista',
+  viewDay: 'Giorno',
+  viewWeek: 'Settimana',
+  newEvent: 'Nuovo impegno',
+  daysNav: 'Giorni della settimana',
+  prevWeek: 'Settimana prima',
+  nextWeek: 'Settimana dopo',
+  today: 'Oggi',
+  eventsOf: (p: { date: string }, f: Format) => `Impegni ${f.of(p.date)}`,
+  newAt: (p: { hour: number }) => `Nuovo impegno alle ${p.hour}:00`,
+  eventMeta: (p: { start: string; end: string; type: EventType }) => `${p.start}–${p.end}, ${eventType[p.type].toLowerCase()}`,
+  suggestedAria: (p: { title: string; start: string; end: string }) => `${p.title}, ${p.start}–${p.end}. Suggerito dal piano: conferma.`,
+  partOf: (p: { part: number; parts: number }) => `, ${p.part} di ${p.parts}`,
+  suggestedMeta: (p: { start: string; end: string }) => `${p.start}–${p.end}, suggerito: tocca per confermare`,
+  empty: 'Niente in agenda. Tocca un’ora per aggiungere un impegno.',
+  confirmed: (p: { title: string; start: string; end: string }) => `In agenda: ${p.title}, ${p.start}–${p.end}.`,
+
+  todoToday: 'Da fare oggi',
+  todoOn: (p: { date: string }, f: Format) => `Da fare ${f.on(p.date)}`,
+  noDue: 'Niente in scadenza.',
+  undated: 'Senza data',
+  noUndated: 'Nessuna attività senza data.',
+  newTask: 'Nuova attività',
+  taskPlaceholder: 'Aggiungi un’attività',
+  forToday: 'Per oggi',
+  forDay: (p: { date: string }, f: Format) => `Per ${f.on(p.date, { short: true })}`,
+  add: 'Aggiungi',
+  since: (p: { date: string }, f: Format) => f.from(p.date, { short: true }),
+  removeTask: (p: { title: string }) => `Elimina ${p.title}`,
+
+  openDay: (p: { date: string }, f: Format) => `Apri ${f.dateLong(p.date)}`,
+  free: 'Libero',
+
+  sheet: {
+    edit: 'Modifica impegno',
+    title: 'Titolo',
+    titlePlaceholder: 'Topologia Algebrica',
+    type: 'Tipo',
+    day: 'Giorno',
+    start: 'Inizio',
+    end: 'Fine',
+    course: 'Corso',
+    noCourse: 'Nessuno',
+    errTitle: 'Dai un titolo all’impegno.',
+    errEnd: 'La fine deve venire dopo l’inizio.',
+    updated: 'Impegno aggiornato.',
+    added: (p: { date: string }, f: Format) => `Impegno aggiunto ${f.on(p.date)}.`,
+    removed: 'Impegno tolto dall’agenda.',
+    delete: 'Elimina',
+    save: 'Salva',
+  },
+}

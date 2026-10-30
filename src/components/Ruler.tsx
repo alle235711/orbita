@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import type { Course, Deadline } from '../db/schema'
 import type { ISODate } from '../lib/dates'
+import { useI18n } from '../i18n/store'
 import { useElementWidth } from '../lib/useElementWidth'
 import { layoutRuler } from './ruler'
 import './Ruler.css'
@@ -9,8 +10,9 @@ const ROW = 15
 
 /** Righello del tempo fino alla laurea, con le scadenze reali. */
 export function Ruler({ today, courses, deadlines }: { today: ISODate; courses: Course[]; deadlines: Deadline[] }) {
+  const i18n = useI18n()
   const [ref, width] = useElementWidth<HTMLDivElement>()
-  const layout = useMemo(() => (width ? layoutRuler(today, courses, deadlines, width) : null), [today, courses, deadlines, width])
+  const layout = useMemo(() => (width ? layoutRuler(today, courses, deadlines, width, i18n) : null), [today, courses, deadlines, width, i18n])
   const extra = layout ? (layout.rows - 1) * ROW : 0
   const lineY = 36 + extra
   const labelY = (row: number) => 24 + extra - row * ROW

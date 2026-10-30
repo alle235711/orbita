@@ -10,22 +10,18 @@ import { useCourses, useSetting } from '../../db/hooks'
 import { alive } from '../../db/repo'
 import { saveReview, setNeedsFix } from '../../db/review-actions'
 import type { Card, ReviewMode } from '../../db/schema'
-import { formatDate, relativeDays, diffDays, withDate } from '../../lib/dates'
-import { MIN_ACCURACY, MODE_LABEL, modeForBox } from '../../review/leitner'
+import { useI18n } from '../../i18n/store'
+import { diffDays } from '../../lib/dates'
+import { MIN_ACCURACY, modeForBox } from '../../review/leitner'
 import { courseRank, dailyQueue } from '../../review/queue'
 import { CardEditor } from './CardEditor'
 import { RecallExercise, type RecallDone } from './RecallExercise'
 import { TypingExercise, type TypingDone } from './TypingExercise'
 import './RipassoPage.css'
 
-const INSTRUCTIONS: Record<ReviewMode, string> = {
-  copia: 'Ricopiala senza guardare la tastiera: la ripeti e intanto alleni le dita.',
-  completa: 'La parte nascosta va scritta a memoria, insieme a tutto il resto.',
-  nome: 'Leggi l’enunciato e scrivi il nome della scheda.',
-  memoria: 'Scrivi l’enunciato a memoria, poi confrontalo con il testo.',
-}
-
 export default function RipassoPage() {
+  const { t, f } = useI18n()
+  const tr = t.ripasso
   const route = useRoute()
   const today = useToday()
   const courses = useCourses()
@@ -112,9 +108,9 @@ export default function RipassoPage() {
   }
 
   const describe = (ok: boolean, boxAfter: number, isEarly: boolean, due?: string) => {
-    if (isEarly) return `${ok ? 'Giusta' : 'Da rivedere'}: era in anticipo, resta nella scatola ${boxAfter}.`
-    const when = due ? relativeDays(diffDays(today, due)) : ''
-    return ok ? `Sale nella scatola ${boxAfter}: la rivedi ${when}.` : `Torna nella scatola 1: la rivedi ${when}.`
+    if (isEarly) return tr.outcomeEarly({ ok, box: boxAfter })
+    const days = due ? diffDays(today, due) : undefined
+    return ok ? tr.outcomeUp({ box: boxAfter, days }, f) : tr.outcomeDown({ days }, f)
   }
 
   const onTypingDone = async (r: TypingDone) => {
@@ -138,10 +134,11 @@ export default function RipassoPage() {
     return (
       <Page className="ripasso" labelledBy="titolo-ripasso">
         <h1 id="titolo-ripasso" className="page__title">
-          Ripasso a 10 dita
+          {tr.title}
         </h1>
         <p className="page__lead">
-          Non ci sono ancora schede. Importale dalla pagina <a href="#/dati">Dati</a>.
+          {tr.noCardsBefore}
+          <a href="#/dati">{tr.noCardsLink}</a>.
         </p>
       </Page>
     )
@@ -155,7 +152,7 @@ export default function RipassoPage() {
       {subject ? <SubjectChalk courseId={subject.id} className="ripasso__chalk" /> : null}
 
       <div className="ripasso__subjects">
-        <div className="choices" role="group" aria-label="Materia">
+        <div className="choices" role="group" aria-label={tr.subjects}>
           {subjects.map((s) => (
             <button key={s.id} type="button" className="chip" aria-pressed={s.id === subject?.id} onClick={() => choose(s.id)}>
               {s.name}
@@ -164,9 +161,9 @@ export default function RipassoPage() {
         </div>
         {subject?.sections.length ? (
           <label className="ripasso__section">
-            <span className="sr-only">Sezione del programma</span>
+            <span className="sr-only">{tr.section}</span>
             <select className="field" value={section} onChange={(e) => subject && choose(subject.id, e.target.value)}>
-              <option value="">Tutto il programma</option>
+              <option value="">{tr.allProgram}</option>
               {subject.sections.map((s) => (
                 <option key={s} value={s}>
                   {s}
@@ -181,21 +178,21 @@ export default function RipassoPage() {
         <>
           <header className="ripasso__head">
             <h1 id="titolo-ripasso" className="ripasso__title">
-              {mode === 'nome' && !saved ? 'Di che cosa si tratta?' : card.title}
+              {mode === 'nome' && !saved ? tr.whatIsIt : card.title}
             </h1>
             <p className="ripasso__lead">
-              {subject.name}, {early ? 'in anticipo' : `scheda ${Math.min(total, doneToday + 1)} di ${total}`}. {INSTRUCTIONS[mode]}
+              {tr.lead({ subject: subject.name, early, n: Math.min(total, doneToday + 1), total, mode })}
             </p>
             <p className="ripasso__meta">
               <span>
-                Scatola {current?.box ?? 1} di 5, {MODE_LABEL[mode]}
-                {current?.fresh ? ', scheda nuova' : ''}
+                {tr.box({ box: current?.box ?? 1, mode })}
+                {current?.fresh ? tr.newCard : ''}
               </span>
               <button type="button" className="link-button" aria-pressed={card.needsFix} onClick={() => void setNeedsFix(card.id, !card.needsFix)}>
-                {card.needsFix ? 'Segnata da correggere' : 'Segna da correggere'}
+                {card.needsFix ? tr.needsFix : tr.markFix}
               </button>
               <button type="button" className="link-button" onClick={() => setEditing(card)}>
-                Modifica la scheda
+                {tr.edit}
               </button>
             </p>
           </header>
@@ -210,7 +207,7 @@ export default function RipassoPage() {
               onDone={(r) => void onTypingDone(r)}
               onNext={next}
               showKeyboard={wide}
-              inputLabel={mode === 'copia' ? 'Ricopia la definizione' : 'Scrivi la definizione, parte nascosta compresa'}
+              inputLabel={mode === 'copia' ? tr.copyLabel : tr.completeLabel}
             />
           ) : (
             <RecallExercise
@@ -228,11 +225,10 @@ export default function RipassoPage() {
       ) : (
         <header className="ripasso__head ripasso__head--done">
           <h1 id="titolo-ripasso" className="ripasso__title">
-            Per oggi è tutto
+            {tr.allDone}
           </h1>
           <p className="ripasso__lead">
-            {subject ? `Hai finito le schede di ${subject.name} di oggi` : 'Hai finito le schede di oggi'}
-            {doneToday ? `: ${doneToday} ripassate.` : '.'} Puoi ripassarne altre in anticipo: contano per le statistiche ma non cambiano scatola.
+            {tr.finished({ subject: subject?.name, done: doneToday }, f)}
           </p>
           <NextDue cards={data.cards.filter((c) => c.courseId === subject?.id)} states={states} today={today} />
           {ahead.length ? (
@@ -244,7 +240,7 @@ export default function RipassoPage() {
                 setCurrent(null)
               }}
             >
-              Continua in anticipo
+              {tr.continueEarly}
             </button>
           ) : null}
         </header>
@@ -256,13 +252,14 @@ export default function RipassoPage() {
 }
 
 function NextDue({ cards, states, today }: { cards: Card[]; states: Map<string, { due: string }>; today: string }) {
+  const { t, f } = useI18n()
   const dues = cards.map((c) => states.get(c.id)?.due).filter((d): d is string => !!d && d > today).sort()
   if (!dues.length) return null
   const first = dues[0]!
   const count = dues.filter((d) => d === first).length
   return (
     <p className="ripasso__meta">
-      Le prossime: {count} {count === 1 ? 'scheda' : 'schede'} {withDate('il', formatDate(first))}.
+      {t.ripasso.nextDue({ count, date: first }, f)}
     </p>
   )
 }

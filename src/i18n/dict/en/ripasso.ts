@@ -1,0 +1,91 @@
+import type { ReviewMode } from '../../../db/schema'
+import type { Format } from '../../format/types'
+
+const mode: Record<ReviewMode, string> = {
+  copia: 'Copy',
+  completa: 'Complete',
+  nome: 'Guess the name',
+  memoria: 'From memory',
+}
+
+const instructions: Record<ReviewMode, string> = {
+  copia: 'Copy it out without looking at the keyboard: you repeat it and train your fingers at the same time.',
+  completa: 'The hidden part has to be typed from memory, along with everything else.',
+  nome: 'Read the statement and type the card’s name.',
+  memoria: 'Type the statement from memory, then compare it with the text.',
+}
+
+export const ripasso = {
+  mode,
+  instructions,
+  title: 'Ten-finger review',
+  noCardsBefore: 'There are no cards yet. Import them from the ',
+  noCardsLink: 'Data',
+  subjects: 'Subject',
+  section: 'Syllabus section',
+  allProgram: 'Whole syllabus',
+  whatIsIt: 'What is it?',
+  lead: (p: { subject: string; early: boolean; n: number; total: number; mode: ReviewMode }) =>
+    `${p.subject}, ${p.early ? 'ahead of schedule' : `card ${p.n} of ${p.total}`}. ${instructions[p.mode]}`,
+  box: (p: { box: number; mode: ReviewMode }) => `Box ${p.box} of 5, ${mode[p.mode]}`,
+  newCard: ', new card',
+  needsFix: 'Marked to fix',
+  markFix: 'Mark to fix',
+  edit: 'Edit the card',
+  copyLabel: 'Copy out the definition',
+  completeLabel: 'Type the definition, hidden part included',
+  allDone: 'All done for today',
+  finished: (p: { subject?: string; done: number }, f: Format) =>
+    `${p.subject ? `You’ve finished today’s ${p.subject} cards` : 'You’ve finished today’s cards'}${p.done ? `: ${f.count(p.done, 'card', 'cards')} reviewed.` : '.'} You can review more ahead of schedule: they count towards the stats but don’t change box.`,
+  continueEarly: 'Keep going ahead of schedule',
+  nextDue: (p: { count: number; date: string }, f: Format) => `Next up: ${f.count(p.count, 'card', 'cards')} ${f.on(p.date)}.`,
+  outcomeEarly: (p: { ok: boolean; box: number }) => `${p.ok ? 'Right' : 'To review'}: it was early, so it stays in box ${p.box}.`,
+  outcomeUp: (p: { box: number; days?: number }, f: Format) => `Moves up to box ${p.box}: you’ll see it again ${p.days === undefined ? '' : f.relativeDays(p.days)}.`,
+  outcomeDown: (p: { days?: number }, f: Format) => `Back to box 1: you’ll see it again ${p.days === undefined ? '' : f.relativeDays(p.days)}.`,
+
+  editor: {
+    title: 'Edit the card',
+    cardTitle: 'Title',
+    text: 'Text',
+    key: 'Key, the hidden part in Complete',
+    section: 'Syllabus section',
+    kind: 'Type',
+    needsFix: 'To fix',
+    save: 'Save',
+    errEmpty: 'Title and text can’t be left empty.',
+    errKey: 'The key must appear in the text exactly as written, so it can be hidden in Complete.',
+    updated: 'Card updated. Future imports won’t overwrite it.',
+  },
+
+  exercise: 'Exercise',
+  skip: 'Skip',
+  nextCard: 'Next card',
+  check: 'Check',
+  restart: 'Start over',
+  typingPlaceholder: 'Tap here and type',
+  completed: 'Card completed',
+  hiddenPart: 'Hidden part: type it from memory',
+  precision: 'accuracy',
+  ofCard: 'of the card',
+
+  namePlaceholder: 'The card’s name',
+  memoryPlaceholder: 'Type the statement from memory',
+  memoryLabel: 'The statement, from memory',
+  similarity: 'similarity',
+  distance: (p: { n: number }, f: Format) => (p.n === 0 ? 'identical' : f.count(p.n, 'word differs', 'words differ')),
+  compareLabel: 'Word-by-word comparison with the reference text',
+  legendSame: 'same',
+  legendDiff: 'different',
+  legendMissing: 'missing',
+  legendExtra: 'extra',
+  verdictOk: 'Over 85%: usually counted as right.',
+  verdictKo: 'Under 85%: usually counted as wrong.',
+  decide: 'Your call.',
+  countRight: 'Count as right',
+  countWrong: 'Count as wrong',
+  correctedChars: (p: { n: number }, f: Format) => f.plural(p.n, 'corrected character', 'corrected characters'),
+  enterToCheck: 'Enter to check',
+  ctrlEnterToCheck: 'Ctrl + Enter to check',
+  keyboardNote: 'From memory, the keyboard only shows typos.',
+  youWrote: (p: { text: string }) => `You wrote: ${p.text}`,
+}

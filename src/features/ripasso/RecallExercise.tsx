@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { Keyboard } from '../../components/Keyboard'
-import { formatDecimal } from '../../lib/dates'
+import { useI18n, useT } from '../../i18n/store'
 import { MIN_SIMILARITY } from '../../review/leitner'
 import { alignWords, type DiffOp } from '../../review/similarity'
 import { applyValue, freeWpm, startTyping } from '../../review/typing'
@@ -27,6 +27,8 @@ interface RecallExerciseProps {
 
 /** Indovina il nome e A memoria: scrivi senza aiuti, poi il confronto parola per parola. */
 export function RecallExercise({ mode, reference, prompt, saved, onDecide, onNext, showKeyboard }: RecallExerciseProps) {
+  const { t, f } = useI18n()
+  const tr = t.ripasso
   const [state, setState] = useState(() => startTyping(reference))
   const [checked, setChecked] = useState(false)
   const field = useRef<HTMLTextAreaElement & HTMLInputElement>(null)
@@ -77,26 +79,26 @@ export function RecallExercise({ mode, reference, prompt, saved, onDecide, onNex
     autoCapitalize: 'off',
     spellCheck: false,
     readOnly: checked,
-    placeholder: mode === 'nome' ? 'Il nome della scheda' : 'Scrivi l’enunciato a memoria',
+    placeholder: mode === 'nome' ? tr.namePlaceholder : tr.memoryPlaceholder,
   }
 
   return (
     <>
-      <section className="exercise" aria-label="Esercizio">
+      <section className="exercise" aria-label={tr.exercise}>
         {mode === 'nome' && prompt ? <p className="exercise__text exercise__text--plain">{prompt}</p> : null}
         <label htmlFor="recall" className="sr-only">
-          {mode === 'nome' ? 'Il nome della scheda' : 'L’enunciato, a memoria'}
+          {mode === 'nome' ? tr.namePlaceholder : tr.memoryLabel}
         </label>
         <div className={`exercise__row${mode === 'memoria' ? ' exercise__row--stack' : ''}`}>
           {mode === 'memoria' ? <textarea rows={5} {...fieldProps} /> : <input type="text" {...fieldProps} />}
           {!checked ? (
             <button type="button" className="btn btn--primary" onClick={check} disabled={!state.typed.trim()}>
-              Controlla
+              {tr.check}
             </button>
           ) : null}
           {!checked ? (
             <button type="button" className="btn" onClick={onNext}>
-              Salta
+              {t.common.skip}
             </button>
           ) : null}
         </div>
@@ -104,38 +106,38 @@ export function RecallExercise({ mode, reference, prompt, saved, onDecide, onNex
         {result ? (
           <div className="compare">
             <p className="compare__score">
-              <strong className="tnum">{formatDecimal(result.similarity * 100, 0)}%</strong> di somiglianza
+              <strong className="tnum">{f.number(result.similarity * 100, 0)}%</strong> {tr.similarity}
               <span>
                 {' '}
-                ({result.distance === 0 ? 'identico' : `${result.distance} ${result.distance === 1 ? 'parola diversa' : 'parole diverse'}`})
+                ({tr.distance({ n: result.distance }, f)})
               </span>
             </p>
-            <p className="compare__words" aria-label="Confronto parola per parola con il testo di riferimento">
+            <p className="compare__words" aria-label={tr.compareLabel}>
               {result.ops.map((op, i) => (
                 <Word key={i} op={op} />
               ))}
             </p>
             <p className="compare__legend">
-              <span className="w w--ok">uguale</span> <span className="w w--sub">diversa</span> <span className="w w--miss">mancante</span>{' '}
-              <span className="w w--extra">in più</span>
+              <span className="w w--ok">{tr.legendSame}</span> <span className="w w--sub">{tr.legendDiff}</span>{' '}
+              <span className="w w--miss">{tr.legendMissing}</span> <span className="w w--extra">{tr.legendExtra}</span>
             </p>
             {saved ? (
               <div className="exercise__row">
                 <p className="exercise__hint">{saved}</p>
                 <button type="button" className="btn btn--primary" onClick={onNext} autoFocus>
-                  Scheda successiva
+                  {tr.nextCard}
                 </button>
               </div>
             ) : (
               <div className="exercise__row compare__decide">
                 <p className="compare__question">
-                  {suggestion ? 'Sopra l’85%: di solito si conta giusta.' : 'Sotto l’85%: di solito si conta sbagliata.'} Decidi tu.
+                  {suggestion ? tr.verdictOk : tr.verdictKo} {tr.decide}
                 </p>
                 <button type="button" className={`btn${suggestion ? ' btn--primary' : ''}`} onClick={() => decide(true)}>
-                  Conta come giusta
+                  {tr.countRight}
                 </button>
                 <button type="button" className={`btn${suggestion ? '' : ' btn--primary'}`} onClick={() => decide(false)}>
-                  Conta come sbagliata
+                  {tr.countWrong}
                 </button>
               </div>
             )}
@@ -143,21 +145,21 @@ export function RecallExercise({ mode, reference, prompt, saved, onDecide, onNex
         ) : (
           <p className="exercise__stats">
             <span>
-              <strong className="tnum">{freeWpm(state, Date.now())}</strong> parole al minuto
+              <strong className="tnum">{freeWpm(state, Date.now())}</strong> {t.common.wpm}
             </span>
             <span>
-              <strong className="tnum">{state.corrections}</strong> {state.corrections === 1 ? 'carattere corretto' : 'caratteri corretti'}
+              <strong className="tnum">{state.corrections}</strong> {tr.correctedChars({ n: state.corrections }, f)}
             </span>
             <span className="exercise__hint">
-              {mode === 'memoria' ? 'Ctrl + Invio per controllare' : 'Invio per controllare'}
+              {mode === 'memoria' ? tr.ctrlEnterToCheck : tr.enterToCheck}
             </span>
           </p>
         )}
       </section>
       {showKeyboard ? (
         <div className="exercise__keyboard">
-          <Keyboard errors={state.typoKeys} label="Tastiera dell’HP 250 G8: in rosso i tasti degli errori di battitura." />
-          <p className="exercise__note">A memoria la tastiera mostra solo gli errori di battitura.</p>
+          <Keyboard errors={state.typoKeys} label={t.legacy.keyboardRecall} />
+          <p className="exercise__note">{tr.keyboardNote}</p>
         </div>
       ) : null}
     </>
@@ -165,12 +167,13 @@ export function RecallExercise({ mode, reference, prompt, saved, onDecide, onNex
 }
 
 function Word({ op }: { op: DiffOp }) {
+  const tr = useT().ripasso
   switch (op.op) {
     case 'equal':
       return <span className="w w--ok">{op.ref.text} </span>
     case 'sub':
       return (
-        <span className="w w--sub" title={`Hai scritto: ${op.ans.text}`}>
+        <span className="w w--sub" title={tr.youWrote({ text: op.ans.text })}>
           <s>{op.ans.text}</s> {op.ref.text}{' '}
         </span>
       )

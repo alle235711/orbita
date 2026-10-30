@@ -1,0 +1,23 @@
+// Il dizionario italiano.
+
+import { agenda } from './agenda'
+import { app } from './app'
+import { art } from './art'
+import { briefing } from './briefing'
+import { common } from './common'
+import { dati } from './dati'
+import { energy } from './energy'
+import { errors } from './errors'
+import { legacy } from './legacy'
+import { nav } from './nav'
+import { oggi } from './oggi'
+import { plan } from './plan'
+import { quicklog } from './quicklog'
+import { regole } from './regole'
+import { ripasso } from './ripasso'
+import { ruler } from './ruler'
+import { sport } from './sport'
+import { stats } from './stats'
+import { typing } from './typing'
+
+export const it = { common, app, nav, oggi, plan, briefing, regole, ruler, agenda, ripasso, typing, stats, dati, quicklog, errors, energy, sport, art, legacy }

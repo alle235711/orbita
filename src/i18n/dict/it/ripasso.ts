@@ -1,0 +1,91 @@
+import type { ReviewMode } from '../../../db/schema'
+import type { Format } from '../../format/types'
+
+const mode: Record<ReviewMode, string> = {
+  copia: 'Copia',
+  completa: 'Completa',
+  nome: 'Indovina il nome',
+  memoria: 'A memoria',
+}
+
+const instructions: Record<ReviewMode, string> = {
+  copia: 'Ricopiala senza guardare la tastiera: la ripeti e intanto alleni le dita.',
+  completa: 'La parte nascosta va scritta a memoria, insieme a tutto il resto.',
+  nome: 'Leggi l’enunciato e scrivi il nome della scheda.',
+  memoria: 'Scrivi l’enunciato a memoria, poi confrontalo con il testo.',
+}
+
+export const ripasso = {
+  mode,
+  instructions,
+  title: 'Ripasso a 10 dita',
+  noCardsBefore: 'Non ci sono ancora schede. Importale dalla pagina ',
+  noCardsLink: 'Dati',
+  subjects: 'Materia',
+  section: 'Sezione del programma',
+  allProgram: 'Tutto il programma',
+  whatIsIt: 'Di che cosa si tratta?',
+  lead: (p: { subject: string; early: boolean; n: number; total: number; mode: ReviewMode }) =>
+    `${p.subject}, ${p.early ? 'in anticipo' : `scheda ${p.n} di ${p.total}`}. ${instructions[p.mode]}`,
+  box: (p: { box: number; mode: ReviewMode }) => `Scatola ${p.box} di 5, ${mode[p.mode]}`,
+  newCard: ', scheda nuova',
+  needsFix: 'Segnata da correggere',
+  markFix: 'Segna da correggere',
+  edit: 'Modifica la scheda',
+  copyLabel: 'Ricopia la definizione',
+  completeLabel: 'Scrivi la definizione, parte nascosta compresa',
+  allDone: 'Per oggi è tutto',
+  finished: (p: { subject?: string; done: number }, f: Format) =>
+    `${p.subject ? `Hai finito le schede di ${p.subject} di oggi` : 'Hai finito le schede di oggi'}${p.done ? `: ${f.count(p.done, 'ripassata', 'ripassate')}.` : '.'} Puoi ripassarne altre in anticipo: contano per le statistiche ma non cambiano scatola.`,
+  continueEarly: 'Continua in anticipo',
+  nextDue: (p: { count: number; date: string }, f: Format) => `Le prossime: ${f.count(p.count, 'scheda', 'schede')} ${f.on(p.date)}.`,
+  outcomeEarly: (p: { ok: boolean; box: number }) => `${p.ok ? 'Giusta' : 'Da rivedere'}: era in anticipo, resta nella scatola ${p.box}.`,
+  outcomeUp: (p: { box: number; days?: number }, f: Format) => `Sale nella scatola ${p.box}: la rivedi ${p.days === undefined ? '' : f.relativeDays(p.days)}.`,
+  outcomeDown: (p: { days?: number }, f: Format) => `Torna nella scatola 1: la rivedi ${p.days === undefined ? '' : f.relativeDays(p.days)}.`,
+
+  editor: {
+    title: 'Modifica la scheda',
+    cardTitle: 'Titolo',
+    text: 'Testo',
+    key: 'Chiave, la parte nascosta in Completa',
+    section: 'Sezione del programma',
+    kind: 'Tipo',
+    needsFix: 'Da correggere',
+    save: 'Salva',
+    errEmpty: 'Titolo e testo non possono restare vuoti.',
+    errKey: 'La chiave deve comparire nel testo così com’è, per poterla nascondere in Completa.',
+    updated: 'Scheda aggiornata. Le prossime importazioni non la sovrascriveranno.',
+  },
+
+  exercise: 'Esercizio',
+  skip: 'Salta',
+  nextCard: 'Scheda successiva',
+  check: 'Controlla',
+  restart: 'Ricomincia',
+  typingPlaceholder: 'Tocca qui e scrivi',
+  completed: 'Scheda completata',
+  hiddenPart: 'Parte nascosta: scrivila a memoria',
+  precision: 'di precisione',
+  ofCard: 'della scheda',
+
+  namePlaceholder: 'Il nome della scheda',
+  memoryPlaceholder: 'Scrivi l’enunciato a memoria',
+  memoryLabel: 'L’enunciato, a memoria',
+  similarity: 'di somiglianza',
+  distance: (p: { n: number }, f: Format) => (p.n === 0 ? 'identico' : f.count(p.n, 'parola diversa', 'parole diverse')),
+  compareLabel: 'Confronto parola per parola con il testo di riferimento',
+  legendSame: 'uguale',
+  legendDiff: 'diversa',
+  legendMissing: 'mancante',
+  legendExtra: 'in più',
+  verdictOk: 'Sopra l’85%: di solito si conta giusta.',
+  verdictKo: 'Sotto l’85%: di solito si conta sbagliata.',
+  decide: 'Decidi tu.',
+  countRight: 'Conta come giusta',
+  countWrong: 'Conta come sbagliata',
+  correctedChars: (p: { n: number }, f: Format) => f.plural(p.n, 'carattere corretto', 'caratteri corretti'),
+  enterToCheck: 'Invio per controllare',
+  ctrlEnterToCheck: 'Ctrl + Invio per controllare',
+  keyboardNote: 'A memoria la tastiera mostra solo gli errori di battitura.',
+  youWrote: (p: { text: string }) => `Hai scritto: ${p.text}`,
+}

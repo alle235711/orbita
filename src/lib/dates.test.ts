@@ -2,18 +2,13 @@ import { describe, expect, it } from 'vitest'
 import {
   addDays,
   diffDays,
-  formatDate,
-  formatMinutes,
-  formatShort,
   isBetween,
   rangeDays,
-  relativeDays,
   resolveDate,
   toHHMM,
   toMinutes,
   weekday,
   weekStart,
-  withDate,
 } from './dates'
 
 describe('date', () => {
@@ -53,44 +48,5 @@ describe('date', () => {
     expect(toMinutes('18:30')).toBe(1110)
     expect(toHHMM(1110)).toBe('18:30')
     expect(toHHMM(545)).toBe('9:05')
-  })
-
-  it('formatta in italiano', () => {
-    expect(formatDate('2026-11-13')).toBe('13 novembre')
-    expect(formatDate('2027-02')).toBe('febbraio 2027')
-    expect(formatShort('2027-07')).toBe('lug')
-    expect(formatShort('2026-12-10')).toBe('10 dic')
-    expect(relativeDays(17)).toBe('tra 17 giorni')
-    expect(relativeDays(1)).toBe('domani')
-    expect(formatMinutes(45)).toBe('45 min')
-    expect(formatMinutes(90)).toBe('1 h 30')
-    expect(formatMinutes(120)).toBe('2 h')
-  })
-})
-
-describe('withDate: articolo davanti alla data', () => {
-  it('elide davanti a 8 e 11', () => {
-    expect(withDate('il', formatDate('2026-11-08'))).toBe('l’8 novembre')
-    expect(withDate('il', formatDate('2026-11-11'))).toBe('l’11 novembre')
-    expect(withDate('dal', formatShort('2026-11-11'))).toBe('dall’11 nov')
-    expect(withDate('al', '8 marzo')).toBe('all’8 marzo')
-    expect(withDate('del', '8 marzo')).toBe('dell’8 marzo')
-    expect(withDate('nel', '8 marzo')).toBe('nell’8 marzo')
-    expect(withDate('sul', '8 marzo')).toBe('sull’8 marzo')
-  })
-
-  it('non elide negli altri casi', () => {
-    expect(withDate('il', formatDate('2026-11-18'))).toBe('il 18 novembre')
-    expect(withDate('il', formatDate('2027-03-01'))).toBe('il 1 marzo')
-    expect(withDate('il', formatDate('2026-11-13'))).toBe('il 13 novembre')
-    expect(withDate('il', formatDate('2026-11-28'))).toBe('il 28 novembre')
-    expect(withDate('a', formatDate('2027-02'))).toBe('a febbraio 2027')
-    expect(withDate('il', 'febbraio 2027')).toBe('il febbraio 2027')
-  })
-
-  it('mantiene la maiuscola', () => {
-    expect(withDate('Il', '8 novembre')).toBe('L’8 novembre')
-    expect(withDate('Dal', '11 gen')).toBe('Dall’11 gen')
-    expect(withDate('Il', '13 novembre')).toBe('Il 13 novembre')
   })
 })

@@ -9,22 +9,26 @@ import { db } from '../../db/db'
 import { useDayPlan } from '../../db/plan-context'
 import { alive } from '../../db/repo'
 import type { Deadline } from '../../db/schema'
-import { addDays, capitalize, diffDays, formatDate, formatLong, isBetween, isMonthOnly, relativeDays, resolveDate, toHHMM, withDate } from '../../lib/dates'
-import { ENERGY } from '../../lib/energy'
+import { addDays, diffDays, isBetween, resolveDate, toHHMM } from '../../lib/dates'
 import { priorityReason, weekStatus } from '../../rules/briefing'
 import { itemDuration } from '../../rules/plan'
-import { formatHours, WORK_TYPES } from '../../rules/rules'
+import { WORK_TYPES } from '../../rules/rules'
+import { useI18n, useRenderedPlan } from '../../i18n/store'
 import './BriefingPage.css'
 
 export default function BriefingPage() {
   const today = useToday()
   const state = useDayPlan(today)
+  const i18n = useI18n()
+  const { f, t } = i18n
+  const tb = t.briefing
+  const plan = useRenderedPlan(state?.plan)
   const runs = useLiveQuery(() => db.typingRuns.where('date').between(addDays(today, -60), today, true, true).toArray().then(alive), [today])
 
   const status = useMemo(() => (state && runs ? weekStatus(state.context, runs) : null), [state, runs])
-  if (!state || !status) return <Page className="briefing" />
+  if (!state || !status || !plan) return <Page className="briefing" />
 
-  const { plan, context, now } = state
+  const { context, now } = state
   const priorityHours = plan.priority
     ? context.sessions
         .filter((s) => s.courseId === plan.priority!.courseId && WORK_TYPES.includes(s.type) && isBetween(s.date, addDays(today, -6), today))
@@ -40,7 +44,6 @@ export default function BriefingPage() {
 
   const { sport, hours } = plan
   const deficit = Math.max(0, hours.target7 - hours.last7)
-  const mainLabel = sport.main === 'arrampicata' ? 'arrampicate' : 'palestra'
 
   return (
     <Page className="briefing" labelledBy="titolo-briefing">
@@ -48,11 +51,11 @@ export default function BriefingPage() {
 
       <header className="brief__head">
         <p className="brief__date">
-          {capitalize(formatLong(today))}, calcolato alle {toHHMM(now)} su questo dispositivo, senza rete.
-          {context.energy ? ` Disco da ${ENERGY[context.energy].name}.` : ''}
+          {tb.computedAt({ date: today, time: toHHMM(now) }, f)}
+          {context.energy ? tb.disk({ energy: context.energy }) : ''}
         </p>
         <h1 id="titolo-briefing" className="page__title">
-          Briefing
+          {tb.title}
         </h1>
       </header>
 
@@ -60,42 +63,38 @@ export default function BriefingPage() {
         <h2 id="h-prio">
           {plan.priority ? (
             <>
-              Oggi la priorità è
+              {tb.priorityLead}
               <br />
               {plan.priority.name}
             </>
           ) : (
-            'Nessun esame sotto la soglia'
+            tb.noPriority
           )}
         </h2>
-        <p>{plan.priority ? priorityReason(plan, priorityHours) : 'Il piano segue l’esame più vicino e l’energia di oggi.'}</p>
+        <p>{plan.priority ? priorityReason(state.plan, priorityHours, i18n) : tb.noPriorityText}</p>
         <ol className="brief__plan" role="list">
           {plan.items.slice(0, 4).map((item, i) => (
             <li key={item.key}>
               <span className="brief__plan-n">{i + 1}</span>
               <span>
-                <strong>{item.title}</strong>, {itemDuration(item)}
+                <strong>{item.title}</strong>, {itemDuration(item, f)}
               </span>
             </li>
           ))}
         </ol>
         <a className="btn btn--primary" href={href('oggi')}>
-          Vai al piano
+          {tb.goToPlan}
         </a>
       </section>
 
       <section className="brief__section" aria-labelledby="h-tappe">
-        <h2 id="h-tappe">Verso la laurea</h2>
+        <h2 id="h-tappe">{tb.toGraduation}</h2>
         <Ruler today={today} courses={context.courses} deadlines={context.deadlines} />
         <ul className="brief__milestones" role="list">
           {milestones.map((m) => (
             <li key={m.id}>
               <span className="brief__when">
-                {m.end
-                  ? `${withDate('dal', formatDate(m.date))} ${withDate('al', formatDate(m.end))}`
-                  : isMonthOnly(m.date)
-                    ? formatDate(m.date)
-                    : `${formatDate(m.date)}, ${relativeDays(m.days)}`}
+                {tb.when({ date: m.date, end: m.end, days: m.days }, f)}
               </span>
               <span className="brief__what">{m.title}</span>
             </li>
@@ -104,53 +103,51 @@ export default function BriefingPage() {
       </section>
 
       <section className="brief__section" aria-labelledby="h-settimana">
-        <h2 id="h-settimana">La settimana</h2>
+        <h2 id="h-settimana">{tb.week}</h2>
         <dl className="week-status">
           <div>
-            <dt>Ore negli ultimi 7 giorni</dt>
+            <dt>{tb.hoursLast7}</dt>
             <dd className="week-status__value">
-              {formatHours(hours.last7)} <span>di {formatHours(hours.target7)}</span>
+              {f.hours(hours.last7)} <span>{tb.hoursOf({ target: hours.target7 }, f)}</span>
             </dd>
             <dd>
               {deficit > 0
-                ? `${formatHours(deficit)} sotto il ritmo di ${formatHours(hours.hoursPerDay)} al giorno: domani l’obiettivo è ${formatHours(hours.tomorrow)}.`
-                : 'In pari con il ritmo della settimana.'}
+                ? tb.hoursDeficit({ deficit, perDay: hours.hoursPerDay, tomorrow: hours.tomorrow }, f)
+                : tb.hoursOnPace}
             </dd>
           </div>
           <div>
-            <dt>Sport</dt>
+            <dt>{tb.sport}</dt>
             <dd className="week-status__value">
-              {sport.mainDone}/{sport.mainTarget} <span>{mainLabel}, {sport.runsDone}/{sport.runsTarget} corse</span>
+              {sport.mainDone}/{sport.mainTarget} <span>{tb.sportSummary({ main: sport.main === 'arrampicata' ? 'arrampicata' : 'palestra', runsDone: sport.runsDone, runsTarget: sport.runsTarget })}</span>
             </dd>
-            <dd>{plan.notes.find((n) => n.ruleId === 'sport')?.text ?? 'Obiettivi della settimana raggiunti.'}</dd>
+            <dd>{plan.notes.find((n) => n.ruleId === 'sport')?.text ?? tb.sportGoalsReached}</dd>
           </div>
           <div>
-            <dt>Lean 4</dt>
+            <dt>{tb.abilityTitle}</dt>
             <dd className="week-status__value">
-              {Number.isFinite(plan.leanGap) ? (plan.leanGap === 0 ? 'Oggi' : `${plan.leanGap} g`) : 'Mai'} <span>{plan.leanGap === 0 ? 'già fatto' : 'dall’ultima sessione'}</span>
+              {Number.isFinite(plan.leanGap) ? (plan.leanGap === 0 ? tb.abilityToday : tb.abilityDays({ n: plan.leanGap })) : tb.abilityNever} <span>{plan.leanGap === 0 ? tb.abilityDone : tb.abilitySince}</span>
             </dd>
-            <dd>{plan.notes.find((n) => n.ruleId === 'lean')?.text ?? 'Dentro la soglia.'}</dd>
+            <dd>{plan.notes.find((n) => n.ruleId === 'lean')?.text ?? tb.abilityWithin}</dd>
           </div>
           <div>
-            <dt>Inglese con ELSA</dt>
+            <dt>{tb.englishTitle}</dt>
             <dd className="week-status__value">
-              {status.english.streak} g <span>di fila</span>
+              {tb.streak({ n: status.english.streak })} <span>{tb.streakSuffix}</span>
             </dd>
             <dd>
-              {status.english.minutes7} minuti questa settimana
-              {status.english.lastScore !== undefined ? `, ultimo punteggio ${status.english.lastScore}` : ''}
-              {status.english.scoreChange ? ` (${status.english.scoreChange > 0 ? '+' : ''}${status.english.scoreChange} in due settimane)` : ''}.
+              {tb.englishDetail({ minutes: status.english.minutes7, lastScore: status.english.lastScore, change: status.english.scoreChange }, f)}
             </dd>
           </div>
           <div>
-            <dt>Dattilografia</dt>
+            <dt>{tb.typingTitle}</dt>
             <dd className="week-status__value">
-              {status.typing.lastWpm ?? '–'} <span>parole al minuto</span>
+              {status.typing.lastWpm ?? '–'} <span>{tb.wpm}</span>
             </dd>
             <dd>
               {status.typing.bestWpm
-                ? `Record ${status.typing.bestWpm}${status.typing.daysSinceBest ? `, fermo da ${status.typing.daysSinceBest} giorni` : ', appena battuto'}. ${status.typing.runs7} ${status.typing.runs7 === 1 ? 'prova' : 'prove'} in settimana.`
-                : 'Nessuna prova ancora: la prima lezione è la riga di base.'}
+                ? tb.typingRecord({ best: status.typing.bestWpm, daysSinceBest: status.typing.daysSinceBest, runs: status.typing.runs7 }, f)
+                : tb.typingNone}
             </dd>
           </div>
         </dl>
@@ -158,7 +155,7 @@ export default function BriefingPage() {
 
       <div className="brief__columns">
         <section className="brief__section" aria-labelledby="h-regole">
-          <h2 id="h-regole">Le regole di oggi</h2>
+          <h2 id="h-regole">{tb.todayRules}</h2>
           {plan.notes.length ? (
             <ul className="notes" role="list">
               {plan.notes.map((n, i) => (
@@ -169,32 +166,32 @@ export default function BriefingPage() {
               ))}
             </ul>
           ) : (
-            <p className="brief__muted">Nessuna regola è scattata oggi.</p>
+            <p className="brief__muted">{tb.noRules}</p>
           )}
           <a className="btn" href={href('regole')}>
-            Modifica le regole
+            {tb.editRules}
           </a>
         </section>
 
         <section className="brief__section" aria-labelledby="h-domani">
-          <h2 id="h-domani">Domani</h2>
+          <h2 id="h-domani">{tb.tomorrow}</h2>
           <p className="brief__muted">
-            Obiettivo di {formatHours(hours.tomorrow)}
-            {plan.tirocinio ? ', ancora in tirocinio' : ''}.
+            {tb.tomorrowGoal({ hours: hours.tomorrow }, f)}
+            {plan.tirocinio ? tb.tomorrowPeriod : ''}.
           </p>
           {plan.tomorrow.length ? (
             <ul className="notes" role="list">
               {plan.tomorrow.map((item) => (
                 <li key={item.key} className="note">
                   <strong>
-                    {item.title}, {itemDuration(item)}
+                    {item.title}, {itemDuration(item, f)}
                   </strong>
                   <span>{item.detail}</span>
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="brief__muted">Niente da aggiungere per ora: il piano di domani si calcola domattina.</p>
+            <p className="brief__muted">{tb.tomorrowNothing}</p>
           )}
         </section>
       </div>

@@ -2,7 +2,8 @@
 // dallo stesso contesto delle regole.
 
 import type { Session, TypingRun } from '../db/schema'
-import { addDays, diffDays, formatDate, isBetween, withDate, type ISODate } from '../lib/dates'
+import type { I18n } from '../i18n'
+import { addDays, diffDays, isBetween, type ISODate } from '../lib/dates'
 import type { ThresholdSpec } from './defaults'
 import type { DayPlan, RuleContext } from './types'
 
@@ -70,15 +71,10 @@ export function weekStatus(ctx: Pick<RuleContext, 'sessions' | 'today'>, runs: T
 }
 
 /** La frase sulla priorità: perché quella materia oggi. */
-export function priorityReason(plan: DayPlan, workedOnPriority7: number): string | undefined {
+export function priorityReason(plan: DayPlan, workedOnPriority7: number, i18n: Pick<I18n, 't' | 'f'>): string | undefined {
   const p = plan.priority
   if (!p) return undefined
-  const when = p.days === 0 ? 'oggi' : p.days === 1 ? 'domani' : `tra ${p.days} giorni`
-  const hours =
-    workedOnPriority7 > 0
-      ? ` Negli ultimi 7 giorni ci hai dedicato ${(Math.round(workedOnPriority7 * 2) / 2).toLocaleString('it-IT')} h.`
-      : ' Negli ultimi 7 giorni non ci hai ancora lavorato.'
-  return `È l’esame più vicino: ${when}, ${withDate('il', formatDate(p.examDate))}.${hours}`
+  return i18n.t.briefing.priorityReason({ days: p.days, date: p.examDate, hours: workedOnPriority7 }, i18n.f)
 }
 
 /** Una soglia valida: dentro i limiti e sul passo previsto. */

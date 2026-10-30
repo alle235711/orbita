@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react'
+import { useT } from '../i18n/store'
 import './Chalk.css'
 
 // Disegni a gesso (SPEC §2): tratto sottile che si traccia da solo
@@ -72,6 +73,7 @@ function ChainsAndTorus() {
 
 /** Diagramma HR: Astrofisica Stellare. */
 function HertzsprungRussell() {
+  const art = useT().art
   return (
     <g>
       <P d="M950,84 L950,262 L1240,262" delay={0.1} />
@@ -82,9 +84,9 @@ function HertzsprungRussell() {
       <circle cx="990" cy="244" r="2.5" fill="#B9C7EE" fillOpacity="0.45" />
       <T x={932} y={96} size={17} delay={1}>L</T>
       <T x={1200} y={284} size={15} delay={1}>← T</T>
-      <T x={1046} y={140} size={14} delay={1.1}>sequenza principale</T>
-      <T x={1172} y={100} size={14} delay={1.15}>giganti</T>
-      <T x={962} y={226} size={14} delay={1.2}>nane bianche</T>
+      <T x={1046} y={140} size={14} delay={1.1}>{art.mainSequence}</T>
+      <T x={1172} y={100} size={14} delay={1.15}>{art.giants}</T>
+      <T x={962} y={226} size={14} delay={1.2}>{art.whiteDwarfs}</T>
     </g>
   )
 }

@@ -9,8 +9,6 @@ export type LessonId = 'base' | 'superiore' | 'inferiore' | 'accenti' | 'numeri'
 
 export interface Lesson {
   id: LessonId
-  title: string
-  detail: string
   /** I tasti nuovi della lezione. */
   focus: string
   /** Tutti i caratteri ammessi, quelli delle lezioni precedenti compresi. */
@@ -24,15 +22,15 @@ const ACCENTS = 'àèéìòùAEIOUBCDFGHLMNPQRSTVZ'
 const NUMBERS = "1234567890'ì!\"£$%&/()=?^;:_*"
 
 export const LESSONS: Lesson[] = [
-  { id: 'base', title: 'Riga di base', detail: 'Le dita a riposo: a s d f, j k l ò, con i rilievi su f e j.', focus: BASE, allowed: BASE },
-  { id: 'superiore', title: 'Riga superiore', detail: 'Si sale di una riga senza perdere la base.', focus: TOP, allowed: BASE + TOP },
-  { id: 'inferiore', title: 'Riga inferiore', detail: 'Si scende: z x c v, b n m e la punteggiatura.', focus: BOTTOM, allowed: BASE + TOP + BOTTOM },
-  { id: 'accenti', title: 'Accenti e maiuscole', detail: 'Le vocali accentate e lo Shift della mano opposta.', focus: ACCENTS, allowed: BASE + TOP + BOTTOM + ACCENTS },
-  { id: 'numeri', title: 'Numeri e simboli', detail: 'La riga dei numeri e i simboli col Shift, come nelle formule delle schede.', focus: NUMBERS, allowed: BASE + TOP + BOTTOM + ACCENTS + NUMBERS },
-  { id: 'testi', title: 'Testi', detail: 'Le schede del ripasso, intere.', focus: '', allowed: '' },
+  { id: 'base', focus: BASE, allowed: BASE },
+  { id: 'superiore', focus: TOP, allowed: BASE + TOP },
+  { id: 'inferiore', focus: BOTTOM, allowed: BASE + TOP + BOTTOM },
+  { id: 'accenti', focus: ACCENTS, allowed: BASE + TOP + BOTTOM + ACCENTS },
+  { id: 'numeri', focus: NUMBERS, allowed: BASE + TOP + BOTTOM + ACCENTS + NUMBERS },
+  { id: 'testi', focus: '', allowed: '' },
 ]
 
-export const TARGETED: Lesson = { id: 'mirato', title: 'Esercizio mirato', detail: 'Parole con i tasti dove sbagli di più.', focus: '', allowed: '' }
+export const TARGETED: Lesson = { id: 'mirato', focus: '', allowed: '' }
 
 export const LESSON_BY_ID: Record<LessonId, Lesson> = Object.fromEntries([...LESSONS, TARGETED].map((l) => [l.id, l])) as Record<LessonId, Lesson>
 

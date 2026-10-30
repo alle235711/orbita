@@ -8,7 +8,7 @@ import { FingerLegend, Keyboard } from '../../components/Keyboard'
 import { db } from '../../db/db'
 import { alive, save } from '../../db/repo'
 import type { TypingRun } from '../../db/schema'
-import { formatDecimal, formatShort } from '../../lib/dates'
+import { useI18n } from '../../i18n/store'
 import { mulberry32 } from '../../lib/rng'
 import { KEYS } from '../../review/keyboard'
 import { corpusWords, generateDrill, generateTargeted, LESSON_BY_ID, LESSONS, TARGETED, type LessonId } from '../../typing/lessons'
@@ -26,6 +26,8 @@ const keyName = (id: string) => {
 }
 
 export default function DattilografiaPage() {
+  const { t, f } = useI18n()
+  const tt = t.typing
   const route = useRoute()
   const today = useToday()
   const [canPractice] = useState(hasPhysicalKeyboard)
@@ -94,11 +96,13 @@ export default function DattilografiaPage() {
       keyHits: r.keyHits,
     })
     const passed = r.accuracy >= PASS.accuracy && r.wpm >= PASS.wpm
-    setOutcome(
-      `${r.wpm} parole al minuto, ${formatDecimal(r.accuracy * 100, 0)}%. ${
-        lessonId === 'testi' || lessonId === 'mirato' ? '' : passed ? 'Lezione superata.' : `Per superarla: ${PASS.accuracy * 100}% e ${PASS.wpm} parole al minuto.`
-      }`,
-    )
+    const tail =
+      lessonId === 'testi' || lessonId === 'mirato'
+        ? ''
+        : passed
+          ? tt.lessonPassed
+          : tt.toPass({ accuracy: PASS.accuracy * 100, wpm: PASS.wpm })
+    setOutcome(`${tt.result({ wpm: r.wpm, accuracy: r.accuracy }, f)} ${tail}`)
   }
 
   const next = () => {
@@ -111,18 +115,16 @@ export default function DattilografiaPage() {
     <Page className="datti" labelledBy="titolo-datti">
       <header className="datti__head">
         <h1 id="titolo-datti" className="page__title">
-          Dattilografia
+          {tt.title}
         </h1>
         <p className="page__lead">
-          {canPractice
-            ? 'Un passo alla volta, senza guardare la tastiera: si passa alla lezione dopo con il 95% di precisione e 25 parole al minuto.'
-            : 'Le lezioni si fanno con la tastiera fisica del PC. Qui trovi le statistiche: errori per tasto e ultime prove.'}
+          {canPractice ? tt.leadPractice({ accuracy: PASS.accuracy * 100, wpm: PASS.wpm }) : tt.leadStats}
         </p>
       </header>
 
       <div className={`datti__grid${canPractice ? '' : ' datti__grid--stats'}`}>
         <section className="datti__path" aria-labelledby="h-percorso">
-          <h2 id="h-percorso">Il percorso</h2>
+          <h2 id="h-percorso">{tt.path}</h2>
           <ol className="path" role="list">
             {LESSONS.map((l, i) => {
               const p = progress[l.id]
@@ -132,10 +134,10 @@ export default function DattilografiaPage() {
                 <>
                   <span className="path__n">{i + 1}</span>
                   <span className="path__body">
-                    <span className="path__title">{l.title}</span>
+                    <span className="path__title">{tt.lessons[l.id].title}</span>
                     <span className="path__meta">
-                      {p ? `${p.bestWpm} parole al minuto, ${formatDecimal(p.bestAccuracy * 100, 0)}%` : 'Da fare'}
-                      {passed ? ', superata' : l.id === recommended ? ', la prossima' : ''}
+                      {p ? tt.best({ wpm: p.bestWpm, accuracy: p.bestAccuracy }, f) : tt.todo}
+                      {passed ? tt.passed : l.id === recommended ? tt.upNext : ''}
                     </span>
                   </span>
                 </>
@@ -158,8 +160,8 @@ export default function DattilografiaPage() {
         {canPractice ? (
           <div className="datti__practice">
             <div className="datti__lesson">
-              <h2>{lesson.title}</h2>
-              <p>{lesson.detail}</p>
+              <h2>{tt.lessons[lesson.id].title}</h2>
+              <p>{tt.lessons[lesson.id].detail}</p>
             </div>
             {text ? (
               <TypingExercise
@@ -170,11 +172,11 @@ export default function DattilografiaPage() {
                 onDone={(r) => void onDone(r)}
                 onNext={next}
                 showKeyboard
-                inputLabel={`Esercizio: ${lesson.title}`}
-                nextLabel="Un altro esercizio"
+                inputLabel={tt.exerciseLabel({ title: tt.lessons[lesson.id].title })}
+                nextLabel={tt.another}
               />
             ) : (
-              <p className="page__lead">{lessonId === 'mirato' ? 'Servono ancora un paio di prove per sapere dove sbagli.' : 'Preparo l’esercizio…'}</p>
+              <p className="page__lead">{lessonId === 'mirato' ? tt.needRuns : tt.preparing}</p>
             )}
           </div>
         ) : null}
@@ -182,60 +184,60 @@ export default function DattilografiaPage() {
 
       <section className="datti__errors" aria-labelledby="h-errori">
         <div className="datti__errors-head">
-          <h2 id="h-errori">Errori per tasto</h2>
+          <h2 id="h-errori">{tt.errorsByKey}</h2>
           {canPractice && worst.length ? (
             <button type="button" className="btn btn--primary" onClick={() => choose(TARGETED.id)}>
-              Esercizio mirato
+              {tt.targeted}
             </button>
           ) : null}
         </div>
         {worst.length ? (
           <p className="datti__worst">
-            Sbagli di più su{' '}
+            {tt.worstLead}{' '}
             {worst.map((w, i) => (
               <span key={w.key}>
-                <strong className="datti__key">{keyName(w.key)}</strong> ({formatDecimal(w.rate * 100, 0)}%){i < worst.length - 1 ? ', ' : '.'}
+                <strong className="datti__key">{keyName(w.key)}</strong> ({f.number(w.rate * 100, 0)}%){i < worst.length - 1 ? ', ' : '.'}
               </span>
             ))}
           </p>
         ) : (
-          <p className="datti__worst">Ancora nessun errore registrato: la mappa si colora con le prove.</p>
+          <p className="datti__worst">{tt.noErrors}</p>
         )}
         <div className="datti__heat">
-          <Keyboard errors={errorsByKey} errorScale={0.25} label="Mappa degli errori per tasto: più rosso, più errori." />
+          <Keyboard errors={errorsByKey} errorScale={0.25} label={tt.heatLabel} />
           <FingerLegend />
         </div>
       </section>
 
       <section className="datti__runs" aria-labelledby="h-prove">
-        <h2 id="h-prove">Ultime prove</h2>
+        <h2 id="h-prove">{tt.lastRuns}</h2>
         {runs.length ? (
           <table className="runs">
             <thead>
               <tr>
-                <th scope="col">Giorno</th>
-                <th scope="col">Lezione</th>
+                <th scope="col">{tt.colDay}</th>
+                <th scope="col">{tt.colLesson}</th>
                 <th scope="col" className="num">
-                  Parole al minuto
+                  {tt.colWpm}
                 </th>
                 <th scope="col" className="num">
-                  Precisione
+                  {tt.colAccuracy}
                 </th>
               </tr>
             </thead>
             <tbody>
               {runs.slice(0, 8).map((r) => (
                 <tr key={r.id}>
-                  <td>{formatShort(r.date)}</td>
-                  <td>{LESSON_BY_ID[r.lesson as LessonId]?.title ?? r.lesson}</td>
+                  <td>{f.dateShort(r.date)}</td>
+                  <td>{tt.lessons[r.lesson as LessonId]?.title ?? r.lesson}</td>
                   <td className="num tnum">{r.wpm}</td>
-                  <td className="num tnum">{formatDecimal(r.accuracy * 100, 0)}%</td>
+                  <td className="num tnum">{f.number(r.accuracy * 100, 0)}%</td>
                 </tr>
               ))}
             </tbody>
           </table>
         ) : (
-          <p className="datti__worst">Nessuna prova ancora.</p>
+          <p className="datti__worst">{tt.noRuns}</p>
         )}
       </section>
     </Page>

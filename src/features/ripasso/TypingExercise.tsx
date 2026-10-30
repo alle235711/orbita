@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { FingerLegend, Keyboard } from '../../components/Keyboard'
-import { formatDecimal } from '../../lib/dates'
+import { useI18n } from '../../i18n/store'
 import { strokeFor, strokeHint } from '../../review/keyboard'
 import { MIN_ACCURACY } from '../../review/leitner'
 import { inRanges, keyRanges } from '../../review/mask'
@@ -32,7 +32,9 @@ interface TypingExerciseProps {
 }
 
 /** Copia e Completa: il testo si colora mentre scrivi, la tastiera suggerisce il tasto. */
-export function TypingExercise({ text, mode, hiddenKey, outcome, onDone, onNext, showKeyboard, inputLabel, nextLabel = 'Scheda successiva' }: TypingExerciseProps) {
+export function TypingExercise({ text, mode, hiddenKey, outcome, onDone, onNext, showKeyboard, inputLabel, nextLabel }: TypingExerciseProps) {
+  const { t, f } = useI18n()
+  const tr = t.ripasso
   const [state, setState] = useState(() => startTyping(text))
   const [now, setNow] = useState(() => Date.now())
   const finished = useRef(false)
@@ -74,12 +76,12 @@ export function TypingExercise({ text, mode, hiddenKey, outcome, onDone, onNext,
   }, [stats.done, state, onDone])
 
   const hint = stats.done
-    ? outcome ?? 'Scheda completata'
+    ? outcome ?? tr.completed
     : next === undefined
       ? ''
       : hiddenHere
-        ? 'Parte nascosta: scrivila a memoria'
-        : strokeHint(next)
+        ? tr.hiddenPart
+        : strokeHint(next, t.typing.hint)
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && stats.done) {
@@ -96,7 +98,7 @@ export function TypingExercise({ text, mode, hiddenKey, outcome, onDone, onNext,
 
   return (
     <>
-      <section className="exercise" aria-label="Esercizio">
+      <section className="exercise" aria-label={tr.exercise}>
         <p className="exercise__text" aria-hidden="true">
           {[...text].map((ch, i) => {
             const st = states[i]!
@@ -128,25 +130,25 @@ export function TypingExercise({ text, mode, hiddenKey, outcome, onDone, onNext,
             autoCapitalize="off"
             spellCheck={false}
             enterKeyHint={stats.done ? 'next' : 'done'}
-            placeholder="Tocca qui e scrivi"
+            placeholder={tr.typingPlaceholder}
             readOnly={stats.done}
           />
           <button type="button" className="btn" onClick={reset}>
-            Ricomincia
+            {tr.restart}
           </button>
           <button type="button" className={`btn ${stats.done ? 'btn--primary' : ''}`} onClick={onNext}>
-            {stats.done ? nextLabel : 'Salta'}
+            {stats.done ? (nextLabel ?? tr.nextCard) : tr.skip}
           </button>
         </div>
         <p className="exercise__stats">
           <span>
-            <strong className="tnum">{stats.wpm}</strong> parole al minuto
+            <strong className="tnum">{stats.wpm}</strong> {t.common.wpm}
           </span>
           <span>
-            <strong className="tnum">{state.hits + state.misses ? `${formatDecimal(stats.accuracy * 100, 0)}%` : '—'}</strong> di precisione
+            <strong className="tnum">{state.hits + state.misses ? `${f.number(stats.accuracy * 100, 0)}%` : '—'}</strong> {tr.precision}
           </span>
           <span>
-            <strong className="tnum">{Math.round(stats.progress * 100)}%</strong> della scheda
+            <strong className="tnum">{Math.round(stats.progress * 100)}%</strong> {tr.ofCard}
           </span>
           <span className={`exercise__hint${stats.done ? (stats.accuracy >= MIN_ACCURACY ? ' exercise__hint--ok' : ' exercise__hint--ko') : ''}`} aria-live="polite">
             {hint}
@@ -158,7 +160,7 @@ export function TypingExercise({ text, mode, hiddenKey, outcome, onDone, onNext,
           <Keyboard
             next={stats.done || hiddenHere || next === undefined ? null : strokeFor(next)}
             errors={hiddenHere ? state.keyErrors : undefined}
-            label={`Tastiera italiana dell’HP 250 G8 con i tasti colorati per dito. ${hint}`}
+            label={t.legacy.keyboardTyping({ hint })}
           />
           <FingerLegend />
         </div>

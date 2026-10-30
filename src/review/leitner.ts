@@ -11,13 +11,6 @@ export const INTERVALS: Record<LeitnerBox, number> = { 1: 1, 2: 2, 3: 4, 4: 8, 5
 export const MIN_ACCURACY = 0.97
 export const MIN_SIMILARITY = 0.85
 
-export const MODE_LABEL: Record<ReviewMode, string> = {
-  copia: 'Copia',
-  completa: 'Completa',
-  nome: 'Indovina il nome',
-  memoria: 'A memoria',
-}
-
 export function modeForBox(box: LeitnerBox | undefined): ReviewMode {
   switch (box ?? 1) {
     case 1:

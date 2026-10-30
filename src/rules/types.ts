@@ -1,6 +1,7 @@
 import type { CalendarEvent, Course, Deadline, RuleConfig, RuleId, Session, SessionType, Workout, WorkoutType } from '../db/schema'
 import type { ISODate } from '../lib/dates'
 import type { Energy } from '../lib/energy'
+import type { PlanMsg } from '../i18n/messages'
 
 /** Tutto quello che serve al motore di regole, già caricato dal database. */
 export interface RuleContext {
@@ -37,8 +38,8 @@ export type PlanKind = SessionType | WorkoutType | 'camminata'
 export interface PlanItem {
   /** Stabile nella giornata: serve a confermare i blocchi in agenda. */
   key: string
-  title: string
-  detail: string
+  title: PlanMsg
+  detail: PlanMsg
   /** Durata totale in minuti. */
   minutes: number
   blocks: { count: number; minutes: number; pause: number }
@@ -55,9 +56,9 @@ export interface PlanItem {
 
 export interface BriefingNote {
   ruleId: RuleId
-  title: string
+  title: PlanMsg
   /** Il perché, in una frase. */
-  text: string
+  text: PlanMsg
   level: 'info' | 'avviso'
 }
 
@@ -90,9 +91,9 @@ export interface SportStatus {
 export interface DayPlan {
   tier: Tier
   energy: Energy
-  headline: [string, string]
+  headline: [PlanMsg, PlanMsg]
   /** La frase della regola applicata, sotto il titolo della copertina. */
-  rule: string
+  rule: PlanMsg
   items: PlanItem[]
   tomorrow: PlanItem[]
   notes: BriefingNote[]

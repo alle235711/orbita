@@ -1,6 +1,6 @@
 import { test } from '@playwright/test'
 import { mkdirSync } from 'node:fs'
-import { importDemo, isoDate } from './helpers'
+import { importDemo, isoDate, isoWeekday, setLanguage } from './helpers'
 
 // Screenshot di ogni schermata alle tre dimensioni di riferimento (SPEC §1),
 // con i dati dimostrativi e l'ora fissata alle 10:20, per avere sempre
@@ -12,7 +12,7 @@ const VIEWPORTS = [
   { name: '1280x800', width: 1280, height: 800, mobile: false },
 ]
 
-const SCREENS: { name: string; hash: string; full?: boolean; type?: string }[] = [
+const SCREENS: { name: string; hash: string; full?: boolean; type?: string; otherLanguage?: boolean }[] = [
   { name: 'oggi', hash: '#/oggi' },
   { name: 'agenda', hash: '#/agenda', full: true },
   { name: 'agenda-settimana', hash: '#/agenda?vista=settimana', full: true },
@@ -22,6 +22,9 @@ const SCREENS: { name: string; hash: string; full?: boolean; type?: string }[] =
   { name: 'ripasso', hash: '#/ripasso?materia=sdm', type: 'Il raggio di Bohr è a_0 = 4 pi ezs' },
   { name: 'dattilografia', hash: '#/dattilografia', full: true },
   { name: 'dati', hash: '#/dati', full: true },
+  // Giorno nell'altra lingua: il giorno della settimana di oggi è tra quelli in inglese.
+  { name: 'oggi-en', hash: '#/oggi', otherLanguage: true },
+  { name: 'briefing-en', hash: '#/briefing', full: true, otherLanguage: true },
 ]
 
 const now = new Date()
@@ -42,6 +45,7 @@ for (const vp of VIEWPORTS) {
       test(screen.name, async ({ page }, testInfo) => {
         await page.clock.setFixedTime(now)
         await importDemo(page, testInfo, today)
+        if (screen.otherLanguage) await setLanguage(page, { base: 'it', otherDays: [isoWeekday(now)] })
         await page.goto(`/${screen.hash}`)
         await page.reload()
         await page.waitForLoadState('networkidle')

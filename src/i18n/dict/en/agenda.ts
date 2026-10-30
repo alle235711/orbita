@@ -1,0 +1,71 @@
+import type { EventType } from '../../../db/schema'
+import type { Format } from '../../format/types'
+import { capitalize } from '../../format/util'
+
+const eventType: Record<EventType, string> = {
+  lezione: 'Lecture',
+  studio: 'Study',
+  lavoro: 'Work',
+  sport: 'Sport',
+  esame: 'Exam',
+  altro: 'Other',
+}
+
+export const agenda = {
+  title: 'Agenda',
+  eventType,
+  dayLead: (p: { date: string; isToday: boolean }, f: Format) => `${capitalize(f.dateLong(p.date))}${p.isToday ? ', today' : ''}`,
+  weekLead: (p: { from: string; to: string }, f: Format) => `Week ${f.from(p.from, { short: true })} ${f.to(p.to, { short: true })}`,
+  weekRange: (p: { from: string; to: string }, f: Format) => `${f.dateShort(p.from)} – ${f.dateShort(p.to)}`,
+  view: 'View',
+  viewDay: 'Day',
+  viewWeek: 'Week',
+  newEvent: 'New event',
+  daysNav: 'Days of the week',
+  prevWeek: 'Previous week',
+  nextWeek: 'Next week',
+  today: 'Today',
+  eventsOf: (p: { date: string }, f: Format) => `Events ${f.on(p.date)}`,
+  newAt: (p: { hour: number }) => `New event at ${p.hour}:00`,
+  eventMeta: (p: { start: string; end: string; type: EventType }) => `${p.start}–${p.end}, ${eventType[p.type].toLowerCase()}`,
+  suggestedAria: (p: { title: string; start: string; end: string }) => `${p.title}, ${p.start}–${p.end}. Suggested by the plan: confirm.`,
+  partOf: (p: { part: number; parts: number }) => `, ${p.part} of ${p.parts}`,
+  suggestedMeta: (p: { start: string; end: string }) => `${p.start}–${p.end}, suggested: tap to confirm`,
+  empty: 'Nothing scheduled. Tap an hour to add an event.',
+  confirmed: (p: { title: string; start: string; end: string }) => `Scheduled: ${p.title}, ${p.start}–${p.end}.`,
+
+  todoToday: 'To do today',
+  todoOn: (p: { date: string }, f: Format) => `To do ${f.on(p.date)}`,
+  noDue: 'Nothing due.',
+  undated: 'No date',
+  noUndated: 'No undated tasks.',
+  newTask: 'New task',
+  taskPlaceholder: 'Add a task',
+  forToday: 'For today',
+  forDay: (p: { date: string }, f: Format) => `For ${f.dateShort(p.date)}`,
+  add: 'Add',
+  since: (p: { date: string }, f: Format) => f.from(p.date, { short: true }),
+  removeTask: (p: { title: string }) => `Delete ${p.title}`,
+
+  openDay: (p: { date: string }, f: Format) => `Open ${f.dateLong(p.date)}`,
+  free: 'Free',
+
+  sheet: {
+    edit: 'Edit event',
+    title: 'Title',
+    titlePlaceholder: 'Algebraic Topology',
+    type: 'Type',
+    day: 'Day',
+    start: 'Start',
+    end: 'End',
+    course: 'Course',
+    noCourse: 'None',
+    errTitle: 'Give the event a title.',
+    errEnd: 'The end must come after the start.',
+    updated: 'Event updated.',
+    added: (p: { date: string }, f: Format) => `Event added ${f.on(p.date)}.`,
+    removed: 'Event removed from the agenda.',
+    delete: 'Delete',
+    save: 'Save',
+  },
+}

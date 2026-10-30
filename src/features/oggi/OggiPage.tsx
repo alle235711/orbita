@@ -10,6 +10,8 @@ import { Ruler } from '../../components/Ruler'
 import { setEnergy } from '../../db/actions'
 import { useDay } from '../../db/hooks'
 import { useDayPlan } from '../../db/plan-context'
+import { renderMsg } from '../../i18n/messages'
+import { useI18n, useRenderedPlan } from '../../i18n/store'
 import { toMinutes } from '../../lib/dates'
 import { DEFAULT_ENERGY } from '../../lib/energy'
 import { useElementWidth } from '../../lib/useElementWidth'
@@ -32,6 +34,8 @@ export default function OggiPage() {
   const today = useToday()
   const day = useDay(today)
   const state = useDayPlan(today)
+  const i18n = useI18n()
+  const to = i18n.t.oggi
   const [logOpen, setLogOpen] = useState(false)
   const [intro] = useState(() => !introPlayed)
   const [coverRef, width] = useElementWidth<HTMLDivElement>()
@@ -43,7 +47,7 @@ export default function OggiPage() {
   const wide = width >= WIDE
   const u = wide ? Math.min(1, width / 1180) : 1
   const energy = day?.energy ?? DEFAULT_ENERGY
-  const plan = state?.plan
+  const plan = useRenderedPlan(state?.plan)
 
   // Coordinate del mockup → pixel. Sul telefono l'orbita si allunga in
   // verticale per lasciare posto alle etichette.
@@ -75,9 +79,9 @@ export default function OggiPage() {
     // I suggerimenti fuori dall'arco (dopo le 19) restano in agenda, non qui.
     const blocks: PlanetInput[] = suggestions
       .filter((b) => b.part === 1 && toMinutes(b.start) <= DAY_END)
-      .map((b) => ({ id: b.key, minutes: toMinutes(b.start), label: shorten(b.title, !wide), time: b.start, kind: 'suggestion' }))
+      .map((b) => ({ id: b.key, minutes: toMinutes(b.start), label: shorten(renderMsg(b.item.title, i18n), !wide), time: b.start, kind: 'suggestion' }))
     return [...events, ...blocks]
-  }, [state, suggestions, wide])
+  }, [state, suggestions, wide, i18n])
 
   const style = { '--u': `${u}px` } as CSSProperties
   const dayNumber = Number(today.slice(8, 10))
@@ -89,7 +93,7 @@ export default function OggiPage() {
           <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
             <path d="M7 2v10M2 7h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
           </svg>
-          <span className="log-button__label">Registra</span>
+          <span className="log-button__label">{to.register}</span>
         </button>
       </TopbarActions>
 
@@ -115,7 +119,7 @@ export default function OggiPage() {
         <p className="cover__rule">{plan?.rule ?? ' '}</p>
 
         <section className="cover__energy" aria-labelledby="energy-q">
-          <h2 id="energy-q">Quanto mangia il tuo buco nero oggi?</h2>
+          <h2 id="energy-q">{to.energyQuestion}</h2>
           <EnergyPicker value={day?.energy} onChange={(e) => void setEnergy(today, e)} labelledBy="energy-q" />
         </section>
 
@@ -144,7 +148,7 @@ export default function OggiPage() {
           </div>
 
           <div className="sr-only">
-            <h2>L’orbita di oggi</h2>
+            <h2>{to.orbitHeading}</h2>
             {state?.context.events.length ? (
               <ul>
                 {state.context.events.map((e) => (
@@ -154,10 +158,10 @@ export default function OggiPage() {
                 ))}
               </ul>
             ) : (
-              <p>Nessun impegno in agenda oggi.</p>
+              <p>{to.noEvents}</p>
             )}
             {suggestions.length ? (
-              <p>Blocchi suggeriti dal piano: {suggestions.map((b) => `${b.start} ${b.title}`).join(', ')}.</p>
+              <p>{to.suggestedBlocks({ blocks: suggestions.map((b) => ({ start: b.start, title: renderMsg(b.item.title, i18n) })) })}</p>
             ) : null}
           </div>
 

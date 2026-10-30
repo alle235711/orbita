@@ -1,3 +1,4 @@
+import { DEFAULT_LANGUAGE, type LanguageSettings } from '../i18n/lang'
 import type { OrbitaDB } from './db'
 
 export interface ActiveTimer {
@@ -16,6 +17,8 @@ export interface SettingValues {
   targetAverage: number
   lastBackupAt: number | null
   activeTimer: ActiveTimer | null
+  /** Passare sempre da normalizeLanguage in lettura e scrittura. */
+  language: LanguageSettings
 }
 
 export const SETTING_DEFAULTS: SettingValues = {
@@ -23,6 +26,7 @@ export const SETTING_DEFAULTS: SettingValues = {
   targetAverage: 28,
   lastBackupAt: null,
   activeTimer: null,
+  language: DEFAULT_LANGUAGE,
 }
 
 export async function getSetting<K extends keyof SettingValues>(db: OrbitaDB, key: K): Promise<SettingValues[K]> {

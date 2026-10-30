@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react'
+import { useT } from '../i18n/store'
 import { useElementWidth } from '../lib/useElementWidth'
 import { ROWS, type Finger, type Stroke } from '../review/keyboard'
 import './Keyboard.css'
@@ -59,20 +60,16 @@ export function Keyboard({ next, errors, errorScale = 3, label }: KeyboardProps)
   )
 }
 
+const LEGEND_FINGERS: Finger[] = ['mignolo', 'anulare', 'medio', 'indice', 'pollice']
+
 export function FingerLegend() {
-  const items: [Finger, string][] = [
-    ['mignolo', 'mignoli'],
-    ['anulare', 'anulari'],
-    ['medio', 'medi'],
-    ['indice', 'indici'],
-    ['pollice', 'pollici'],
-  ]
+  const t = useT().typing
   return (
-    <ul className="kbd-legend" role="list" aria-label="Colori delle dita">
-      {items.map(([f, label]) => (
+    <ul className="kbd-legend" role="list" aria-label={t.legendLabel}>
+      {LEGEND_FINGERS.map((f) => (
         <li key={f}>
           <span aria-hidden="true" style={{ background: FINGER_VAR[f] }} />
-          {label}
+          {t.fingers[f]}
         </li>
       ))}
     </ul>
