@@ -535,3 +535,51 @@
   grid-column: auto;
   margin-top: 0;
 }
+
+/* L'elenco di comete e lune è per i lettori di schermo; quando un collegamento
+   riceve il fuoco da tastiera l'elenco si mostra, così si vede dove si è. */
+.cosmos-sr:focus-within {
+  position: fixed;
+  left: max(var(--gutter), env(safe-area-inset-left));
+  right: max(var(--gutter), env(safe-area-inset-right));
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 40;
+  width: auto;
+  height: auto;
+  max-height: 45dvh;
+  margin: 0;
+  padding: 14px 16px;
+  overflow: auto;
+  clip: auto;
+  white-space: normal;
+  background: var(--panel);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 16px;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.cosmos-sr:focus-within h2 {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.cosmos-sr:focus-within h3 {
+  margin-top: 8px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-rule);
+}
+
+.cosmos-sr:focus-within a {
+  color: var(--text);
+  text-underline-offset: 3px;
+}
+
+.cosmos-sr:focus-within a:focus-visible {
+  outline: 2px solid var(--disk);
+  outline-offset: 2px;
+  border-radius: 4px;
+}

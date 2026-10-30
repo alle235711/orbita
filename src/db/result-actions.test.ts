@@ -5,7 +5,7 @@ import { i18nFor } from '../i18n'
 import { BackupError, exportAll, importBackup, parseBackup } from './backup'
 import { createDb, type OrbitaDB } from './db'
 import { loadRuleContext } from './plan-context'
-import { normalizePendingCaptures, recordResult, removeResult } from './result-actions'
+import { consumeCapture, normalizePendingCaptures, recordResult, removeResult } from './result-actions'
 import { save } from './repo'
 import type { Card, Course } from './schema'
 import { getSetting, setSetting } from './settings'
@@ -139,5 +139,22 @@ describe('plan context', () => {
   it('an attempt keeps the course active', async () => {
     await save(db.results, { courseId: 'c1', date: '2026-10-20', outcome: 'rifiutato' })
     expect((await loadRuleContext(db, '2026-10-28')).courses).toHaveLength(2)
+  })
+})
+
+describe('consumeCapture', () => {
+  it('toglie solo la voce indicata ed è idempotente', async () => {
+    await setSetting(db, 'pendingCaptures', [{ resultId: 'r1', courseId: 'c1' }, { resultId: 'r2', courseId: 'c2' }])
+    await consumeCapture(db, 'r1')
+    expect(await pending()).toEqual([{ resultId: 'r2', courseId: 'c2' }])
+    await consumeCapture(db, 'r1')
+    await consumeCapture(db, 'sconosciuto')
+    expect(await pending()).toEqual([{ resultId: 'r2', courseId: 'c2' }])
+    await consumeCapture(db, 'r2')
+    expect(await pending()).toEqual([])
+  })
+  it('un id sconosciuto non scrive nulla', async () => {
+    await consumeCapture(db, 'x')
+    expect(await db.settings.get('pendingCaptures')).toBeUndefined()
   })
 })

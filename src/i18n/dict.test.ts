@@ -23,6 +23,7 @@ function leaves(node: Node, prefix = ''): { path: string; value: Node }[] {
 /** Foglie che devono restare uguali: nomi propri, nomi legacy, notazione, unità. */
 const SAME_IN_BOTH = new Set<string>([
   'agenda.title', // "Agenda" e "Briefing"
+  'oggi.cosmos.moon', // "nome, voto"
   'app.titles.agenda',
   'nav.items.agenda',
   'briefing.title',

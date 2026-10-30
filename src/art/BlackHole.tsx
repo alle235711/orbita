@@ -1,5 +1,7 @@
-import { useEffect, useId, useRef, type CSSProperties } from 'react'
+import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react'
 import { ENERGY, type Energy } from '../lib/energy'
+import { useSvgIds } from '../lib/useSvgIds'
+import { BH, BH_VIEW, DISK_PATH, INNER_PATH } from './blackhole-geometry'
 import './BlackHole.css'
 
 // Il buco nero della Copertina (SPEC §2), con la geometria del mockup in
@@ -8,10 +10,6 @@ import './BlackHole.css'
 // piegata sopra l'ombra dalla lente, alone e getti da Quasar in su.
 // Due livelli: sotto alone e getti, sfocati e fermi; sopra il disco, che
 // ruota senza filtri così il ridisegno a ogni fotogramma resta leggero.
-
-const VIEW = '520 -140 780 900'
-const DISK = 'M589,205 a336,51.5 0 1,0 672,0 a336,51.5 0 1,0 -672,0 Z M757,205 a168,25.8 0 1,0 336,0 a168,25.8 0 1,0 -336,0 Z'
-const INNER = 'M706.6,205 a218.4,33.6 0 1,0 436.8,0 a218.4,33.6 0 1,0 -436.8,0 Z M757,205 a168,25.8 0 1,0 336,0 a168,25.8 0 1,0 -336,0 Z'
 
 const disk = { stopColor: 'var(--disk)' }
 
@@ -28,7 +26,7 @@ const STAGGER_MS = 120
  * completo di sempre. Salendo di tappa i livelli nuovi compaiono in sequenza;
  * scendendo si spengono insieme. Con il movimento ridotto restano senza transizione.
  */
-export function BlackHole({ level, className, stage }: { level: Energy; className?: string; stage?: BlackHoleStage }) {
+export function BlackHole({ level, className, stage, children }: { level: Energy; className?: string; stage?: BlackHoleStage; children?: ReactNode }) {
   const s = ENERGY[level]
   const current = stage ?? FULL
   const previous = useRef(current)
@@ -42,13 +40,11 @@ export function BlackHole({ level, className, stage }: { level: Energy; classNam
     opacity: current >= n ? target : 0,
     transitionDelay: current > from && n > from && n <= current ? `${(n - from - 1) * STAGGER_MS}ms` : '0ms',
   })
-  const uid = useId().replace(/[^a-zA-Z0-9_-]/g, '')
-  const id = (name: string) => `${uid}-${name}`
-  const url = (name: string) => `url(#${id(name)})`
+  const { id, url } = useSvgIds()
 
   return (
     <div className={`bh${className ? ` ${className}` : ''}`} aria-hidden="true" data-stage={current}>
-      <svg className="bh__layer" viewBox={VIEW} preserveAspectRatio="xMidYMid meet">
+      <svg className="bh__layer" viewBox={BH_VIEW} preserveAspectRatio="xMidYMid meet">
         <defs>
           <radialGradient id={id('glow')} cx="925" cy="205" r="300" gradientUnits="userSpaceOnUse">
             <stop offset="0" style={disk} stopOpacity="0.85" />
@@ -72,7 +68,7 @@ export function BlackHole({ level, className, stage }: { level: Energy; classNam
             <feGaussianBlur stdDeviation="3" />
           </filter>
         </defs>
-        <g transform="rotate(-9 925 205)">
+        <g transform={`rotate(${BH.tiltDeg} ${BH.cx} ${BH.cy})`}>
           <circle className="bh__lvl" cx="925" cy="205" r="300" fill={url('glow')} filter={url('soft')} style={lvl(2, s.glow)} />
           <g className="bh__lvl" style={lvl(5, s.jet)}>
             <polygon points="921,205 929,205 952,-330 898,-330" fill={url('jetUp')} filter={url('haze')} />
@@ -82,7 +78,7 @@ export function BlackHole({ level, className, stage }: { level: Energy; classNam
         </g>
       </svg>
 
-      <svg className="bh__layer bh__layer--disk" viewBox={VIEW} preserveAspectRatio="xMidYMid meet">
+      <svg className="bh__layer bh__layer--disk" viewBox={BH_VIEW} preserveAspectRatio="xMidYMid meet">
         <defs>
           <linearGradient id={id('dop')} x1="589" y1="205" x2="1261" y2="205" gradientUnits="userSpaceOnUse">
             <stop offset="0" stopColor="#FFFFFF" stopOpacity="0.95" />
@@ -99,27 +95,32 @@ export function BlackHole({ level, className, stage }: { level: Energy; classNam
             <rect x="500" y="205" width="850" height="320" />
           </clipPath>
         </defs>
-        <g transform="rotate(-9 925 205)">
+        <g transform={`rotate(${BH.tiltDeg} ${BH.cx} ${BH.cy})`}>
           <g className="bh__lvl" style={lvl(3, s.disk)}>
-            <path d={DISK} fill={url('dop')} fillRule="evenodd" />
-            <path d={INNER} fill="#FFFFFF" fillOpacity="0.32" fillRule="evenodd" />
+            <path d={DISK_PATH} fill={url('dop')} fillRule="evenodd" />
+            <path d={INNER_PATH} fill="#FFFFFF" fillOpacity="0.32" fillRule="evenodd" />
           </g>
           <g className="bh__lvl" style={lvl(4, s.disk)}>
             <ellipse className="bh__flow" cx="925" cy="205" rx="252" ry="38" fill="none" stroke="#FFFFFF" strokeOpacity="0.5" strokeWidth="2" strokeDasharray="3 31" strokeLinecap="round" />
             <path d="M776,205 A149,149 0 0,1 1074,205" fill="none" stroke={url('lens')} strokeWidth="40" strokeLinecap="round" />
           </g>
-          <circle cx="925" cy="205" r="112" fill="#000000" />
-          <circle className="bh__lvl" cx="925" cy="205" r="116.5" fill="none" stroke="#FFFFFF" strokeWidth="2" style={lvl(1, s.ring)} />
+          <circle cx={BH.cx} cy={BH.cy} r={BH.shadow} fill="#000000" />
+          <circle className="bh__lvl" cx={BH.cx} cy={BH.cy} r={BH.ring} fill="none" stroke="#FFFFFF" strokeWidth="2" style={lvl(1, s.ring)} />
           <g className="bh__lvl" style={lvl(4, s.disk)}>
             <path d="M799.6,205 A125.4,125.4 0 0,0 1050.4,205" fill="none" stroke={url('lens')} strokeWidth="7" />
             <g clipPath={url('front')}>
-              <path d={DISK} fill={url('dop')} fillRule="evenodd" />
-              <path d={INNER} fill="#FFFFFF" fillOpacity="0.32" fillRule="evenodd" />
+              <path d={DISK_PATH} fill={url('dop')} fillRule="evenodd" />
+              <path d={INNER_PATH} fill="#FFFFFF" fillOpacity="0.32" fillRule="evenodd" />
               <ellipse className="bh__flow" cx="925" cy="205" rx="252" ry="38" fill="none" stroke="#FFFFFF" strokeOpacity="0.5" strokeWidth="2" strokeDasharray="3 31" strokeLinecap="round" />
             </g>
           </g>
         </g>
       </svg>
+      {children ? (
+        <svg className="bh__layer bh__layer--cosmos" viewBox={BH_VIEW} preserveAspectRatio="xMidYMid meet">
+          {children}
+        </svg>
+      ) : null}
     </div>
   )
 }

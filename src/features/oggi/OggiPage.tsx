@@ -1,14 +1,22 @@
+import { useReducedMotion } from 'motion/react'
 import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { Page } from '../../app/Page'
 import { TopbarActions } from '../../app/TopbarActions'
 import { useToday } from '../../app/useToday'
 import { BlackHole } from '../../art/BlackHole'
+import { COSMOS_PHONE, COSMOS_WIDE } from '../../art/celestial'
+import { Cosmos } from '../../art/Cosmos'
+import { composeCosmos, type ListComet } from '../../art/cosmos-model'
+import type { Dict } from '../../i18n/dict'
+import type { Format } from '../../i18n'
 import { FarGalaxy, Grain, Sky } from '../../art/Sky'
 import { EnergyPicker } from '../../components/EnergyPicker'
 import { QuickLog } from '../../components/QuickLog'
 import { Ruler } from '../../components/Ruler'
 import { setEnergy } from '../../db/actions'
-import { useDay, useTuning } from '../../db/hooks'
+import { db } from '../../db/db'
+import { useCourses, useDay, usePendingCaptures, useResults, useTuning } from '../../db/hooks'
+import { consumeCapture } from '../../db/result-actions'
 import { useDayPlan } from '../../db/plan-context'
 import { renderMsg } from '../../i18n/messages'
 import { useI18n, useRenderedPlan } from '../../i18n/store'
@@ -28,8 +36,21 @@ let introPlayed = false
 
 const WIDE = 860
 
+/** Dove porta il tocco su una cometa (il Multiverso arriva con la sezione E: per ora il Libretto). */
+const COMET_TARGET = '#/libretto'
+/** Lato minimo dell'area di tocco di una testa, in pixel. */
+const HIT_SIZE = 44
+
 /** Etichette brevi sul telefono: la prima parola basta a riconoscere l'impegno. */
 const shorten = (title: string, narrow: boolean) => (narrow && title.length > 14 ? title.split(/\s+/)[0]! : title)
+
+/** Il testo di una cometa per i lettori di schermo. */
+function cometText(c: ListComet, t: Dict['oggi']['cosmos'], f: Format): string {
+  const s = c.state
+  if (s.kind === 'comet') return s.approx ? t.cometMonth({ name: c.name, date: s.date }, f) : t.comet({ name: c.name, days: s.days, date: s.date }, f)
+  if (s.date === null || s.days === null) return t.periodicNoDate({ name: c.name, outcome: s.outcome })
+  return s.approx ? t.periodicMonth({ name: c.name, outcome: s.outcome, date: s.date }, f) : t.periodic({ name: c.name, outcome: s.outcome, days: s.days, date: s.date }, f)
+}
 
 export default function OggiPage() {
   const today = useToday()
@@ -85,6 +106,21 @@ export default function OggiPage() {
     return [...events, ...blocks]
   }, [state, suggestions, wide, i18n])
 
+  const courses = useCourses()
+  const results = useResults()
+  const reduced = !!useReducedMotion()
+  const layout = wide ? COSMOS_WIDE : COSMOS_PHONE
+  const pending = usePendingCaptures()
+  const model = useMemo(() => (width && pending ? composeCosmos({ courses, results, today, layout, pending }) : null), [width, pending, courses, results, today, layout])
+  // Le voci che non si possono animare (risultato cambiato, corso sparito) si consumano subito.
+  useEffect(() => {
+    for (const id of model?.stale ?? []) void consumeCapture(db, id)
+  }, [model])
+  const firstCapture = model?.captures[0]
+  // pixel per unità del viewBox del buco nero (--bhu nel CSS)
+  const hitRadius = HIT_SIZE / 2 / (wide ? u : 0.28 + 0.000512 * width)
+  const cosmosCount = model ? model.list.comets.length + model.list.moons.length : 0
+
   const style = { '--u': `${u}px` } as CSSProperties
   const dayNumber = Number(today.slice(8, 10))
 
@@ -101,7 +137,9 @@ export default function OggiPage() {
 
       <div ref={coverRef} className={`cover${wide ? ' cover--wide' : ''}${intro ? ' cover--intro' : ''}`} style={style}>
         <Sky />
-        <BlackHole level={energy} className={`cover__bh${intro ? ' bh--rise' : ''}`} />
+        <BlackHole level={energy} className={`cover__bh${intro ? ' bh--rise' : ''}`}>
+          {model ? <Cosmos model={model} layout={layout} reduced={reduced} startDelay={intro ? 1.6 : 0.4} onCaptured={(id) => void consumeCapture(db, id)} hitRadius={hitRadius} onCometTap={() => (location.hash = COMET_TARGET)} /> : null}
+        </BlackHole>
 
         <h1 id="oggi-title" className="cover__title">
           {/* cambiando fascia il titolo si riaccende con una breve dissolvenza */}
@@ -165,7 +203,38 @@ export default function OggiPage() {
             {suggestions.length ? (
               <p>{to.suggestedBlocks({ blocks: suggestions.map((b) => ({ start: b.start, title: renderMsg(b.item.title, i18n) })) })}</p>
             ) : null}
+            <p role="status">{firstCapture ? to.cosmos.captured({ name: firstCapture.name, grade: firstCapture.moon.grade, lode: firstCapture.moon.lode }) : ''}</p>
           </div>
+
+          {model && cosmosCount > 0 ? (
+            <div className="sr-only cosmos-sr">
+              <section aria-labelledby="cosmos-h">
+                <h2 id="cosmos-h">{to.cosmos.title}</h2>
+                {model.list.comets.length ? (
+                  <>
+                    <h3>{to.cosmos.cometsTitle}</h3>
+                    <ul>
+                      {model.list.comets.map((c) => (
+                        <li key={c.courseId}>
+                          <a href={COMET_TARGET}>{cometText(c, to.cosmos, i18n.f)}</a>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : null}
+                {model.list.moons.length ? (
+                  <>
+                    <h3>{to.cosmos.moonsTitle}</h3>
+                    <ul>
+                      {model.list.moons.map((m) => (
+                        <li key={m.courseId}>{m.lode ? to.cosmos.moonLode(m) : to.cosmos.moon(m)}</li>
+                      ))}
+                    </ul>
+                  </>
+                ) : null}
+              </section>
+            </div>
+          ) : null}
 
           <CompleteProfileCard />
 

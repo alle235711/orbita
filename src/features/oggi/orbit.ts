@@ -86,6 +86,9 @@ export interface PlacedPlanet extends PlanetInput {
 
 type Box = [number, number, number, number] // x1, y1, x2, y2
 
+/** Quanto pesa, in px² di sovrapposizione, salire o scendere di una riga. */
+const TIER_COST = 2
+
 const overlap = (a: Box, b: Box) =>
   Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])) * Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1]))
 
@@ -110,20 +113,24 @@ export function placePlanets(planets: PlanetInput[], m: Mapping, width: number, 
     const r = p.kind === 'now' ? 18 : 6
     const gap = p.kind === 'now' ? 13 : 8
     const fits = x + gap + w <= width - 4
-    const above = (box: [number, number]): Box => [box[0], y - r - 4 - fontSize, box[1], y - r - 2]
-    const below = (box: [number, number]): Box => [box[0], y + r + 18 - fontSize, box[1], y + r + 20]
+    // Se i quattro posti vicini al pianeta sono tutti occupati, l'etichetta sale o scende di una riga.
+    const shift = (tier: number) => tier * (fontSize + 3)
+    const above = (box: [number, number], tier: number): Box => [box[0], y - r - 4 - fontSize - shift(tier), box[1], y - r - 2 - shift(tier)]
+    const below = (box: [number, number], tier: number): Box => [box[0], y + r + 18 - fontSize + shift(tier), box[1], y + r + 20 + shift(tier)]
     const right: [number, number] = [x + gap, x + gap + w]
     const left: [number, number] = [x - gap - w, x - gap]
     const sides = p.kind === 'now' ? ['above', 'below'] : preferAbove ? ['above', 'below'] : ['below', 'above']
     const anchors = fits ? ['start', 'end'] : ['end', 'start']
-    const candidates = anchors.flatMap((anchor) =>
-      sides.map((side) => {
-        const span = anchor === 'start' ? right : left
-        const box = side === 'above' ? above(span) : below(span)
-        const outside = box[0] < 0 || box[2] > width ? 1e6 : 0
-        const cost = outside + placed.reduce((sum, b) => sum + overlap(box, b), 0)
-        return { anchor: anchor as 'start' | 'end', side, box, cost }
-      }),
+    const candidates = [0, 1, 2].flatMap((tier) =>
+      anchors.flatMap((anchor) =>
+        sides.map((side) => {
+          const span = anchor === 'start' ? right : left
+          const box = side === 'above' ? above(span, tier) : below(span, tier)
+          const outside = box[0] < 0 || box[2] > width ? 1e6 : 0
+          const cost = outside + tier * TIER_COST + placed.reduce((sum, b) => sum + overlap(box, b), 0)
+          return { anchor: anchor as 'start' | 'end', side, tier, box, cost }
+        }),
+      ),
     )
     const best = candidates.reduce((a, b) => (b.cost < a.cost ? b : a))
     placed.push(best.box)
@@ -134,7 +141,7 @@ export function placePlanets(planets: PlanetInput[], m: Mapping, width: number, 
       y,
       anchor: best.anchor,
       labelX: best.anchor === 'start' ? x + gap : x - gap,
-      labelY: best.side === 'above' ? y - r - 4 : y + r + 18,
+      labelY: best.side === 'above' ? y - r - 4 - shift(best.tier) : y + r + 18 + shift(best.tier),
     }
   })
 }

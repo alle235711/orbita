@@ -1,3 +1,4 @@
+import { useSvgIds } from '../lib/useSvgIds'
 import { FAR_GALAXY_KNOTS, FAR_GALAXY_PATH, STARS } from './cover-data'
 import './Sky.css'
 
@@ -26,16 +27,17 @@ export function Grain() {
 
 /** La piccola galassia a spirale lontana della Copertina. */
 export function FarGalaxy({ className }: { className?: string }) {
+  const ids = useSvgIds()
   return (
     <svg className={className} viewBox="1012 498 140 84" aria-hidden="true">
       <defs>
-        <filter id="far-haze" x="-20%" y="-50%" width="140%" height="200%">
+        <filter id={ids.id('haze')} x="-20%" y="-50%" width="140%" height="200%">
           <feGaussianBlur stdDeviation="3" />
         </filter>
       </defs>
-      <path d={FAR_GALAXY_PATH} fill="none" stroke="#9FB6FF" strokeOpacity="0.28" strokeWidth="9" strokeLinecap="round" filter="url(#far-haze)" />
+      <path d={FAR_GALAXY_PATH} fill="none" stroke="#9FB6FF" strokeOpacity="0.28" strokeWidth="9" strokeLinecap="round" filter={ids.url('haze')} />
       <path d={FAR_GALAXY_PATH} fill="none" stroke="#DCE4FF" strokeOpacity="0.6" strokeWidth="1.4" strokeLinecap="round" />
-      <ellipse cx="1082" cy="540" rx="11" ry="6" transform="rotate(-28 1082 540)" fill="#FFE7B0" opacity="0.85" filter="url(#far-haze)" />
+      <ellipse cx="1082" cy="540" rx="11" ry="6" transform="rotate(-28 1082 540)" fill="#FFE7B0" opacity="0.85" filter={ids.url('haze')} />
       <g fill="#FF7FB8" opacity="0.8">
         {FAR_GALAXY_KNOTS.map(([x, y, r], i) => (
           <circle key={i} cx={x} cy={y} r={r} />

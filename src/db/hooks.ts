@@ -8,7 +8,8 @@ import { activeCourses, normalizeGraduation, normalizeTargetAverage } from '../l
 import { normalizeModules, normalizeStudyBlock, type ModulesSettings, type StudyBlockSettings } from '../modules/types'
 import { DEFAULT_TUNING, resolveGroups, type Tuning } from '../rules/defaults'
 import { normalizeProfile, type Profile } from './profile'
-import { getSetting, type GraduationSettings, type SettingValues } from './settings'
+import { normalizePendingCaptures } from './result-actions'
+import { getSetting, type GraduationSettings, type PendingCapture, type SettingValues } from './settings'
 
 const EMPTY: never[] = []
 
@@ -68,4 +69,9 @@ export function useStudyBlock(): StudyBlockSettings | undefined {
 export function useTuning(): Tuning {
   const rules = useRules()
   return useMemo(() => (rules.length ? resolveGroups(rules) : DEFAULT_TUNING), [rules])
+}
+
+/** Voti appena presi in attesa dell'animazione di cattura; undefined mentre carica. */
+export function usePendingCaptures(): PendingCapture[] | undefined {
+  return useLiveQuery(async () => normalizePendingCaptures(await getSetting(db, 'pendingCaptures')), [])
 }

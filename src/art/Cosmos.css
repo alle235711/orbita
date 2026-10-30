@@ -1,0 +1,11 @@
+/* Il livello di comete e lune sta nell'SVG del buco nero: nessun filtro,
+   nessuna fusione, nessun will-change. Risponde al tocco solo sulle teste. */
+.bh__layer--cosmos {
+  pointer-events: none;
+}
+
+.cosmos__hit {
+  fill: transparent;
+  pointer-events: all;
+  cursor: pointer;
+}

@@ -63,3 +63,12 @@ export async function removeResult(db: OrbitaDB, id: string): Promise<void> {
     if (pending.some((p) => p.resultId === id)) await setSetting(db, 'pendingCaptures', pending.filter((p) => p.resultId !== id))
   })
 }
+
+/** Toglie una cattura dall'attesa (animata o scaduta). Idempotente: un id sconosciuto non fa nulla. */
+export async function consumeCapture(db: OrbitaDB, resultId: string): Promise<void> {
+  await db.transaction('rw', db.settings, async () => {
+    const pending = normalizePendingCaptures(await getSetting(db, 'pendingCaptures'))
+    const next = pending.filter((p) => p.resultId !== resultId)
+    if (next.length !== pending.length) await setSetting(db, 'pendingCaptures', next)
+  })
+}

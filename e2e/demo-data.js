@@ -63,7 +63,7 @@ export function demoBackup(today, { deckIds = [] } = {}) {
     id: `demo-c-${i + 1}`,
     name,
     cfu: [9, 6, 12, 9, 6][i],
-    examDate: [shift(today, 17), shift(today, 21), shift(today, 70).slice(0, 7), shift(today, 71).slice(0, 7), shift(today, 72).slice(0, 7)][i],
+    examDate: [shift(today, 9), shift(today, 24), shift(today, 70).slice(0, 7), shift(today, 97).slice(0, 7), shift(today, 72).slice(0, 7)][i],
     difficulty: [2, 3, 2, 1, 2][i],
     semester: 1,
     sections: ['Parte A', 'Parte B'],
