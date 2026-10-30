@@ -16,11 +16,21 @@ import { useI18n } from '../../i18n/store'
 import { workSessionTypes } from '../../modules/registry'
 import { DEFAULT_MODULES } from '../../modules/types'
 import { scheduleDay, type SuggestedBlock } from '../../rules/schedule'
+import { hiddenCourseIds, isHiddenLesson, withoutHiddenLessons } from '../../ics/hide'
 import { agendaWindow, eventsByDay, layoutDay, weekHours } from './agenda'
 import { EventSheet, type EventDraft } from './EventSheet'
+import { IcsImportSheet } from './IcsImportSheet'
 import './AgendaPage.css'
 
 type View = 'giorno' | 'settimana'
+
+/** Un blocco occupa almeno questo tempo: tanto serve a una riga di testo senza toccare il blocco dopo. */
+const MIN_BLOCK_MINUTES = 35
+const MIN_WEEK_BLOCK_MINUTES = 45
+/** Sotto questa durata il blocco ha una riga sola (titolo e ora); sotto TINY_MINUTES solo il titolo. */
+const SHORT_MINUTES = 75
+const TINY_MINUTES = 30
+const spanOf = (start: string, end: string) => toMinutes(end) - toMinutes(start)
 
 const blockType = (b: SuggestedBlock): EventType =>
   ['arrampicata', 'corsa', 'palestra', 'camminata'].includes(b.item.kind) ? 'sport' : 'studio'
@@ -41,6 +51,7 @@ export default function AgendaPage() {
   const modules = useModules() ?? DEFAULT_MODULES
   const span = agendaWindow(tuning)
   const [draft, setDraft] = useState<EventDraft | null>(null)
+  const [icsOpen, setIcsOpen] = useState(false)
 
   const data = useLiveQuery(async () => {
     const [events, sessions, tasks] = await Promise.all([
@@ -54,8 +65,14 @@ export default function AgendaPage() {
   const go = (next: { giorno?: ISODate; vista?: View }) =>
     navigate('agenda', { giorno: next.giorno ?? day, ...(next.vista ?? view) === 'settimana' ? { vista: 'settimana' } : {} })
 
-  const byDay = useMemo(() => eventsByDay(data?.events ?? [], week), [data, week])
-  const hours = useMemo(() => weekHours(day, today, data?.sessions ?? [], data?.events ?? [], workSessionTypes(modules)), [day, today, data, modules])
+  // Le lezioni dei corsi con "Nascondi le lezioni" restano nel database ma non si vedono né pesano sulle ore.
+  const visible = useMemo(() => withoutHiddenLessons(data?.events ?? [], courses), [data, courses])
+  const hiddenToday = useMemo(() => {
+    const hidden = hiddenCourseIds(courses)
+    return (data?.events ?? []).filter((e) => e.date === day && isHiddenLesson(e, hidden)).length
+  }, [data, courses, day])
+  const byDay = useMemo(() => eventsByDay(visible, week), [visible, week])
+  const hours = useMemo(() => weekHours(day, today, data?.sessions ?? [], visible, workSessionTypes(modules)), [day, today, data, visible, modules])
   const suggestions = useMemo(
     () => (plan ? scheduleDay(plan.plan.items, plan.context.events, { from: plan.now, tuning }) : []),
     [plan, tuning],
@@ -112,6 +129,13 @@ export default function AgendaPage() {
             </svg>
             {ta.newEvent}
           </button>
+          <button type="button" className="btn" onClick={() => setIcsOpen(true)}>
+            <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="1.5" y="2.5" width="11" height="10" rx="2" />
+              <path d="M1.5 5.5h11M4.5 1v3M9.5 1v3M7 7.2v3.1M5.6 8.9L7 10.3l1.4-1.4" />
+            </svg>
+            {ta.ics.open}
+          </button>
         </div>
       </header>
 
@@ -157,6 +181,7 @@ export default function AgendaPage() {
             span={span}
             day={day}
             events={byDay.get(day) ?? []}
+            hiddenCount={hiddenToday}
             suggestions={day === today ? suggestions : []}
             now={day === today ? now : null}
             onEdit={(e) => setDraft(e)}
@@ -170,6 +195,7 @@ export default function AgendaPage() {
       )}
 
       <EventSheet draft={draft} courses={courses} onClose={() => setDraft(null)} />
+      <IcsImportSheet open={icsOpen} onClose={() => setIcsOpen(false)} />
     </Page>
   )
 }
@@ -180,6 +206,7 @@ interface DayTimelineProps {
   span: { start: number; end: number }
   day: ISODate
   events: CalendarEvent[]
+  hiddenCount: number
   suggestions: SuggestedBlock[]
   now: number | null
   onEdit: (e: CalendarEvent) => void
@@ -187,7 +214,7 @@ interface DayTimelineProps {
   onConfirm: (b: SuggestedBlock) => void
 }
 
-function DayTimeline({ day, events, suggestions, now, span, onEdit, onNew, onConfirm }: DayTimelineProps) {
+function DayTimeline({ day, events, hiddenCount, suggestions, now, span, onEdit, onNew, onConfirm }: DayTimelineProps) {
   const i18n = useI18n()
   const { t, f } = i18n
   const ta = t.agenda
@@ -199,7 +226,7 @@ function DayTimeline({ day, events, suggestions, now, span, onEdit, onNew, onCon
   const from = Math.min(span.start, ...items.map((i) => Math.floor(toMinutes(i.start) / 60) * 60))
   const to = Math.max(span.end, ...items.map((i) => Math.ceil(toMinutes(i.end) / 60) * 60))
   const hours = Array.from({ length: (to - from) / 60 }, (_, i) => from / 60 + i)
-  const placed = layoutDay(items)
+  const placed = layoutDay(items, MIN_BLOCK_MINUTES)
   const pos = (start: number, end: number): CSSProperties => ({
     top: `calc(${(start - from) / 60} * var(--hour))`,
     height: `calc(${(end - start) / 60} * var(--hour) - 4px)`,
@@ -223,8 +250,9 @@ function DayTimeline({ day, events, suggestions, now, span, onEdit, onNew, onCon
               left: `calc(${p.column} / ${p.columns} * 100%)`,
               width: `calc(100% / ${p.columns} - 4px)`,
             }
-            const short = p.end - p.start < 50
-            const tiny = p.end - p.start < 30
+            const real = p.item.kind === 'event' ? spanOf(p.item.event.start, p.item.event.end) : spanOf(p.item.block.start, p.item.block.end)
+            const short = real < SHORT_MINUTES
+            const tiny = real < TINY_MINUTES
             if (p.item.kind === 'event') {
               const e = p.item.event
               return (
@@ -260,6 +288,7 @@ function DayTimeline({ day, events, suggestions, now, span, onEdit, onNew, onCon
         ) : null}
       </div>
       {!events.length && !suggestions.length ? <p className="timeline__empty">{ta.empty}</p> : null}
+      {hiddenCount ? <p className="timeline__hidden">{ta.ics.hiddenLessons({ count: hiddenCount }, f)}</p> : null}
     </section>
   )
 }
@@ -371,10 +400,10 @@ function WeekGrid({ week, today, byDay, span, onOpen, onEdit }: WeekGridProps) {
           </button>
           <ul className="week__items" role="list" aria-label={t.agenda.dayLead({ date: d, isToday: false }, f)}>
             {(byDay.get(d) ?? []).length === 0 ? <li className="week__none">{t.agenda.free}</li> : null}
-            {layoutDay(byDay.get(d) ?? []).map((p) => (
+            {layoutDay(byDay.get(d) ?? [], MIN_WEEK_BLOCK_MINUTES).map((p) => (
               <li
                 key={p.item.id}
-                className={`block block--${p.item.type} block--mini`}
+                className={`block block--${p.item.type} block--mini${spanOf(p.item.start, p.item.end) < 60 ? ' block--short' : ''}`}
                 style={{
                   top: `calc(${(p.start - from) / 60} * var(--hour))`,
                   height: `calc(${(p.end - p.start) / 60} * var(--hour) - 3px)`,

@@ -23,10 +23,11 @@ export interface Placed<T> {
 /**
  * Impegni che si sovrappongono vanno affiancati: ogni gruppo di impegni
  * sovrapposti si divide in colonne, la prima libera per ciascuno.
+ * `minMinutes` è la durata minima occupata: un impegno breve non copre il successivo.
  */
-export function layoutDay<T extends { start: string; end: string }>(items: T[]): Placed<T>[] {
+export function layoutDay<T extends { start: string; end: string }>(items: T[], minMinutes = 15): Placed<T>[] {
   const sorted = items
-    .map((item) => ({ item, start: toMinutes(item.start), end: Math.max(toMinutes(item.end), toMinutes(item.start) + 15) }))
+    .map((item) => ({ item, start: toMinutes(item.start), end: Math.max(toMinutes(item.end), toMinutes(item.start) + minMinutes) }))
     .sort((a, b) => a.start - b.start || b.end - a.end)
   const out: Placed<T>[] = []
   let group: Placed<T>[] = []

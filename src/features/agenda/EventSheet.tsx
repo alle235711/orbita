@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { toast } from '../../app/toast'
 import { Sheet } from '../../components/Sheet'
 import { db } from '../../db/db'
-import { remove, save } from '../../db/repo'
+import { patch, remove, save } from '../../db/repo'
 import { useModules } from '../../db/hooks'
 import type { CalendarEvent, Course, EventType } from '../../db/schema'
 import { eventTypeEnabled } from '../../modules/registry'
@@ -30,6 +30,7 @@ export function EventSheet({ draft, courses, onClose }: EventSheetProps) {
   const [end, setEnd] = useState('10:00')
   const [type, setType] = useState<EventType>('lezione')
   const [courseId, setCourseId] = useState('')
+  const [location, setLocation] = useState('')
   const [error, setError] = useState('')
   const editing = !!draft?.id
 
@@ -41,6 +42,7 @@ export function EventSheet({ draft, courses, onClose }: EventSheetProps) {
     setEnd(toTimeInput(draft.end ?? '10:00'))
     setType(draft.type ?? 'lezione')
     setCourseId(draft.courseId ?? '')
+    setLocation(draft.location ?? '')
     setError('')
   }, [draft])
 
@@ -60,8 +62,11 @@ export function EventSheet({ draft, courses, onClose }: EventSheetProps) {
       title: title.trim(),
       type,
       courseId: courseId || undefined,
+      location: location.trim() || undefined,
       suggested: draft.suggested ?? false,
       confirmed: true,
+      // Un evento importato che l'utente ha toccato non viene più riscritto dalle importazioni.
+      ...(draft.source === 'ics' ? { userEdited: true } : {}),
     })
     toast(editing ? ta.sheet.updated : ta.sheet.added({ date }, f))
     onClose()
@@ -69,6 +74,7 @@ export function EventSheet({ draft, courses, onClose }: EventSheetProps) {
 
   const del = async () => {
     if (!draft?.id) return
+    if (draft.source === 'ics') await patch(db.events, draft.id, { userEdited: true })
     await remove(db.events, draft.id)
     toast(ta.sheet.removed)
     onClose()
@@ -81,6 +87,7 @@ export function EventSheet({ draft, courses, onClose }: EventSheetProps) {
           <span>{ta.sheet.title}</span>
           <input className="field" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={ta.sheet.titlePlaceholder} autoFocus />
         </label>
+        {draft?.source === 'ics' ? <p className="form-hint">{ta.ics.fromTimetable}</p> : null}
         <div className="choices" role="radiogroup" aria-label={ta.sheet.type}>
           {EVENT_TYPES.filter((id) => id === type || eventTypeEnabled(modules, id)).map((id) => (
             <button key={id} type="button" role="radio" aria-checked={type === id} className="chip" onClick={() => setType(id)}>
@@ -115,6 +122,10 @@ export function EventSheet({ draft, courses, onClose }: EventSheetProps) {
             </label>
           ) : null}
         </div>
+        <label className="form-field">
+          <span>{ta.location}</span>
+          <input className="field" value={location} onChange={(e) => setLocation(e.target.value)} />
+        </label>
         <p className="form-error" role="alert">
           {error}
         </p>

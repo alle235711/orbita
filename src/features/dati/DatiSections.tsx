@@ -1,3 +1,4 @@
+import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState } from 'react'
 import { DateField } from '../../components/DateField'
 import { ModuleSwitches } from '../../components/ModuleSwitches'
@@ -104,6 +105,14 @@ export function ExamsSection({ cardCounts }: { cardCounts: Map<string, number> |
   const results = useResults()
   const passed = new Set(courses.filter((c) => courseStatus(c.id, results).kind === 'superato').map((c) => c.id))
   const [adding, setAdding] = useState(false)
+  // Lezioni vive per corso: l'interruttore compare dove ce ne sono (o dove è già acceso).
+  const lessonCounts = useLiveQuery(async () => {
+    const byCourse = new Map<string, number>()
+    for (const e of await db.events.toArray()) {
+      if (!e.deletedAt && e.type === 'lezione' && e.courseId) byCourse.set(e.courseId, (byCourse.get(e.courseId) ?? 0) + 1)
+    }
+    return byCourse
+  })
   const byExam = (a: Course, b: Course) =>
     (a.examDate ? resolveDate(a.examDate) : '9999').localeCompare(b.examDate ? resolveDate(b.examDate) : '9999') || a.name.localeCompare(b.name, 'it')
   const first = courses.filter((c) => c.semester !== 2).sort(byExam)
@@ -114,7 +123,7 @@ export function ExamsSection({ cardCounts }: { cardCounts: Map<string, number> |
       <p className="dati__hint">{td.coursesHint}</p>
       <ul className="courses" role="list">
         {first.map((c) => (
-          <CourseRow key={c.id} course={c} cards={cardCounts?.get(c.id) ?? 0} passed={passed.has(c.id)} />
+          <CourseRow key={c.id} course={c} cards={cardCounts?.get(c.id) ?? 0} lessons={lessonCounts?.get(c.id) ?? 0} passed={passed.has(c.id)} />
         ))}
       </ul>
       {later.length ? (
@@ -122,7 +131,7 @@ export function ExamsSection({ cardCounts }: { cardCounts: Map<string, number> |
           <h3 className="dati__sub">{td.secondSemester}</h3>
           <ul className="courses" role="list">
             {later.map((c) => (
-              <CourseRow key={c.id} course={c} cards={cardCounts?.get(c.id) ?? 0} passed={passed.has(c.id)} />
+              <CourseRow key={c.id} course={c} cards={cardCounts?.get(c.id) ?? 0} lessons={lessonCounts?.get(c.id) ?? 0} passed={passed.has(c.id)} />
             ))}
           </ul>
         </>
@@ -177,12 +186,13 @@ function NewExam({ onDone }: { onDone: () => void }) {
   )
 }
 
-function CourseRow({ course, cards, passed }: { course: Course; cards: number; passed: boolean }) {
+function CourseRow({ course, cards, lessons, passed }: { course: Course; cards: number; lessons: number; passed: boolean }) {
   const { t, f } = useI18n()
   const td = t.dati
   const te = t.profilo.exams
   const meta = [course.code, course.degree, cards ? td.cardsMeta({ n: cards }, f) : null].filter(Boolean).join(', ')
   const del = useConfirm(() => void remove(db.courses, course.id))
+  const hidden = course.hideLessons === true
   return (
     <li className="course">
       <div className="course__name">
@@ -226,6 +236,25 @@ function CourseRow({ course, cards, passed }: { course: Course; cards: number; p
           ))}
         </div>
       </div>
+      {lessons > 0 || hidden ? (
+        <div className="course__lessons">
+          <span className="date-field__label">
+            {td.lessons.hide}
+          </span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={hidden}
+            aria-label={td.lessons.aria({ name: course.name })}
+            className="switch"
+            onClick={() => void patch(db.courses, course.id, { hideLessons: hidden ? undefined : true })}
+          >
+            <span className="switch__thumb" />
+            <span className="switch__text">{hidden ? t.regole.on : t.regole.off}</span>
+          </button>
+          {hidden ? <span className="course__meta">{td.lessons.hiddenNote}</span> : null}
+        </div>
+      ) : null}
       <div className="dati__actions">
         <button type="button" className={`btn${del.armed ? ' btn--danger' : ''}`} onClick={del.press}>
           {del.armed ? te.removeConfirm : te.remove}

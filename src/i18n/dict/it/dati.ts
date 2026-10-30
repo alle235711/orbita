@@ -50,4 +50,9 @@ export const dati = {
     otherDaysUsage: (p: { other: Lang }) => `In questi giorni l’interfaccia è in ${p.other === 'en' ? 'inglese' : 'italiano'}.`,
     otherDaysMax: 'Al massimo tre giorni: toglierne uno per sceglierne un altro.',
   },
+  lessons: {
+    hide: 'Nascondi le lezioni',
+    aria: (p: { name: string }) => `Nascondi le lezioni di ${p.name}`,
+    hiddenNote: 'Nascoste da agenda, copertina e pianificazione.',
+  },
 }

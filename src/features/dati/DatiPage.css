@@ -185,3 +185,11 @@
   font-weight: 700;
   color: var(--disk);
 }
+
+.course__lessons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  min-height: var(--tap);
+}

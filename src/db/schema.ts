@@ -66,6 +66,14 @@ export interface CalendarEvent extends Syncable {
   courseId?: string
   /** Chiave della voce del piano da cui viene, per non riproporla. */
   planKey?: string
+  /** Presente solo per gli eventi creati dall'importazione di un file .ics. */
+  source?: 'ics'
+  /** UID del VEVENT (la serie) da cui viene l'evento. */
+  uid?: string
+  /** Luogo (aula), testo libero. */
+  location?: string
+  /** L'utente ha modificato o tolto un evento importato: l'importazione non lo tocca più. */
+  userEdited?: boolean
 }
 
 export interface Task extends Syncable {
@@ -91,6 +99,8 @@ export interface Course extends Syncable {
   cfu?: number
   /** Id del mazzo d'esempio da cui vengono le schede del corso. */
   sampleDeck?: string
+  /** Nasconde le lezioni (eventi 'lezione') del corso da agenda, copertina e pianificazione. */
+  hideLessons?: boolean
 }
 
 export type DeadlineKind = 'periodo' | 'scadenza'

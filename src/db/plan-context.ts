@@ -7,6 +7,7 @@ import { resolveGroups } from '../rules/defaults'
 import { evaluate } from '../rules/plan'
 import type { DayPlan, RuleContext } from '../rules/types'
 import { db, type OrbitaDB } from './db'
+import { withoutHiddenLessons } from '../ics/hide'
 import { alive } from './repo'
 import type { CalendarEvent, ExamResult } from './schema'
 import { activeCourses } from '../libretto/grades'
@@ -41,7 +42,8 @@ export async function loadRuleContext(db: OrbitaDB, today: ISODate): Promise<Loa
   const active = activeCourses(liveCourses, results)
   const activeIds = new Set(active.map((c) => c.id))
   const queue = dailyQueue({ today, cards: alive(cards).filter((c) => activeIds.has(c.courseId)), states: alive(states), courses: active, newPerDay })
-  const eventsAll = alive(events)
+  // Le lezioni nascoste non occupano tempo di pianificazione e non compaiono in copertina.
+  const eventsAll = withoutHiddenLessons(alive(events), liveCourses)
   return {
     today,
     energy: day && !day.deletedAt ? day.energy : undefined,

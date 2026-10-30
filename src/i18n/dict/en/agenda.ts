@@ -68,4 +68,51 @@ export const agenda = {
     delete: 'Delete',
     save: 'Save',
   },
+  location: 'Place',
+  ics: {
+    open: 'Import timetable',
+    title: 'Import timetable',
+    intro: 'Choose an .ics file with your lesson timetable, for example the one you export from your university website. The file stays on this device.',
+    choose: 'Choose the .ics file',
+    chooseAnother: 'Choose another file',
+    reading: 'Reading the file…',
+    window: (p: { from: string; to: string }, f: Format) => `Lessons ${f.from(p.from, { year: true })} ${f.to(p.to, { year: true })}.`,
+    confirmHint: 'Check the matches: no title is linked to a course without your confirmation.',
+    noCourses: 'You have no exams in Data yet: lessons will be imported without a course.',
+    groupMeta: (p: { count: number; first: string; last: string }, f: Format) =>
+      `${f.count(p.count, 'lesson', 'lessons')}, ${f.from(p.first, { short: true })} ${f.to(p.last, { short: true })}`,
+    courseLabel: (p: { summary: string }) => `Course for “${p.summary}”`,
+    optNone: 'No course',
+    optSkip: 'Do not import',
+    by: {
+      code: 'Suggested from the code',
+      name: 'Suggested from the name',
+      previous: 'As in the last import',
+    },
+    untitled: 'Lesson',
+    summary: (p: { add: number; update: number; remove: number; keptEdited: number }, f: Format) =>
+      [
+        p.add ? f.count(p.add, 'new lesson', 'new lessons') : '',
+        p.update ? f.count(p.update, 'updated', 'updated') : '',
+        p.remove ? f.count(p.remove, 'removed', 'removed') : '',
+        p.keptEdited ? f.count(p.keptEdited, 'edited by you, left as it is', 'edited by you, left as they are') : '',
+      ]
+        .filter(Boolean)
+        .join(', ') + '.',
+    nothingChanges: 'Nothing to change: the agenda is already up to date.',
+    importAction: (p: { count: number }, f: Format) => `Import ${f.count(p.count, 'lesson', 'lessons')}`,
+    done: (p: { added: number; updated: number; removed: number }) => `Timetable imported: ${p.added} new, ${p.updated} updated, ${p.removed} removed.`,
+    skipped: {
+      unsupportedRule: (p: { n: number }, f: Format) => `${f.count(p.n, 'event skipped', 'events skipped')}: unsupported recurrence`,
+      rdate: (p: { n: number }, f: Format) => `${f.count(p.n, 'event skipped', 'events skipped')}: extra dates (RDATE) not supported`,
+      tooMany: (p: { n: number }, f: Format) => `${f.count(p.n, 'event skipped', 'events skipped')}: too many repeats`,
+      badEvent: (p: { n: number }, f: Format) => `${f.count(p.n, 'event skipped', 'events skipped')}: incomplete or unreadable data`,
+      thisAndFuture: (p: { n: number }, f: Format) => f.count(p.n, '“this and future” change ignored', '“this and future” changes ignored'),
+      allDay: (p: { n: number }, f: Format) => f.count(p.n, 'all-day event not imported', 'all-day events not imported'),
+      unknownZone: (p: { n: number }, f: Format) =>
+        `${f.count(p.n, 'event with an unknown time zone', 'events with an unknown time zone')}: the time is taken as written`,
+    },
+    hiddenLessons: (p: { count: number }, f: Format) => `${f.count(p.count, 'lesson hidden', 'lessons hidden')}. Change it in Data.`,
+    fromTimetable: 'Imported from your timetable. If you edit it, future imports will leave it as it is.',
+  },
 }

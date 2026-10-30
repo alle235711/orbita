@@ -62,6 +62,7 @@ export function demoBackup(today, { deckIds = [] } = {}) {
   const courses = COURSE_NAMES.map((name, i) => ({
     id: `demo-c-${i + 1}`,
     name,
+    ...(i === 4 ? { code: 'ALC-301' } : {}),
     cfu: [9, 6, 12, 9, 6][i],
     examDate: [shift(today, 9), shift(today, 24), shift(today, 70).slice(0, 7), shift(today, 97).slice(0, 7), shift(today, 72).slice(0, 7)][i],
     difficulty: [2, 3, 2, 1, 2][i],

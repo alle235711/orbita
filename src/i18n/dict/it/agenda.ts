@@ -68,4 +68,51 @@ export const agenda = {
     delete: 'Elimina',
     save: 'Salva',
   },
+  location: 'Luogo',
+  ics: {
+    open: 'Importa orario',
+    title: 'Importa l’orario',
+    intro: 'Scegli un file .ics con l’orario delle lezioni, per esempio quello che esporti dal sito del tuo ateneo. Il file resta su questo dispositivo.',
+    choose: 'Scegli il file .ics',
+    chooseAnother: 'Scegli un altro file',
+    reading: 'Leggo il file…',
+    window: (p: { from: string; to: string }, f: Format) => `Lezioni ${f.from(p.from, { year: true })} ${f.to(p.to, { year: true })}.`,
+    confirmHint: 'Controlla gli abbinamenti: nessun titolo viene collegato a un corso senza la tua conferma.',
+    noCourses: 'Non hai ancora esami in Dati: le lezioni si importano senza corso.',
+    groupMeta: (p: { count: number; first: string; last: string }, f: Format) =>
+      `${f.count(p.count, 'lezione', 'lezioni')}, ${f.from(p.first, { short: true })} ${f.to(p.last, { short: true })}`,
+    courseLabel: (p: { summary: string }) => `Corso per «${p.summary}»`,
+    optNone: 'Nessun corso',
+    optSkip: 'Non importare',
+    by: {
+      code: 'Proposto dal codice',
+      name: 'Proposto dal nome',
+      previous: 'Come nell’ultima importazione',
+    },
+    untitled: 'Lezione',
+    summary: (p: { add: number; update: number; remove: number; keptEdited: number }, f: Format) =>
+      [
+        p.add ? f.count(p.add, 'lezione nuova', 'lezioni nuove') : '',
+        p.update ? f.count(p.update, 'aggiornata', 'aggiornate') : '',
+        p.remove ? f.count(p.remove, 'tolta', 'tolte') : '',
+        p.keptEdited ? f.count(p.keptEdited, 'modificata da te, lasciata com’è', 'modificate da te, lasciate come sono') : '',
+      ]
+        .filter(Boolean)
+        .join(', ') + '.',
+    nothingChanges: 'Niente da cambiare: l’agenda è già aggiornata.',
+    importAction: (p: { count: number }, f: Format) => `Importa ${f.count(p.count, 'lezione', 'lezioni')}`,
+    done: (p: { added: number; updated: number; removed: number }) => `Orario importato: ${p.added} nuove, ${p.updated} aggiornate, ${p.removed} tolte.`,
+    skipped: {
+      unsupportedRule: (p: { n: number }, f: Format) => `${f.count(p.n, 'evento ignorato', 'eventi ignorati')}: ricorrenza non supportata`,
+      rdate: (p: { n: number }, f: Format) => `${f.count(p.n, 'evento ignorato', 'eventi ignorati')}: date aggiuntive (RDATE) non supportate`,
+      tooMany: (p: { n: number }, f: Format) => `${f.count(p.n, 'evento ignorato', 'eventi ignorati')}: troppe ripetizioni`,
+      badEvent: (p: { n: number }, f: Format) => `${f.count(p.n, 'evento ignorato', 'eventi ignorati')}: dati incompleti o illeggibili`,
+      thisAndFuture: (p: { n: number }, f: Format) => f.count(p.n, 'modifica «da qui in avanti» ignorata', 'modifiche «da qui in avanti» ignorate'),
+      allDay: (p: { n: number }, f: Format) => f.count(p.n, 'evento di tutto il giorno non importato', 'eventi di tutto il giorno non importati'),
+      unknownZone: (p: { n: number }, f: Format) =>
+        `${f.count(p.n, 'evento con un fuso orario sconosciuto', 'eventi con un fuso orario sconosciuto')}: l’ora è presa com’è scritta`,
+    },
+    hiddenLessons: (p: { count: number }, f: Format) => `${f.count(p.count, 'lezione nascosta', 'lezioni nascoste')}. Si cambia in Dati.`,
+    fromTimetable: 'Importata dall’orario. Se la modifichi, le prossime importazioni la lasceranno com’è.',
+  },
 }

@@ -1,8 +1,8 @@
 # CLAUDE.md
 
-Orbita (nome provvisorio). Stato: fase 1 in corso sul branch `feat/fase-1`.
+Orbita (nome provvisorio). Stato: fase 2 in corso sul branch `feat/fase-2`.
 
-La specifica completa è `SPEC.md` nella radice: resta solo in locale (è in `.gitignore`), come `PROMPT.md`. Mockup in `design/`, schede di ripasso in `content/schede-2026-27.json`.
+La specifica completa è `SPEC.md` nella radice, con `SPEC-FASE-2.md` accanto per la fase 2: restano solo in locale (sono in `.gitignore`), come `PROMPT.md`. Mockup in `design/`, schede di ripasso in `content/schede-2026-27.json`.
 
 ## Decisioni di progetto
 Queste sono decisioni già prese: non ridiscuterle e non aggirarle senza che l'utente lo chieda.
@@ -61,9 +61,16 @@ Serve Node 24 (`nvm use`, c'è `.nvmrc`): Vite 8 e Vitest 5 non girano sul Node 
   - Seed e schede incluse hanno `updatedAt = 0`: qualsiasi modifica dell'utente vince nella fusione dei backup (last-write-wins).
 - `src/rules/`: motore di regole, funzioni pure (`defaults.ts` ha le 9 regole e le soglie); `plan.ts` compone il piano, `schedule.ts` mette i blocchi in agenda
 - `src/review/`: coda del ripasso, Leitner, motore di battitura
+- `src/i18n/`: dizionari `it`/`en` (`dict/`), formati di date e numeri (`format/`), `AppError` con `renderError`; ogni testo visibile viene da qui (lo controlla `no-literals.test.ts`)
+- `src/modules/`: i sette moduli accendibili (sport, peso, lingua...) e le loro impostazioni
+- `src/libretto/`: voti, medie e stato degli esami (`grades.ts`, funzioni pure)
+- `src/multiverse/`: scenari degli appelli (universi) e cielo del Multiverso, funzioni pure
+- `src/ics/`: importazione dell'orario da `.ics`, tutta locale (solo `FileReader`/`file.text()`, CSP con `connect-src 'self'`). Il nucleo è puro: `parse.ts`, `rrule.ts` (DAILY/WEEKLY), `time.ts` (fusi con `Intl`), `expand.ts`, `plan.ts`; `apply.ts` scrive via `repo.ts`. Id naturali `ics:<UID>:<occorrenza>`: reimportare è idempotente, gli eventi modificati dall'utente (`userEdited`) non si riscrivono, le occorrenze sparite si cancellano in modo logico. `Course.hideLessons` nasconde le lezioni da Agenda, copertina e pianificazione
+- `src/stats/`: aggregazioni per la pagina Statistiche; `src/typing/`: lezioni e statistiche di battitura; `src/test/`: fixture dei test
 - `src/art/`: oggetti cosmici in SVG (buco nero, cielo, galassie); `public/art/` ha le immagini pre-renderizzate da `scripts/render-art.mjs`
 - `src/features/oggi/`: la copertina; `orbit.ts` è la geometria dell'orbita del mockup (ellisse 700,320 di semiassi 500×200 ruotata di −12°, 8:00 a 162,1°, 19:00 a 28,8°)
 - `e2e/demo-data.js`: backup dimostrativo per screenshot e prove (si importa dalla pagina Dati, mai in automatico)
+- `e2e/ics-fixture.ts`: orario `.ics` inventato, generato rispetto alla data di oggi (nessun `.ics` nel repository); `e2e/ics-helpers.ts` lo importa dal foglio dell'Agenda come farebbe una persona
 
 ## Note di implementazione
 - Le fusioni `mix-blend-mode` (titolo, pianeti, grana) stanno dentro `.cover`, isolata e con sfondo opaco: senza sfondo opaco la grana in overlay schiarisce.

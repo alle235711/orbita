@@ -1,6 +1,7 @@
 import { test } from '@playwright/test'
 import { mkdirSync } from 'node:fs'
 import { importDemo, isoDate, isoWeekday, seedV1Database, setLanguage, walkWizard } from './helpers'
+import { importIcs, openIcsPreview } from './ics-helpers'
 
 // Screenshot di ogni schermata alle tre dimensioni di riferimento (SPEC §1),
 // con i dati dimostrativi e l'ora fissata alle 10:20, per avere sempre
@@ -25,12 +26,15 @@ interface Screen {
   otherLanguage?: boolean
   /** Dopo il caricamento, preme il primo pulsante con questo nome (per fotografare un pannello aperto). */
   click?: RegExp
+  /** Dopo i dati dimostrativi: 'import' importa l'orario inventato; 'preview' lascia aperta l'anteprima del foglio. */
+  ics?: 'import' | 'preview'
 }
 
 const SCREENS: Screen[] = [
   { name: 'oggi', hash: '#/oggi' },
-  { name: 'agenda', hash: '#/agenda', full: true },
-  { name: 'agenda-settimana', hash: '#/agenda?vista=settimana', full: true },
+  { name: 'agenda', hash: '#/agenda', full: true, ics: 'import' },
+  { name: 'agenda-ics', ics: 'preview' },
+  { name: 'agenda-settimana', hash: '#/agenda?vista=settimana', full: true, ics: 'import' },
   { name: 'briefing', hash: '#/briefing', full: true },
   { name: 'libretto', hash: '#/libretto', full: true },
   { name: 'libretto-voto', hash: '#/libretto', click: /registra un voto|record a result/i },
@@ -40,7 +44,7 @@ const SCREENS: Screen[] = [
   { name: 'statistiche', hash: '#/statistiche', full: true },
   { name: 'ripasso', hash: '#/ripasso?materia=demo-c-1', type: 'Il periodo di un pendolo semplice dipende dalla lunghezza' },
   { name: 'dattilografia', hash: '#/dattilografia', full: true },
-  { name: 'dati', hash: '#/dati', full: true },
+  { name: 'dati', hash: '#/dati', full: true, ics: 'import' },
   // Giorno nell'altra lingua: il giorno della settimana di oggi è tra quelli in inglese.
   { name: 'oggi-en', hash: '#/oggi', otherLanguage: true },
   { name: 'briefing-en', hash: '#/briefing', full: true, otherLanguage: true },
@@ -71,8 +75,9 @@ for (const vp of VIEWPORTS) {
         if (setup === 'wizard') await walkWizard(page, screen.step!)
         else if (setup === 'migrated') await seedV1Database(page)
         else await importDemo(page, testInfo, today)
+        if (screen.ics === 'import') await importIcs(page, testInfo, today, { 'Seminario Fittizio': 'Topologia Generale' })
         if (screen.otherLanguage) await setLanguage(page, { base: 'it', otherDays: [isoWeekday(now)] })
-        if (setup !== 'wizard') {
+        if (setup !== 'wizard' && screen.ics !== 'preview') {
           await page.goto(`/${screen.hash}`)
           await page.reload()
         }
@@ -85,6 +90,8 @@ for (const vp of VIEWPORTS) {
         const notice = page.locator('.update-toast button')
         await notice.first().waitFor({ timeout: 3000 }).catch(() => undefined)
         if (await notice.count()) await notice.first().click()
+        // Il foglio è modale: l'avviso si chiude prima di aprirlo.
+        if (screen.ics === 'preview') await openIcsPreview(page, testInfo, today)
         if (setup === 'wizard') await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
         await page.waitForTimeout(800)
         if (screen.click) {

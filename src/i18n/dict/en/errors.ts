@@ -1,3 +1,5 @@
+import type { Format } from '../../format/types'
+
 export const errors = {
   notBackup: () => 'This file isn’t an Orbita backup.',
   backupTooNew: () => 'This backup comes from a newer version of Orbita: update the app and try again.',
@@ -38,5 +40,13 @@ export const errors = {
   },
   universeLimit: () => 'At most four universes.',
   universeMin: () => 'You need at least two to compare them.',
-  generic: () => 'Something went wrong.',
+  icsNotCalendar: () => 'This file is not an .ics calendar.',
+  icsTruncated: () => 'This .ics file looks incomplete: the end of the calendar is missing.',
+  icsNoEvents: () => 'The calendar has no events.',
+  icsNothingToImport: () => 'No lessons to import: the events are all-day or use unsupported recurrences.',
+  icsOutsideWindow: (p: { from: string; to: string }, f: Format) =>
+    `No lessons ${f.from(p.from, { year: true })} ${f.to(p.to, { year: true })}: is the file for another academic year?`,
+  icsTooLarge: (p: { mb: number }) => `The file is too large to be a timetable (over ${p.mb} MB).`,
+  icsReadFailed: (p: { name: string }) => `I can’t read ${p.name}.`,
+  generic:() => 'Something went wrong.',
 }

@@ -50,4 +50,9 @@ export const dati = {
     otherDaysUsage: (p: { other: Lang }) => `On these days the interface is in ${p.other === 'en' ? 'English' : 'Italian'}.`,
     otherDaysMax: 'Three days at most: remove one to pick another.',
   },
+  lessons: {
+    hide: 'Hide lessons',
+    aria: (p: { name: string }) => `Hide the lessons of ${p.name}`,
+    hiddenNote: 'Hidden from the agenda, the cover and planning.',
+  },
 }
