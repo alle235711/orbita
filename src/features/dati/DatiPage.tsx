@@ -1,6 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { Page } from '../../app/Page'
+import { href, useRoute } from '../../app/router'
 import { useToday } from '../../app/useToday'
 import { backupFileName, exportAll, importBackup, parseBackup } from '../../db/backup'
 import { exportCards, importCards, parseContentFile } from '../../db/cards-io'
@@ -14,6 +15,7 @@ import { getI18n, useI18n } from '../../i18n/store'
 import { downloadJson, readJsonFile } from '../../lib/download'
 import { WeekdayToggles } from '../../components/WeekdayToggles'
 import { DecksSection, ExamsSection, ModulesSection, PeriodsSection, ProfileSection } from './DatiSections'
+import { LatexConverter } from './LatexConverter'
 import './DatiPage.css'
 
 type Area = 'backup' | 'schede'
@@ -25,6 +27,18 @@ interface Notice {
 
 
 export default function DatiPage() {
+  const route = useRoute()
+  if (route.query.get('vista') === 'latex') {
+    return (
+      <Page className="dati" labelledBy="titolo-latex">
+        <LatexConverter />
+      </Page>
+    )
+  }
+  return <DatiMain />
+}
+
+function DatiMain() {
   const { t, f } = useI18n()
   const td = t.dati
   const today = useToday()
@@ -170,6 +184,16 @@ export default function DatiPage() {
             {td.overwrite}
           </label>
           <Message notice={notice} area="schede" />
+          {cardCounts?.total ? (
+            <>
+              <p className="dati__hint">{t.math.converter.hint}</p>
+              <div className="dati__actions">
+                <a className="btn" href={href('dati', { vista: 'latex' })}>
+                  {t.math.converter.open}
+                </a>
+              </div>
+            </>
+          ) : null}
         </section>
 
       </div>

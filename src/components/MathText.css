@@ -1,0 +1,42 @@
+/* Le formule seguono il colore del testo; la grandezza di KaTeX (1.21em)
+   si riduce un poco perché accanto a Schibsted Grotesk non sembrino urlate. */
+.math-text .katex {
+  font-size: 1.12em;
+  color: inherit;
+}
+
+.math--inline {
+  /* una formula lunga in linea va a capo dopo = e operatori; i pezzi non si spezzano */
+  overflow-wrap: normal;
+}
+
+.math--display {
+  display: block;
+  max-width: 100%;
+}
+
+.math--display .katex-display {
+  margin: 0.55em 0;
+  padding-block: 0.15em;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+
+.math-text__reading {
+  display: block;
+  margin-top: 0.5em;
+  font-family: var(--font);
+  font-size: var(--fs-small);
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+.math-text__reading-label {
+  font-weight: 700;
+  color: var(--text-rule);
+}
+
+.math-text__reading-label::after {
+  content: ':';
+}

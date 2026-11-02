@@ -6,7 +6,7 @@ import { renderError } from '../i18n/errors'
 import { i18nFor } from '../i18n'
 import { exportAll, importBackup, parseBackup, BackupError } from './backup'
 import { exportCards, importCards, parseContentFile, ImportError } from './cards-io'
-import { createDb, SCHEMA_V1, SCHEMA_V3_DELTA, type OrbitaDB } from './db'
+import { createDb, SCHEMA_V1, SCHEMA_V3_DELTA, SCHEMA_V4_DELTA, type OrbitaDB } from './db'
 import { migrateToV2, V2_INPUT_TABLES, type RawTables } from './migrations/v2'
 import { v1Fixture } from '../test/fixtures'
 import { ensureCards, initDb } from './init'
@@ -105,6 +105,31 @@ describe('schede', () => {
     expect(out.corsi.map((c) => c.nome)).toEqual([...out.corsi.map((c) => c.nome)].sort((a, b) => a.localeCompare(b, 'it')))
     expect(out.corsi.map((c) => c.id).sort()).toEqual([DECK_A, DECK_B, DECK_C].sort())
     expect(parseContentFile(JSON.parse(JSON.stringify(out))).schede).toHaveLength(502)
+  })
+
+  it('importa ed esporta la lettura delle formule (letturaFormula)', async () => {
+    const file = parseContentFile({
+      versione: 2,
+      aggiornato: '2026-11-02',
+      corsi: [{ id: 'k', nome: 'Corso', sezioni: ['S'] }],
+      schede: [
+        { id: 'f1', corso: 'k', sezione: 'S', tipo: 'formula', titolo: 'Livelli', testo: 'Vale $$E_n = -13{,}6/n^2$$', chiave: '', letturaFormula: ' E con n uguale a meno 13,6 su n al quadrato ' },
+        { id: 'f2', corso: 'k', sezione: 'S', tipo: 'formula', titolo: 'Altro', testo: 'Niente', chiave: '' },
+      ],
+    })
+    await importCards(db, file)
+    expect((await db.cards.get('f1'))?.formulaReading).toBe('E con n uguale a meno 13,6 su n al quadrato')
+    expect(await db.cards.get('f2')).not.toHaveProperty('formulaReading')
+    const out = await exportCards(db)
+    expect(out.schede.find((s) => s.id === 'f1')?.letturaFormula).toBe('E con n uguale a meno 13,6 su n al quadrato')
+    expect(out.schede.find((s) => s.id === 'f2')).not.toHaveProperty('letturaFormula')
+    // un nuovo file con la lettura cambiata aggiorna la scheda, uno uguale no
+    const again = await importCards(db, parseContentFile({ ...structuredClone(out), schede: out.schede.map((s) => (s.id === 'f1' ? { ...s, letturaFormula: 'nuova' } : s)) }))
+    expect(again).toMatchObject({ updated: 1, unchanged: 1 })
+    expect((await db.cards.get('f1'))?.formulaReading).toBe('nuova')
+    // e il backup la porta con sé
+    const backup = parseBackup(JSON.parse(JSON.stringify(await exportAll(db))))
+    expect(backup.tables.cards?.find((c) => c.id === 'f1')).toMatchObject({ formulaReading: 'nuova' })
   })
 
   it('segnala i file non validi', () => {
@@ -206,7 +231,7 @@ describe('aggiornamento di Dexie dalla versione 1 alla 2', () => {
     const upgraded = createDb(name)
     try {
       await upgraded.open()
-      expect(upgraded.verno).toBe(4)
+      expect(upgraded.verno).toBe(5)
       expect(await upgraded.results.count()).toBe(0)
       expect(await upgraded.appelli.count()).toBe(0)
       const expected = migrateToV2(fixture)
@@ -245,7 +270,7 @@ describe('aggiornamento di Dexie dalla versione 1 alla 2', () => {
     const upgraded = createDb(name)
     try {
       await upgraded.open()
-      expect(upgraded.verno).toBe(4)
+      expect(upgraded.verno).toBe(5)
       expect(await getSetting(upgraded, 'newCardsPerDay')).toBe(7)
       expect(upgraded.results.schema.idxByName.courseId).toBeDefined()
       expect(upgraded.results.schema.idxByName.date).toBeDefined()
@@ -267,7 +292,7 @@ describe('aggiornamento di Dexie dalla versione 1 alla 2', () => {
     const upgraded = createDb(name)
     try {
       await upgraded.open()
-      expect(upgraded.verno).toBe(4)
+      expect(upgraded.verno).toBe(5)
       expect(await getSetting(upgraded, 'newCardsPerDay')).toBe(9)
       expect((await upgraded.results.get('r1'))?.grade).toBe(27)
       expect(upgraded.appelli.schema.idxByName.courseId).toBeDefined()
@@ -280,9 +305,37 @@ describe('aggiornamento di Dexie dalla versione 1 alla 2', () => {
     }
   })
 
-  it('un database nuovo parte direttamente dalla versione 4, vuoto', async () => {
+  it('da v4 a v5 normalizza la lettura delle formule delle schede e lascia intatto il resto', async () => {
+    const name = `upgrade-${crypto.randomUUID()}`
+    const old = new Dexie(name)
+    old.version(1).stores(SCHEMA_V1)
+    old.version(2).stores(SCHEMA_V1)
+    old.version(3).stores(SCHEMA_V3_DELTA)
+    old.version(4).stores(SCHEMA_V4_DELTA)
+    const base = { courseId: 'k', section: 'S', kind: 'definizione', title: 'T', text: 'Vale $E_n$.', key: 'E_n', needsFix: false, userEdited: false }
+    await old.table('cards').bulkPut([
+      { id: 'a', ...base, updatedAt: 1 },
+      { id: 'b', ...base, letturaFormula: ' E con n ', updatedAt: 2 },
+      { id: 'c', ...base, formulaReading: '  ', updatedAt: 3 },
+    ])
+    await old.table('settings').bulkPut([{ id: 'newCardsPerDay', value: 9, updatedAt: 5 }])
+    old.close()
+    const upgraded = createDb(name)
+    try {
+      await upgraded.open()
+      expect(upgraded.verno).toBe(5)
+      expect(await upgraded.cards.get('a')).toEqual({ id: 'a', ...base, updatedAt: 1 })
+      expect(await upgraded.cards.get('b')).toEqual({ id: 'b', ...base, formulaReading: 'E con n', updatedAt: 2 })
+      expect(await upgraded.cards.get('c')).toEqual({ id: 'c', ...base, updatedAt: 3 })
+      expect(await getSetting(upgraded, 'newCardsPerDay')).toBe(9)
+    } finally {
+      await upgraded.delete()
+    }
+  })
+
+  it('un database nuovo parte direttamente dalla versione 5, vuoto', async () => {
     await db.open()
-    expect(db.verno).toBe(4)
+    expect(db.verno).toBe(5)
     expect(await db.results.count()).toBe(0)
     expect(await db.appelli.count()).toBe(0)
     expect(await db.universes.count()).toBe(0)

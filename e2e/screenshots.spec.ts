@@ -45,6 +45,7 @@ const SCREENS: Screen[] = [
   { name: 'ripasso', hash: '#/ripasso?materia=demo-c-1', type: 'Il periodo di un pendolo semplice dipende dalla lunghezza' },
   { name: 'dattilografia', hash: '#/dattilografia', full: true },
   { name: 'dati', hash: '#/dati', full: true, ics: 'import' },
+  { name: 'dati-latex', hash: '#/dati?vista=latex&corso=demo-c-1&sezione=Parte%20B', full: true },
   // Giorno nell'altra lingua: il giorno della settimana di oggi è tra quelli in inglese.
   { name: 'oggi-en', hash: '#/oggi', otherLanguage: true },
   { name: 'briefing-en', hash: '#/briefing', full: true, otherLanguage: true },

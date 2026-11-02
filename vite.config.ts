@@ -33,6 +33,11 @@ function contentSecurityPolicy(): Plugin {
 
 export default defineConfig({
   base,
+  build: {
+    // I font restano file: la CSP (font-src 'self') non ammette font in data: URL,
+    // e da file finiscono nel precache del service worker (KaTeX compreso).
+    assetsInlineLimit: (file) => (/\.(woff2?|ttf)$/.test(file) ? false : undefined),
+  },
   plugins: [
     react(),
     contentSecurityPolicy(),

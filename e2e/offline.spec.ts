@@ -36,6 +36,22 @@ test('dal primo avvio funziona offline', async ({ page, context }) => {
   })
   expect(fonts).toEqual({ grotesk: true, mono: true })
 
+  // Le formule: il convertitore rende con KaTeX le proposte per le schede d'esempio,
+  // e i font di KaTeX arrivano dal precache del service worker.
+  await page.goto('/#/dati?vista=latex')
+  await expect(page.locator('.latex-item .katex').first()).toBeVisible({ timeout: 20_000 })
+  const katexFonts = await page.evaluate(async () => {
+    await document.fonts.ready
+    await Promise.all([document.fonts.load('20px KaTeX_Main'), document.fonts.load('italic 20px KaTeX_Math')])
+    const faces = [...document.fonts].filter((f) => f.family.replace(/["']/g, '').startsWith('KaTeX_'))
+    return {
+      main: faces.some((f) => f.family.includes('KaTeX_Main') && f.style === 'normal' && f.weight === '400' && f.status === 'loaded'),
+      math: faces.some((f) => f.family.includes('KaTeX_Math') && f.style === 'italic' && f.status === 'loaded'),
+      errors: faces.filter((f) => f.status === 'error').map((f) => `${f.family} ${f.style} ${f.weight}`),
+    }
+  })
+  expect(katexFonts).toEqual({ main: true, math: true, errors: [] })
+
   await page.goto('/#/statistiche')
   await expect(page.getByRole('heading', { name: 'Statistiche' })).toBeVisible()
   await context.setOffline(false)

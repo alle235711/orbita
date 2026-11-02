@@ -40,6 +40,13 @@ export function setNeedsFix(cardId: string, needsFix: boolean): Promise<void> {
 }
 
 /** Modifica nell'app: la scheda non verrà più sovrascritta dalle importazioni. */
-export function updateCard(cardId: string, fields: Pick<Card, 'title' | 'text' | 'key' | 'section' | 'kind'>): Promise<void> {
+export function updateCard(cardId: string, fields: Pick<Card, 'title' | 'text' | 'key' | 'section' | 'kind' | 'formulaReading'>): Promise<void> {
   return patch<Card>(db.cards, cardId, { ...fields, userEdited: true })
+}
+
+/** Conversioni in LaTeX confermate: nuovo testo (e chiave), e ogni scheda conta come modificata da te. */
+export function applyConversions(items: { id: string; text: string; key: string }[]): Promise<void> {
+  return db.transaction('rw', db.cards, async () => {
+    for (const { id, text, key } of items) await patch<Card>(db.cards, id, { text, key, userEdited: true })
+  })
 }

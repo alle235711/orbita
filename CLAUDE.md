@@ -44,7 +44,7 @@ Serve Node 24 (`nvm use`, c'è `.nvmrc`): Vite 8 e Vitest 5 non girano sul Node 
 - `npm test`: test Vitest della logica pura (`src/**/*.test.ts`)
 - `npm run build`: controllo dei tipi (`tsc -b`) e build in `dist/`; con `BASE_PATH=/orbita/` per GitHub Pages
 - `npm run preview`: serve la build, service worker compreso
-- `npm run test:e2e`: Playwright sulla build di produzione (porta 4173): screenshot di ogni schermata a 1180×820, 390×844 e 1280×800 in `docs/screenshots/` e prova offline col service worker. `WEBKIT=1` aggiunge WebKit, che su Ubuntu richiede `sudo npx playwright install-deps webkit`.
+- `npm run test:e2e`: Playwright sulla build di produzione (porta 4173): screenshot di ogni schermata a 1180×820, 390×844 e 1280×800 in `docs/screenshots/`, prova offline col service worker (font di KaTeX compresi) e `e2e/layout.spec.ts`, il controllo automatico di scorrimento orizzontale, controlli coperti e testo tagliato a 1180×820 e 390×844. `WEBKIT=1` aggiunge WebKit, che su Ubuntu richiede `sudo npx playwright install-deps webkit`.
 - `npm run gen:art`: rigenera le immagini pre-renderizzate in `public/art/` e le icone in `public/icons/`
 
 ## Pubblicazione
@@ -66,6 +66,7 @@ Serve Node 24 (`nvm use`, c'è `.nvmrc`): Vite 8 e Vitest 5 non girano sul Node 
 - `src/libretto/`: voti, medie e stato degli esami (`grades.ts`, funzioni pure)
 - `src/multiverse/`: scenari degli appelli (universi) e cielo del Multiverso, funzioni pure
 - `src/ics/`: importazione dell'orario da `.ics`, tutta locale (solo `FileReader`/`file.text()`, CSP con `connect-src 'self'`). Il nucleo è puro: `parse.ts`, `rrule.ts` (DAILY/WEEKLY), `time.ts` (fusi con `Intl`), `expand.ts`, `plan.ts`; `apply.ts` scrive via `repo.ts`. Id naturali `ics:<UID>:<occorrenza>`: reimportare è idempotente, gli eventi modificati dall'utente (`userEdited`) non si riscrivono, le occorrenze sparite si cancellano in modo logico. `Course.hideLessons` nasconde le lezioni da Agenda, copertina e pianificazione
+- `src/math/`: formule con KaTeX (self-hosted, font nel precache). `delimiters.ts` divide il testo in testo/`$...$`/`$$...$$` (mai eccezioni, `\$` è un dollaro), `render.ts` rende con `htmlAndMathml` (HTML aria-hidden, MathML per i lettori di schermo), `convert.ts` + `dictionary.ts` sono il convertitore assistito ASCII→LaTeX (solo proposte; si applica dalla pagina Dati, `#/dati?vista=latex`, con `userEdited`). Il componente è `components/MathText.tsx`; `Card.formulaReading` (la "letturaFormula" dei file) è la lettura a parole. Confronti, battitura, ricerca e chiave lavorano sempre sul sorgente
 - `src/stats/`: aggregazioni per la pagina Statistiche; `src/typing/`: lezioni e statistiche di battitura; `src/test/`: fixture dei test
 - `src/art/`: oggetti cosmici in SVG (buco nero, cielo, galassie); `public/art/` ha le immagini pre-renderizzate da `scripts/render-art.mjs`
 - `src/features/oggi/`: la copertina; `orbit.ts` è la geometria dell'orbita del mockup (ellisse 700,320 di semiassi 500×200 ruotata di −12°, 8:00 a 162,1°, 19:00 a 28,8°)

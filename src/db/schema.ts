@@ -129,6 +129,8 @@ export interface Card extends Syncable {
   key: string
   needsFix: boolean
   userEdited: boolean
+  /** Lettura a parole delle formule del testo, per chi usa un lettore di schermo (la "letturaFormula" dei file). */
+  formulaReading?: string
 }
 
 export type ResultOutcome = 'superato' | 'rifiutato' | 'non-superato'

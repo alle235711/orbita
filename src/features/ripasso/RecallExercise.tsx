@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { Keyboard } from '../../components/Keyboard'
+import { MathText } from '../../components/MathText'
+import { hasMath } from '../../math/delimiters'
 import { useI18n, useT } from '../../i18n/store'
 import { useTuning } from '../../db/hooks'
 import { alignWords, type DiffOp } from '../../review/similarity'
@@ -19,6 +21,8 @@ interface RecallExerciseProps {
   reference: string
   /** Il testo mostrato come domanda in Indovina il nome. */
   prompt?: string
+  /** La lettura a parole delle formule della scheda. */
+  reading?: string
   saved?: string
   onDecide: (result: RecallDone) => void
   onNext: () => void
@@ -26,7 +30,7 @@ interface RecallExerciseProps {
 }
 
 /** Indovina il nome e A memoria: scrivi senza aiuti, poi il confronto parola per parola. */
-export function RecallExercise({ mode, reference, prompt, saved, onDecide, onNext, showKeyboard }: RecallExerciseProps) {
+export function RecallExercise({ mode, reference, prompt, reading, saved, onDecide, onNext, showKeyboard }: RecallExerciseProps) {
   const { t, f } = useI18n()
   const tr = t.ripasso
   const minSimilarity = useTuning().ripasso.minSimilarity! / 100
@@ -86,7 +90,7 @@ export function RecallExercise({ mode, reference, prompt, saved, onDecide, onNex
   return (
     <>
       <section className="exercise" aria-label={tr.exercise}>
-        {mode === 'nome' && prompt ? <p className="exercise__text exercise__text--plain">{prompt}</p> : null}
+        {mode === 'nome' && prompt ? <MathText as="p" className="exercise__text exercise__text--plain" source={prompt} reading={reading} /> : null}
         <label htmlFor="recall" className="sr-only">
           {mode === 'nome' ? tr.namePlaceholder : tr.memoryLabel}
         </label>
@@ -118,6 +122,12 @@ export function RecallExercise({ mode, reference, prompt, saved, onDecide, onNex
                 <Word key={i} op={op} />
               ))}
             </p>
+            {mode === 'memoria' && hasMath(reference) ? (
+              <div className="exercise__rendered">
+                <p className="exercise__rendered-label">{t.math.withFormulas}</p>
+                <MathText as="p" source={reference} reading={reading} />
+              </div>
+            ) : null}
             <p className="compare__legend">
               <span className="w w--ok">{tr.legendSame}</span> <span className="w w--sub">{tr.legendDiff}</span>{' '}
               <span className="w w--miss">{tr.legendMissing}</span> <span className="w w--extra">{tr.legendExtra}</span>

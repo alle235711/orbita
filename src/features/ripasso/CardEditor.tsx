@@ -1,9 +1,11 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useId, useState, type FormEvent } from 'react'
 import { toast } from '../../app/toast'
+import { MathText } from '../../components/MathText'
 import { Sheet } from '../../components/Sheet'
 import { setNeedsFix, updateCard } from '../../db/review-actions'
 import type { Card } from '../../db/schema'
 import { useT } from '../../i18n/store'
+import { hasMath } from '../../math/delimiters'
 
 interface CardEditorProps {
   card: Card | null
@@ -20,6 +22,8 @@ export function CardEditor({ card, sections, onClose }: CardEditorProps) {
   const [key, setKey] = useState('')
   const [section, setSection] = useState('')
   const [kind, setKind] = useState('')
+  const [reading, setReading] = useState('')
+  const hintId = useId()
   const [fix, setFix] = useState(false)
   const [error, setError] = useState('')
 
@@ -30,6 +34,7 @@ export function CardEditor({ card, sections, onClose }: CardEditorProps) {
     setKey(card.key)
     setSection(card.section)
     setKind(card.kind)
+    setReading(card.formulaReading ?? '')
     setFix(card.needsFix)
     setError('')
   }, [card])
@@ -40,7 +45,7 @@ export function CardEditor({ card, sections, onClose }: CardEditorProps) {
     const t = text.trim().replace(/\s+/g, ' ')
     if (!title.trim() || !t) return setError(te.errEmpty)
     if (key && !t.includes(key)) return setError(te.errKey)
-    await updateCard(card.id, { title: title.trim(), text: t, key, section, kind: kind.trim() || card.kind })
+    await updateCard(card.id, { title: title.trim(), text: t, key, section, kind: kind.trim() || card.kind, formulaReading: reading.trim() || undefined })
     if (fix !== card.needsFix) await setNeedsFix(card.id, fix)
     toast(te.updated)
     onClose()
@@ -58,6 +63,19 @@ export function CardEditor({ card, sections, onClose }: CardEditorProps) {
         <label className="form-field">
           <span>{te.text}</span>
           <textarea className="field" rows={6} value={text} onChange={(e) => setText(e.target.value)} />
+        </label>
+        {hasMath(text) ? (
+          <div className="form-field editor__preview">
+            <span>{te.preview}</span>
+            <MathText as="p" source={text} reading={reading} />
+          </div>
+        ) : null}
+        <label className="form-field">
+          <span>{te.reading}</span>
+          <textarea className="field" rows={2} value={reading} onChange={(e) => setReading(e.target.value)} aria-describedby={hintId} />
+          <small id={hintId} className="editor__hint">
+            {te.readingHint}
+          </small>
         </label>
         <label className="form-field">
           <span>{te.key}</span>

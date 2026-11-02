@@ -301,4 +301,10 @@ export const SAMPLES: DictSamples = {
   'multiverso.params.gapHint': [{ n: 60 }],
   'multiverso.carousel.item': [{ n: 1, total: 3 }],
   'multiverso.toast.chosen': [{ n: 3 }],
+  'math.converter.count': [{ n: 12, total: 40 }, f],
+  'math.converter.keyLost': [{ key: 'lambda_min' }],
+  'math.converter.keyChanged': [{ key: '\\lambda_' }],
+  'math.converter.applyAll': [{ n: 12 }, f],
+  'math.converter.applyAllConfirm': [{ n: 12 }, f],
+  'math.converter.convertedAll': [{ n: 11, skipped: 1 }, f],
 }

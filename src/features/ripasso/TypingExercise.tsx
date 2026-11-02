@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { FingerLegend, Keyboard } from '../../components/Keyboard'
+import { MathText } from '../../components/MathText'
+import { hasMath } from '../../math/delimiters'
 import { useI18n } from '../../i18n/store'
 import { strokeFor, strokeHint } from '../../review/keyboard'
 import { useTuning } from '../../db/hooks'
@@ -21,6 +23,8 @@ interface TypingExerciseProps {
   text: string
   mode: Extract<ReviewMode, 'copia' | 'completa'>
   hiddenKey?: string
+  /** La lettura a parole delle formule della scheda. */
+  reading?: string
   /** Testo dopo il completamento: l'esito della revisione. */
   outcome?: string
   onDone: (result: TypingDone) => void
@@ -32,7 +36,7 @@ interface TypingExerciseProps {
 }
 
 /** Copia e Completa: il testo si colora mentre scrivi, la tastiera suggerisce il tasto. */
-export function TypingExercise({ text, mode, hiddenKey, outcome, onDone, onNext, showKeyboard, inputLabel, nextLabel }: TypingExerciseProps) {
+export function TypingExercise({ text, mode, hiddenKey, reading, outcome, onDone, onNext, showKeyboard, inputLabel, nextLabel }: TypingExerciseProps) {
   const { t, f } = useI18n()
   const tr = t.ripasso
   const [state, setState] = useState(() => startTyping(text))
@@ -62,6 +66,8 @@ export function TypingExercise({ text, mode, hiddenKey, outcome, onDone, onNext,
   const pos = state.typed.length
   const next = text[pos]
   const hiddenHere = next !== undefined && inRanges(pos, ranges)
+  // Si batte sempre il sorgente; la resa delle formule si vede in Copia e, in Completa, solo alla fine.
+  const showRendered = hasMath(text) && (mode === 'copia' || stats.done)
 
   useEffect(() => {
     if (!stats.done || finished.current) return
@@ -102,6 +108,12 @@ export function TypingExercise({ text, mode, hiddenKey, outcome, onDone, onNext,
   return (
     <>
       <section className="exercise" aria-label={tr.exercise}>
+        {showRendered ? (
+          <div className="exercise__rendered">
+            <p className="exercise__rendered-label">{t.math.withFormulas}</p>
+            <MathText as="p" source={text} reading={reading} />
+          </div>
+        ) : null}
         <p className="exercise__text" aria-hidden="true">
           {[...text].map((ch, i) => {
             const st = states[i]!

@@ -10,7 +10,7 @@ test('un database della fase 1 si aggiorna e conserva i dati', async ({ page }) 
   await page.goto('/')
   await expect(page.getByRole('heading', { name: 'Completa il profilo' })).toBeVisible({ timeout: 20_000 })
 
-  // La versione è salita a 40 e le righe sono nel formato nuovo.
+  // La versione è salita a 50 e le righe sono nel formato nuovo.
   const state = await page.evaluate(
     () =>
       new Promise<{ version: number; sessionTypes: Record<string, string>; ruleIds: string[]; deadlineIds: string[]; profile: unknown; resultsIndexes: string[]; appelliIndexes: string[]; universesIndexes: string[] }>((resolve, reject) => {
@@ -45,7 +45,8 @@ test('un database della fase 1 si aggiorna e conserva i dati', async ({ page }) 
         }
       }),
   )
-  expect(state.version).toBe(40)
+  // Dexie moltiplica per dieci: versione 5 (formulaReading delle schede) = 50
+  expect(state.version).toBe(50)
   expect(state.appelliIndexes).toEqual(expect.arrayContaining(['courseId', 'date', 'updatedAt']))
   expect(state.universesIndexes).toEqual(expect.arrayContaining(['order', 'updatedAt']))
   expect(state.resultsIndexes).toEqual(expect.arrayContaining(['courseId', 'date', 'updatedAt']))

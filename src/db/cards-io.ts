@@ -29,6 +29,8 @@ export interface ContentCard {
   chiave: string
   /** Facoltativo: segnata da correggere nell'app. */
   daCorreggere?: boolean
+  /** Facoltativo: lettura a parole delle formule, per i lettori di schermo. */
+  letturaFormula?: string
 }
 
 export interface ContentFile {
@@ -84,7 +86,16 @@ export interface CardImportResult {
 }
 
 const sameContent = (a: Card, b: Omit<Card, 'id' | 'updatedAt' | 'needsFix' | 'userEdited'>) =>
-  a.courseId === b.courseId && a.section === b.section && a.kind === b.kind && a.title === b.title && a.text === b.text && a.key === b.key
+  a.courseId === b.courseId &&
+  a.section === b.section &&
+  a.kind === b.kind &&
+  a.title === b.title &&
+  a.text === b.text &&
+  a.key === b.key &&
+  (a.formulaReading ?? '') === (b.formulaReading ?? '')
+
+/** La lettura delle formule di una scheda del file: una stringa non vuota, oppure niente. */
+const readingOf = (s: ContentCard): string | undefined => (typeof s.letturaFormula === 'string' && s.letturaFormula.trim() ? s.letturaFormula.trim() : undefined)
 
 /**
  * Importa le schede: aggiunge le nuove, aggiorna quelle cambiate e lascia
@@ -123,7 +134,9 @@ export async function importCards(
     const rows: Card[] = []
     file.schede.forEach((s, i) => {
       const current = existing[i]
-      const content = { courseId: s.corso, section: s.sezione, kind: s.tipo, title: s.titolo, text: s.testo, key: s.chiave }
+      const reading = readingOf(s)
+      const fields = { courseId: s.corso, section: s.sezione, kind: s.tipo, title: s.titolo, text: s.testo, key: s.chiave }
+      const content = { ...fields, ...(reading ? { formulaReading: reading } : {}) }
       if (!current) {
         rows.push({ id: s.id, ...content, needsFix: !!s.daCorreggere, userEdited: false, updatedAt: 0 })
         result.added++
@@ -132,8 +145,9 @@ export async function importCards(
       } else if (sameContent(current, content) && !current.deletedAt) {
         result.unchanged++
       } else {
+        const { formulaReading: _old, ...kept } = current
         rows.push({
-          ...current,
+          ...kept,
           ...content,
           needsFix: current.needsFix || !!s.daCorreggere,
           userEdited: false,
@@ -181,6 +195,7 @@ export async function exportCards(db: OrbitaDB): Promise<ContentFile> {
       testo: c.text,
       chiave: c.key,
       ...(c.needsFix ? { daCorreggere: true } : {}),
+      ...(c.formulaReading ? { letturaFormula: c.formulaReading } : {}),
     })),
   }
 }

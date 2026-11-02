@@ -204,6 +204,7 @@ export default function RipassoPage() {
               text={card.text}
               mode={mode}
               hiddenKey={card.key}
+              reading={card.formulaReading}
               outcome={saved}
               onDone={(r) => void onTypingDone(r)}
               onNext={next}
@@ -216,6 +217,7 @@ export default function RipassoPage() {
               mode={mode}
               reference={mode === 'nome' ? card.title : card.text}
               prompt={mode === 'nome' ? card.text : undefined}
+              reading={card.formulaReading}
               saved={saved}
               onDecide={(r) => void onRecallDecide(r)}
               onNext={next}

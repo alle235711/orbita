@@ -193,3 +193,111 @@
   gap: 6px 12px;
   min-height: var(--tap);
 }
+
+/* Converti in LaTeX: testo attuale e proposta affiancati, una scheda per riga. */
+.latex__back {
+  display: inline-flex;
+  margin-bottom: 10px;
+}
+
+.latex {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  max-width: 1200px;
+  padding-top: 14px;
+  border-top: 2px solid var(--text);
+}
+
+.latex__filters {
+  max-width: 720px;
+}
+
+.latex__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+}
+
+.latex__status:focus {
+  outline: none;
+}
+
+.latex__list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.latex-item {
+  display: grid;
+  gap: 12px;
+  padding: 18px 0;
+  border-top: 1px solid var(--line);
+  min-width: 0;
+}
+
+.latex-item__head {
+  display: grid;
+  gap: 2px;
+}
+
+.latex-item__pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+
+@media (min-width: 760px) {
+  .latex-item__pair {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 24px;
+  }
+}
+
+.latex-item__col {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
+}
+
+.latex-item__source,
+.latex-item__render {
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-m);
+  line-height: 1.55;
+  overflow-wrap: break-word;
+}
+
+.latex-item__source {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--text-rule);
+  font-variant-ligatures: none;
+}
+
+.latex-item__render {
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.latex-item__edit summary {
+  display: list-item;
+  padding-block: 12px;
+  font-size: var(--fs-small);
+  font-weight: 700;
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.latex-item__edit .field {
+  box-sizing: border-box;
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-variant-ligatures: none;
+}

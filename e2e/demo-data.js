@@ -121,6 +121,28 @@ export function demoBackup(today, { deckIds = [] } = {}) {
     }
   })
 
+  // schede con formule (inventate): due già in LaTeX, una in testo semplice da convertire
+  const formulaCard = (k, title, text, key, extra = {}) => ({
+    id: `demo-card-1-f${k}`,
+    courseId: courses[0].id,
+    section: 'Parte B',
+    kind: 'formula',
+    title,
+    text,
+    key,
+    needsFix: false,
+    userEdited: false,
+    updatedAt: stamp,
+    ...extra,
+  })
+  cards.push(
+    formulaCard(1, 'Energia del fotone', 'L’energia di un fotone è $E = h \\nu$, cioè $$E = \\hbar \\omega = \\frac{h c}{\\lambda}$$ con $\\omega = 2 \\pi \\nu$.', 'h \\nu', {
+      formulaReading: 'E uguale h tagliato per omega, uguale h per c fratto lambda.',
+    }),
+    formulaCard(2, 'Livelli dell’idrogeno', 'I livelli valgono $E_n = -\\frac{13{,}6\\,\\mathrm{eV}}{n^2}$ e la degenerazione è $2n^2$.', '2n^2'),
+    formulaCard(3, 'Lunghezza di de Broglie', 'La lunghezza d’onda di de Broglie è lambda = h / p, con p = m v, e il livello E_n scala come 1/n^2.', 'h / p'),
+  )
+
   for (let i = 45; i >= 1; i--) {
     const date = shift(today, -i)
     const energy = 1 + Math.floor(r() * 5)
@@ -191,6 +213,10 @@ export function demoBackup(today, { deckIds = [] } = {}) {
     { id: id('k'), title: 'Scegliere l’argomento della tesi', done: false, updatedAt: stamp },
   )
 
+  // le schede con le formule sono già nell'ultima scatola, lontane: non cambiano il ripasso né il piano di oggi
+  cards.filter((c) => c.kind === 'formula').forEach((c) => {
+    cardState.push({ id: c.id, box: 5, due: shift(today, 40), firstReviewed: shift(today, -30), lastReviewed: shift(today, -5), updatedAt: stamp })
+  })
   // schede: le prime già in giro per le scatole, alcune scadute oggi
   cards.slice(0, 30).forEach((c, i) => {
     const box = 1 + (i % 5)

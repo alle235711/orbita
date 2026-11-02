@@ -122,6 +122,25 @@
   font-variant-ligatures: none;
 }
 
+.exercise__rendered {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-m);
+  font-size: clamp(16px, 1.05rem + 0.3vw, 19px);
+  line-height: 1.55;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+
+.exercise__rendered-label {
+  font-size: var(--fs-small);
+  font-weight: 700;
+  color: var(--text-2);
+}
+
 .exercise__text--plain {
   color: var(--text);
   margin-bottom: 14px;
@@ -317,4 +336,23 @@
     margin-left: 0;
     flex-basis: 100%;
   }
+}
+
+/* Editor della scheda: anteprima delle formule e nota sulla lettura. */
+.editor__preview p {
+  padding: 10px 12px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-m);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--text);
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+
+.editor__hint {
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--text-3);
 }

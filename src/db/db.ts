@@ -1,5 +1,6 @@
 import { Dexie, type EntityTable } from 'dexie'
 import { diffTables, migrateToV2, V2_INPUT_TABLES, type RawRow, type RawTables } from './migrations/v2'
+import { normalizeCardV5 } from './migrations/v5'
 import type { TableName, Tables } from './schema'
 
 export type OrbitaDB = Dexie & { [K in TableName]: EntityTable<Tables[K], 'id'> }
@@ -51,6 +52,14 @@ export function createDb(name = 'orbita'): OrbitaDB {
     })
   db.version(3).stores(SCHEMA_V3_DELTA)
   db.version(4).stores(SCHEMA_V4_DELTA)
+  // La versione 5 aggiunge alle schede il campo facoltativo formulaReading: nessun indice, solo la normalizzazione.
+  db.version(5)
+    .stores({})
+    .upgrade(async (tx) => {
+      const rows = (await tx.table('cards').toArray()) as RawRow[]
+      const changed = rows.map(normalizeCardV5).filter((r, i) => r !== rows[i])
+      if (changed.length) await tx.table('cards').bulkPut(changed)
+    })
   // Una scheda rimasta aperta con la versione vecchia deve lasciare la
   // connessione, altrimenti un'altra scheda non può aggiornare il database.
   db.on('versionchange', () => {

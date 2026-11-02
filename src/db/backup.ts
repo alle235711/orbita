@@ -4,6 +4,7 @@ import { isRealDay, MAX_GRADE, MIN_GRADE } from '../libretto/grades'
 import { isUsableDate } from '../multiverse/scenario'
 import type { OrbitaDB } from './db'
 import { migrateToV2, V2_INPUT_TABLES, type RawRow, type RawTables } from './migrations/v2'
+import { migrateCardsV5 } from './migrations/v5'
 import { TABLE_NAMES, type Syncable, type TableName } from './schema'
 
 // Backup completo in JSON. L'importazione fonde record per record con la
@@ -57,8 +58,10 @@ export function parseBackup(json: unknown): Backup {
       if (name === 'universes' && !validUniverseRow(row as unknown as Record<string, unknown>)) throw new BackupError('backupUniverseRow')
     }
   }
-  if (b.format <= 1) return upgradeV1(b as Backup)
-  return b as Backup
+  const upgraded = b.format <= 1 ? upgradeV1(b as Backup) : (b as Backup)
+  // Le schede passano dalla stessa normalizzazione dell'aggiornamento alla versione 5 di Dexie.
+  const cards = upgraded.tables.cards
+  return cards ? { ...upgraded, tables: { ...upgraded.tables, cards: migrateCardsV5(cards as RawRow[]) as unknown as Syncable[] } } : upgraded
 }
 
 const RESULT_OUTCOMES = ['superato', 'rifiutato', 'non-superato']
