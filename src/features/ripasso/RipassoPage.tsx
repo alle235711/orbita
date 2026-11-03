@@ -12,7 +12,8 @@ import { saveReview, setNeedsFix } from '../../db/review-actions'
 import type { Card, ReviewMode } from '../../db/schema'
 import { useI18n } from '../../i18n/store'
 import { diffDays } from '../../lib/dates'
-import { modeForBox } from '../../review/leitner'
+import { modeForCard } from '../../review/leitner'
+import { hasLatex } from '../../review/latex'
 import { courseRank, dailyQueue } from '../../review/queue'
 import { CardEditor } from './CardEditor'
 import { RecallExercise, type RecallDone } from './RecallExercise'
@@ -87,11 +88,12 @@ export default function RipassoPage() {
     const next = (early ? ahead : todo)[0]
     if (!next) return
     const st = states.get(next.id)
-    setCurrent({ id: next.id, mode: modeForBox(st?.box), box: st?.box ?? 1, fresh: !st })
+    setCurrent({ id: next.id, mode: modeForCard(st?.box, next.text), box: st?.box ?? 1, fresh: !st })
   }, [current, todo, ahead, early, states])
 
   const card = current ? cardsById.get(current.id) : undefined
-  const mode = current?.mode ?? 'copia'
+  // Se la formula sparisce dalla scheda mentre si ripassa (modifica), LaTeX torna Completa.
+  const mode: ReviewMode = current?.mode === 'latex' && card && !hasLatex(card.text) ? 'completa' : (current?.mode ?? 'copia')
   const doneToday = data && subject ? new Set(data.reviews.filter((r) => cardsById.get(r.cardId)?.courseId === subject.id).map((r) => r.cardId)).size : 0
 
   const choose = (materia: string, sezione = '') => {
@@ -198,7 +200,7 @@ export default function RipassoPage() {
             </p>
           </header>
 
-          {mode === 'copia' || mode === 'completa' ? (
+          {mode === 'copia' || mode === 'completa' || mode === 'latex' ? (
             <TypingExercise
               key={`${card.id}:${mode}`}
               text={card.text}
@@ -209,7 +211,7 @@ export default function RipassoPage() {
               onDone={(r) => void onTypingDone(r)}
               onNext={next}
               showKeyboard={wide}
-              inputLabel={mode === 'copia' ? tr.copyLabel : tr.completeLabel}
+              inputLabel={mode === 'copia' ? tr.copyLabel : mode === 'latex' ? tr.latexLabel : tr.completeLabel}
             />
           ) : (
             <RecallExercise

@@ -14,12 +14,14 @@ export function sampleFile(): { corsi: { id: string; nome: string }[]; schede: u
 }
 
 /** Dal primo passo del percorso guidato: "Ripristina un backup" con i dati dimostrativi, come farebbe una persona. */
-export async function importDemo(page: Page, testInfo: TestInfo, today: string, extra: { settings?: { id: string; value: unknown; updatedAt: number }[]; courses?: unknown[]; results?: unknown[] } = {}): Promise<void> {
+export async function importDemo(page: Page, testInfo: TestInfo, today: string, extra: { settings?: { id: string; value: unknown; updatedAt: number }[]; courses?: unknown[]; results?: unknown[]; cards?: unknown[]; cardState?: unknown[] } = {}): Promise<void> {
   const file = testInfo.outputPath('demo-backup.json')
   const backup = demoBackup(today, { deckIds: sampleFile().corsi.map((c) => c.id) })
   backup.tables.settings.push(...(extra.settings ?? []))
   backup.tables.courses.push(...(extra.courses ?? []))
   backup.tables.results.push(...(extra.results ?? []))
+  backup.tables.cards.push(...(extra.cards ?? []))
+  backup.tables.cardState.push(...(extra.cardState ?? []))
   writeFileSync(file, JSON.stringify(backup))
   await page.goto('/')
   await expect(page.getByRole('button', { name: 'Ripristina un backup' })).toBeVisible({ timeout: 20_000 })

@@ -16,7 +16,7 @@ const WIDTH = 840
 const HEIGHT = 5 * 46 + 4 * 6
 
 interface KeyboardProps {
-  /** Il tasto successivo da illuminare, con lo Shift. Omettilo nelle modalità a memoria. */
+  /** Il tasto successivo da illuminare, con lo Shift e con Alt Gr quando il carattere sta al terzo o quarto livello. Omettilo nelle modalità a memoria. */
   next?: Stroke | null
   /** Errori per tasto: nelle modalità a memoria le battute sbagliate, in Dattilografia la mappa di calore. */
   errors?: Record<string, number>
@@ -37,7 +37,7 @@ export function Keyboard({ next, errors, errorScale = 3, label }: KeyboardProps)
           <div key={r} className="kbd__row">
             {row.map((key) => {
               const isNext = next?.key.id === key.id
-              const isShift = next?.shift?.id === key.id
+              const isShift = next?.shift?.id === key.id || next?.altGr?.id === key.id
               const err = errors?.[key.id] ?? 0
               const style = {
                 width: key.width,

@@ -17,7 +17,7 @@ export type WorkoutType = 'arrampicata' | 'corsa' | 'palestra' | 'nuoto' | 'altr
 /** Ordine del piano e dell'interfaccia. */
 export const WORKOUT_ORDER: readonly WorkoutType[] = ['arrampicata', 'palestra', 'corsa', 'nuoto', 'altro']
 export type EventType = 'lezione' | 'studio' | 'lavoro' | 'sport' | 'esame' | 'altro'
-export type ReviewMode = 'copia' | 'completa' | 'nome' | 'memoria'
+export type ReviewMode = 'copia' | 'completa' | 'latex' | 'nome' | 'memoria'
 export type LeitnerBox = 1 | 2 | 3 | 4 | 5
 
 /** id = data del giorno ('YYYY-MM-DD'). */

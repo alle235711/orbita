@@ -34,6 +34,7 @@ const SAME_IN_BOTH = new Set<string>([
   'nav.items.briefing',
   'quicklog.scorePlaceholder', // "0–100"
   'stats.hUnit', // " h"
+  'ripasso.mode.latex', // il nome del linguaggio
   'regole.units.min', // "min"
   'regole.units.hours', // "h"
   // Parole identiche per natura: "Sport", "Backup", "4 g" e simili.

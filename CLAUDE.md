@@ -60,7 +60,7 @@ Serve Node 24 (`nvm use`, c'è `.nvmrc`): Vite 8 e Vitest 5 non girano sul Node 
   - Chiavi naturali dove esistono: `days.id` è la data, `cardState.id` è l'id della scheda, `rules.id` la regola, `settings.id` il nome.
   - Seed e schede incluse hanno `updatedAt = 0`: qualsiasi modifica dell'utente vince nella fusione dei backup (last-write-wins).
 - `src/rules/`: motore di regole, funzioni pure (`defaults.ts` ha le 9 regole e le soglie); `plan.ts` compone il piano, `schedule.ts` mette i blocchi in agenda
-- `src/review/`: coda del ripasso, Leitner, motore di battitura
+- `src/review/`: coda del ripasso, Leitner, motore di battitura. `layout-it.ts` è la tabella dei 4 livelli della tastiera italiana (xkb `it(basic)`, controllata da `layout-it.test.ts` contro `src/test/xkb-it-basic.json`, che rigenera `scripts/xkb-it.mjs`); `latex.ts` dà il sorgente da battere nella modalità LaTeX (scatola 2, schede con formule)
 - `src/i18n/`: dizionari `it`/`en` (`dict/`), formati di date e numeri (`format/`), `AppError` con `renderError`; ogni testo visibile viene da qui (lo controlla `no-literals.test.ts`)
 - `src/modules/`: i sette moduli accendibili (sport, peso, lingua...) e le loro impostazioni
 - `src/libretto/`: voti, medie e stato degli esami (`grades.ts`, funzioni pure)

@@ -5,6 +5,7 @@
 import type { CardState, LeitnerBox, ReviewMode } from '../db/schema'
 import { addDays, type ISODate } from '../lib/dates'
 import { DEFAULT_TUNING, type Tuning } from '../rules/defaults'
+import { hasLatex } from './latex'
 
 /** Intervalli predefiniti: i valori modificabili stanno nel gruppo `ripasso`. */
 export const INTERVALS: Record<LeitnerBox, number> = { 1: 1, 2: 2, 3: 4, 4: 8, 5: 16 }
@@ -14,7 +15,7 @@ export function intervalsFor(tuning: Tuning = DEFAULT_TUNING): Record<LeitnerBox
   return { 1: r.box1!, 2: r.box2!, 3: r.box3!, 4: r.box4!, 5: r.box5! }
 }
 
-/** Precisione minima in Copia e Completa, somiglianza suggerita nelle modalità a memoria. */
+/** Precisione minima in Copia, Completa e LaTeX, somiglianza suggerita nelle modalità a memoria. */
 export const MIN_ACCURACY = 0.97
 export const MIN_SIMILARITY = 0.85
 
@@ -31,10 +32,19 @@ export function modeForBox(box: LeitnerBox | undefined): ReviewMode {
   }
 }
 
+/**
+ * La modalità di una scheda: quella della scatola, ma in scatola 2 le schede
+ * con formule battono il sorgente LaTeX al posto di Completa.
+ */
+export function modeForCard(box: LeitnerBox | undefined, text: string): ReviewMode {
+  const mode = modeForBox(box)
+  return mode === 'completa' && hasLatex(text) ? 'latex' : mode
+}
+
 /** Esito suggerito: in Copia e Completa decide la precisione, a memoria la somiglianza (poi decidi tu). */
 export function suggestedOutcome(mode: ReviewMode, score: number, tuning: Tuning = DEFAULT_TUNING): boolean {
   const r = tuning.ripasso
-  return mode === 'copia' || mode === 'completa' ? score >= r.minAccuracy! / 100 : score >= r.minSimilarity! / 100
+  return mode === 'copia' || mode === 'completa' || mode === 'latex' ? score >= r.minAccuracy! / 100 : score >= r.minSimilarity! / 100
 }
 
 export interface ReviewOutcome {

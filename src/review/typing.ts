@@ -32,12 +32,13 @@ export function startTyping(target: string): TypingState {
 
 /**
  * La punteggiatura "intelligente" di iPad e Android (apostrofi curvi,
- * virgolette, puntini) diventa quella della tastiera del PC.
+ * virgolette, puntini) diventa quella della tastiera del PC. Un carattere
+ * che compare nel testo di riferimento resta com'è: in LaTeX l'accento
+ * grave (`) è un carattere vero, non un apostrofo.
  */
-export function normalizeTyped(value: string): string {
-  return value
-    .replace(/[‘’‛ʼ´`]/g, "'")
-    .replace(/[“”„«»]/g, '"')
+export function normalizeTyped(value: string, target = ''): string {
+  const unless = (re: RegExp, to: string) => (s: string) => s.replace(re, (c) => (target.includes(c) ? c : to))
+  return unless(/[‘’‛ʼ´`]/g, "'")(unless(/[“”„«»]/g, '"')(value))
     .replace(/…/g, '...')
     .replace(/ /g, ' ')
 }
@@ -48,7 +49,7 @@ const bump = (map: Record<string, number>, key: string | null) => {
 
 /** Applica il nuovo valore del campo: aggiunte, cancellazioni o sostituzioni. */
 export function applyValue(state: TypingState, raw: string, now: number, limit = true): TypingState {
-  let value = normalizeTyped(raw)
+  let value = normalizeTyped(raw, state.target)
   if (limit) value = value.slice(0, state.target.length)
   if (value === state.typed) return state
   const prev = state.typed

@@ -42,7 +42,8 @@ describe('tastiera italiana', () => {
     expect(strokeFor('(')).toMatchObject({ key: { id: '8' } })
     expect(strokeFor('a')).toMatchObject({ key: { id: 'a' } })
     expect(strokeFor('a')!.shift).toBeUndefined()
-    expect(strokeFor('€')).toBeNull() // serve Alt Gr
+    expect(strokeFor('€')).toMatchObject({ key: { id: 'e' }, level: 3, altGr: { id: 'altgr' } })
+    expect(strokeFor('☃')).toBeNull() // la tastiera italiana non lo produce
   })
 
   it('sa scrivere ogni carattere delle 502 schede', () => {

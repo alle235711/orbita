@@ -4,6 +4,7 @@ import type { Format } from '../../format/types'
 const mode: Record<ReviewMode, string> = {
   copia: 'Copy',
   completa: 'Complete',
+  latex: 'LaTeX',
   nome: 'Guess the name',
   memoria: 'From memory',
 }
@@ -11,6 +12,7 @@ const mode: Record<ReviewMode, string> = {
 const instructions: Record<ReviewMode, string> = {
   copia: 'Copy it out without looking at the keyboard: you repeat it and train your fingers at the same time.',
   completa: 'The hidden part has to be typed from memory, along with everything else.',
+  latex: 'Type the LaTeX source of the formulas: the rendering above is your reference, and the keyboard shows when Alt Gr is needed.',
   nome: 'Read the statement and type the card’s name.',
   memoria: 'Type the statement from memory, then compare it with the text.',
 }
@@ -34,6 +36,7 @@ export const ripasso = {
   edit: 'Edit the card',
   copyLabel: 'Copy out the definition',
   completeLabel: 'Type the definition, hidden part included',
+  latexLabel: 'Type the LaTeX source of the formula',
   allDone: 'All done for today',
   finished: (p: { subject?: string; done: number }, f: Format) =>
     `${p.subject ? `You’ve finished today’s ${p.subject} cards` : 'You’ve finished today’s cards'}${p.done ? `: ${f.count(p.done, 'card', 'cards')} reviewed.` : '.'} You can review more ahead of schedule: they count towards the stats but don’t change box.`,

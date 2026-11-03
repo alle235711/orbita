@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { FingerLegend, Keyboard } from '../../components/Keyboard'
 import { MathText } from '../../components/MathText'
 import { hasMath } from '../../math/delimiters'
+import { latexSource } from '../../review/latex'
 import { useI18n } from '../../i18n/store'
 import { strokeFor, strokeHint } from '../../review/keyboard'
 import { useTuning } from '../../db/hooks'
@@ -21,7 +22,7 @@ export interface TypingDone {
 
 interface TypingExerciseProps {
   text: string
-  mode: Extract<ReviewMode, 'copia' | 'completa'>
+  mode: Extract<ReviewMode, 'copia' | 'completa' | 'latex'>
   hiddenKey?: string
   /** La lettura a parole delle formule della scheda. */
   reading?: string
@@ -35,21 +36,26 @@ interface TypingExerciseProps {
   nextLabel?: string
 }
 
-/** Copia e Completa: il testo si colora mentre scrivi, la tastiera suggerisce il tasto. */
+/**
+ * Copia, Completa e LaTeX: il testo si colora mentre scrivi, la tastiera suggerisce il tasto.
+ * In LaTeX si batte il sorgente delle formule della scheda, con la resa sopra come riferimento.
+ */
 export function TypingExercise({ text, mode, hiddenKey, reading, outcome, onDone, onNext, showKeyboard, inputLabel, nextLabel }: TypingExerciseProps) {
   const { t, f } = useI18n()
   const tr = t.ripasso
-  const [state, setState] = useState(() => startTyping(text))
+  // Quello che si batte: il testo della scheda, in LaTeX solo il sorgente delle sue formule.
+  const target = useMemo(() => (mode === 'latex' ? latexSource(text) : text), [mode, text])
+  const [state, setState] = useState(() => startTyping(target))
   const [now, setNow] = useState(() => Date.now())
   const finished = useRef(false)
   const input = useRef<HTMLInputElement>(null)
   const ranges = useMemo(() => (mode === 'completa' && hiddenKey ? keyRanges(text, hiddenKey) : []), [mode, hiddenKey, text])
 
   useEffect(() => {
-    setState(startTyping(text))
+    setState(startTyping(target))
     finished.current = false
     if (window.matchMedia('(pointer: fine)').matches) input.current?.focus({ preventScroll: true })
-  }, [text, mode])
+  }, [target, mode])
 
   // Il cronometro va solo mentre scrivi.
   useEffect(() => {
@@ -64,10 +70,10 @@ export function TypingExercise({ text, mode, hiddenKey, reading, outcome, onDone
   const stats = typingStats(state, finished.current ? undefined : now, minSeconds)
   const states = charStates(state)
   const pos = state.typed.length
-  const next = text[pos]
+  const next = target[pos]
   const hiddenHere = next !== undefined && inRanges(pos, ranges)
-  // Si batte sempre il sorgente; la resa delle formule si vede in Copia e, in Completa, solo alla fine.
-  const showRendered = hasMath(text) && (mode === 'copia' || stats.done)
+  // Si batte sempre il sorgente; la resa delle formule si vede in Copia e in LaTeX (è il riferimento) e, in Completa, solo alla fine.
+  const showRendered = hasMath(text) && (mode !== 'completa' || stats.done)
 
   useEffect(() => {
     if (!stats.done || finished.current) return
@@ -100,7 +106,7 @@ export function TypingExercise({ text, mode, hiddenKey, reading, outcome, onDone
   }
 
   const reset = () => {
-    setState(startTyping(text))
+    setState(startTyping(target))
     finished.current = false
     input.current?.focus()
   }
@@ -115,7 +121,7 @@ export function TypingExercise({ text, mode, hiddenKey, reading, outcome, onDone
           </div>
         ) : null}
         <p className="exercise__text" aria-hidden="true">
-          {[...text].map((ch, i) => {
+          {[...target].map((ch, i) => {
             const st = states[i]!
             const masked = st !== 'ok' && st !== 'wrong' && inRanges(i, ranges) && ch !== ' '
             const shown = st === 'wrong' ? state.typed[i] === ' ' ? '·' : state.typed[i] : masked ? '–' : ch

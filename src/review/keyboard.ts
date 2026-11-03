@@ -3,6 +3,7 @@
 // in pixel (tasto normale 50, spazio fra i tasti 6): ogni riga fa 840.
 
 import { typing } from '../i18n/dict/it/typing'
+import { positionFor, type Level } from './layout-it'
 
 export type Finger = 'mignolo' | 'anulare' | 'medio' | 'indice' | 'pollice'
 export type Hand = 'sinistra' | 'destra'
@@ -108,40 +109,45 @@ export const ROWS: Key[][] = [
 
 export const KEYS: Map<string, Key> = new Map(ROWS.flat().map((key) => [key.id, key]))
 
-/** Tasti con un carattere sopra: il carattere con Shift → il tasto. */
-const SHIFTED: Map<string, string> = new Map(
-  ROWS.flat()
-    .filter((key) => key.up && key.up !== '€')
-    .map((key) => [key.up!, key.id]),
-)
-
 export interface Stroke {
   key: Key
-  /** Lo Shift da tenere premuto, quello della mano opposta. */
+  /** Il livello della tastiera: 1 base, 2 Maiusc, 3 Alt Gr, 4 Alt Gr + Maiusc (vedi layout-it.ts). */
+  level: Level
+  /** Lo Shift da tenere premuto, quello della mano opposta (livelli 2 e 4). */
   shift?: Key
+  /** Il tasto Alt Gr da tenere premuto, a destra della barra spaziatrice (livelli 3 e 4). */
+  altGr?: Key
 }
 
-/** Come si scrive un carattere: tasto, dito e Shift; null se serve Alt Gr o non c'è. */
+/** Come si scrive un carattere: tasto, livello, dito, Shift e Alt Gr; null se la tastiera italiana non lo produce. */
 export function strokeFor(char: string): Stroke | null {
-  if (char === ' ') return { key: KEYS.get('space')! }
-  const direct = KEYS.get(char)
-  if (direct && direct.label === char) return { key: direct }
-  const shifted = SHIFTED.get(char)
-  const lower = char.toLowerCase()
-  const keyId = shifted ?? (lower !== char && KEYS.has(lower) ? lower : undefined)
-  if (!keyId) return null
-  const key = KEYS.get(keyId)!
-  return { key, shift: KEYS.get(key.hand === 'sinistra' ? 'rshift' : 'lshift')! }
+  if (char === ' ') return { key: KEYS.get('space')!, level: 1 }
+  const pos = positionFor(char)
+  const key = pos && KEYS.get(pos.key)
+  if (!pos || !key) return null
+  const shifted = pos.level === 2 || pos.level === 4
+  return {
+    key,
+    level: pos.level,
+    shift: shifted ? KEYS.get(key.hand === 'sinistra' ? 'rshift' : 'lshift')! : undefined,
+    altGr: pos.level >= 3 ? KEYS.get('altgr')! : undefined,
+  }
 }
 
-/** «e», medio sinistro · «E», medio sinistro con lo Shift destro · Spazio, col pollice */
+/** «e», medio sinistro · «E», medio sinistro con lo Shift destro · «[», mignolo destro con Alt Gr · Spazio, col pollice */
 export function strokeHint(char: string, h: typeof typing.hint = typing.hint): string {
   if (char === ' ') return h.space
   const stroke = strokeFor(char)
   if (!stroke) return h.special({ char })
-  const { key, shift } = stroke
-  if (!key.finger) return h.altGr({ char, shift: !!shift })
-  return h.finger({ char, finger: key.finger, hand: key.hand, shift: shift ? (shift.id === 'rshift' ? 'destra' : 'sinistra') : undefined })
+  const { key, shift, altGr } = stroke
+  if (!key.finger) return h.rightOfAltGr({ char, shift: !!shift })
+  return h.finger({
+    char,
+    finger: key.finger,
+    hand: key.hand,
+    shift: shift ? (shift.id === 'rshift' ? 'destra' : 'sinistra') : undefined,
+    altGr: !!altGr,
+  })
 }
 
 /** Il tasto da premere per un carattere (per le statistiche di errore). */

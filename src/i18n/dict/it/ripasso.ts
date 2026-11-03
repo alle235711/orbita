@@ -4,6 +4,7 @@ import type { Format } from '../../format/types'
 const mode: Record<ReviewMode, string> = {
   copia: 'Copia',
   completa: 'Completa',
+  latex: 'LaTeX',
   nome: 'Indovina il nome',
   memoria: 'A memoria',
 }
@@ -11,6 +12,7 @@ const mode: Record<ReviewMode, string> = {
 const instructions: Record<ReviewMode, string> = {
   copia: 'Ricopiala senza guardare la tastiera: la ripeti e intanto alleni le dita.',
   completa: 'La parte nascosta va scritta a memoria, insieme a tutto il resto.',
+  latex: 'Batti il sorgente LaTeX delle formule: la resa sopra è il riferimento, i tasti con Alt Gr li suggerisce la tastiera.',
   nome: 'Leggi l’enunciato e scrivi il nome della scheda.',
   memoria: 'Scrivi l’enunciato a memoria, poi confrontalo con il testo.',
 }
@@ -34,6 +36,7 @@ export const ripasso = {
   edit: 'Modifica la scheda',
   copyLabel: 'Ricopia la definizione',
   completeLabel: 'Scrivi la definizione, parte nascosta compresa',
+  latexLabel: 'Batti il sorgente LaTeX della formula',
   allDone: 'Per oggi è tutto',
   finished: (p: { subject?: string; done: number }, f: Format) =>
     `${p.subject ? `Hai finito le schede di ${p.subject} di oggi` : 'Hai finito le schede di oggi'}${p.done ? `: ${f.count(p.done, 'ripassata', 'ripassate')}.` : '.'} Puoi ripassarne altre in anticipo: contano per le statistiche ma non cambiano scatola.`,

@@ -193,6 +193,65 @@ for (const vp of VIEWPORTS) {
       expect(report).toEqual([])
     })
 
+    test('ripasso in LaTeX: resa sopra, Alt Gr e Shift sulla tastiera, nessuna sovrapposizione', async ({ page }, testInfo) => {
+      test.setTimeout(120_000)
+      await page.clock.setFixedTime(now)
+      // Una scheda con formule inventata, già in scatola 2 e scaduta da dieci giorni: è la prima della coda.
+      const source = 'E_n = -\\frac{13{,}6\\,\\mathrm{eV}}{n^2}'
+      const dueOn = new Date(now)
+      dueOn.setDate(dueOn.getDate() - 10)
+      await importDemo(page, testInfo, today, {
+        cards: [
+          { id: 'demo-card-1-latex', courseId: 'demo-c-1', section: 'Parte B', kind: 'formula', title: 'Livelli in LaTeX', text: `I livelli dell’idrogeno valgono $${source}$ in elettronvolt.`, key: 'n^2', needsFix: false, userEdited: false, updatedAt: 1 },
+        ],
+        cardState: [{ id: 'demo-card-1-latex', box: 2, due: isoDate(dueOn), firstReviewed: isoDate(dueOn), lastReviewed: isoDate(dueOn), updatedAt: 1 }],
+      })
+      await page.goto('/#/ripasso?materia=demo-c-1')
+      await page.reload()
+      await dismissNotice(page)
+      await expect(page.getByRole('heading', { level: 1, name: 'Livelli in LaTeX' })).toBeVisible()
+      await expect(page.locator('.ripasso__meta')).toContainText('Scatola 2 di 5, LaTeX')
+      // la resa è il riferimento: HTML nascosto, MathML leggibile; sotto, il sorgente da battere
+      const rendered = page.locator('.exercise__rendered')
+      await expect(rendered.locator('.katex').first()).toBeVisible()
+      await expect(rendered.locator('.katex-html').first()).toHaveAttribute('aria-hidden', 'true')
+      await expect(rendered.locator('.katex-mathml math').first()).toBeAttached()
+      await expect(page.locator('.exercise__text')).toHaveText(source)
+
+      const typer = page.getByLabel('Batti il sorgente LaTeX della formula')
+      await typer.click()
+      await typer.pressSequentially('E_n = -\\frac')
+      // il prossimo carattere è «{»: Alt Gr e Shift insieme, sul tasto di è
+      await expect(page.locator('.exercise__hint')).toHaveText('«{», mignolo destro con Alt Gr (pollice destro) e lo Shift sinistro')
+      if (!vp.mobile) {
+        await expect(page.locator('.kbd__key--next')).toHaveText(/è/)
+        await expect(page.locator('.kbd__key--shift')).toHaveCount(2)
+        await expect(page.locator('.kbd__key--shift', { hasText: 'alt gr' })).toHaveCount(1)
+      } else {
+        await expect(page.locator('.kbd')).toHaveCount(0)
+      }
+      const p = await inspect(page)
+      expect([...p.scroll, ...p.covered, ...p.clipped]).toEqual([])
+
+      // si finisce di battere: scheda giusta, sale in scatola 3, e la revisione è salvata in modalità LaTeX
+      await typer.pressSequentially(source.slice('E_n = -\\frac'.length))
+      await expect(page.locator('.exercise__hint')).toContainText('Sale nella scatola 3')
+      const review = await page.evaluate(
+        () =>
+          new Promise<{ mode: string; ok: boolean }[]>((resolve) => {
+            const open = indexedDB.open('orbita')
+            open.onsuccess = () => {
+              const req = open.result.transaction('cardReviews').objectStore('cardReviews').index('cardId').getAll('demo-card-1-latex')
+              req.onsuccess = () => {
+                open.result.close()
+                resolve(req.result)
+              }
+            }
+          }),
+      )
+      expect(review.map((r) => [r.mode, r.ok])).toEqual([['latex', true]])
+    })
+
     test('il convertitore mostra la resa KaTeX con MathML leggibile e HTML nascosto', async ({ page }, testInfo) => {
       await page.clock.setFixedTime(now)
       await importDemo(page, testInfo, today)
