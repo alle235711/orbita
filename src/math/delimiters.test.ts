@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { hasDisplayMath, hasMath, splitMath } from './delimiters'
+import { hasDisplayMath, hasMath, scanMath, splitMath } from './delimiters'
 
 const text = (value: string) => ({ type: 'text', value })
 const inline = (value: string) => ({ type: 'inline', value })
@@ -69,5 +69,32 @@ describe('splitMath', () => {
     expect(hasMath('$E$')).toBe(true)
     expect(hasDisplayMath('$E$')).toBe(false)
     expect(hasDisplayMath('e poi $$E$$')).toBe(true)
+  })
+})
+
+describe('scanMath', () => {
+  it('dà le posizioni nel sorgente, anche con \\$ prima della formula', () => {
+    const src = 'a \\$ $x$ e $$ y $$ z'
+    const spans = scanMath(src)
+    expect(spans.map((s) => s.type)).toEqual(['text', 'inline', 'text', 'display', 'text'])
+    const inline = spans[1]!
+    expect(src.slice(inline.start, inline.end)).toBe('$x$')
+    expect(src.slice(inline.bodyStart, inline.bodyEnd)).toBe('x')
+    const display = spans[3]!
+    expect(src.slice(display.start, display.end)).toBe('$$ y $$')
+    expect(src.slice(display.bodyStart, display.bodyEnd)).toBe('y')
+  })
+
+  it('coincide con splitMath e copre tutto il sorgente senza buchi', () => {
+    for (const src of ['', 'solo testo', '$$a$$$$b$$', 'Costa 5$ e $x', '$$$$ vuota', '$a $$ b$', '\\$$a$']) {
+      const spans = scanMath(src)
+      expect(spans.map(({ type, value }) => ({ type, value }))).toEqual(splitMath(src))
+      let at = 0
+      for (const s of spans) {
+        expect(s.start).toBe(at)
+        at = s.end
+      }
+      expect(at).toBe(src.length)
+    }
   })
 })

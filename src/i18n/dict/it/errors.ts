@@ -48,5 +48,19 @@ export const errors = {
     `Nessuna lezione ${f.from(p.from, { year: true })} ${f.to(p.to, { year: true })}: il file è per un altro anno accademico?`,
   icsTooLarge: (p: { mb: number }) => `Il file è troppo grande per essere un orario (oltre ${p.mb} MB).`,
   icsReadFailed: (p: { name: string }) => `Non riesco a leggere ${p.name}.`,
+  texUnclosedEnv: (p: { env: string; line: number }) => `Riga ${p.line}: l’ambiente «${p.env}» non è chiuso, manca il suo \\end. Il blocco non viene importato.`,
+  texStrayEnd: (p: { env: string; line: number }) => `Riga ${p.line}: c’è un \\end di «${p.env}» senza il \\begin corrispondente.`,
+  texMismatch: (p: { end: string; begin: string; beginLine: number; line: number }) =>
+    `Riga ${p.line}: il \\end di «${p.end}» non corrisponde al \\begin di «${p.begin}» della riga ${p.beginLine}. Il blocco non viene importato.`,
+  texBraces: (p: { env: string; line: number }) => `Riga ${p.line}: nel blocco «${p.env}» le graffe non sono bilanciate. Il blocco non viene importato.`,
+  texBadTitle: (p: { env: string; line: number }) => `Riga ${p.line}: il titolo tra parentesi quadre del blocco «${p.env}» non si chiude. Il blocco non viene importato.`,
+  texUnknownEnv: (p: { env: string; line: number }) =>
+    `Riga ${p.line}: l’ambiente «${p.env}» non è tra quelli da importare. Se è una scheda, scrivilo nell’elenco degli altri ambienti.`,
+  texBadNewtheorem: (p: { line: number }) => `Riga ${p.line}: questo \\newtheorem non è scritto in una forma che so leggere.`,
+  texBadHeading: (p: { line: number }) => `Riga ${p.line}: il titolo di questa sezione non si legge (graffe mancanti?). La sezione viene saltata.`,
+  texEmpty: (p: { env: string; line: number }) => `Riga ${p.line}: il blocco «${p.env}» è vuoto.`,
+  texInternal: () => 'Questo file non si riesce a leggere: da qui non viene importata nessuna scheda.',
+  texReadFailed: (p: { name: string }) => `Non riesco a leggere ${p.name}.`,
+  texTooLarge: (p: { mb: number }) => `Il file è troppo grande per essere un file .tex (oltre ${p.mb} MB).`,
   generic:() => 'Qualcosa non ha funzionato.',
 }

@@ -16,6 +16,7 @@ import { downloadJson, readJsonFile } from '../../lib/download'
 import { WeekdayToggles } from '../../components/WeekdayToggles'
 import { DecksSection, ExamsSection, ModulesSection, PeriodsSection, ProfileSection } from './DatiSections'
 import { LatexConverter } from './LatexConverter'
+import { TexImport } from './TexImport'
 import './DatiPage.css'
 
 type Area = 'backup' | 'schede'
@@ -32,6 +33,13 @@ export default function DatiPage() {
     return (
       <Page className="dati" labelledBy="titolo-latex">
         <LatexConverter />
+      </Page>
+    )
+  }
+  if (route.query.get('vista') === 'tex') {
+    return (
+      <Page className="dati" labelledBy="titolo-tex">
+        <TexImport />
       </Page>
     )
   }
@@ -184,6 +192,12 @@ function DatiMain() {
             {td.overwrite}
           </label>
           <Message notice={notice} area="schede" />
+          <p className="dati__hint">{t.tex.hint}</p>
+          <div className="dati__actions">
+            <a className="btn" href={href('dati', { vista: 'tex' })}>
+              {t.tex.open}
+            </a>
+          </div>
           {cardCounts?.total ? (
             <>
               <p className="dati__hint">{t.math.converter.hint}</p>

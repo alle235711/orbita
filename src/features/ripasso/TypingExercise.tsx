@@ -6,7 +6,7 @@ import { latexSource } from '../../review/latex'
 import { useI18n } from '../../i18n/store'
 import { strokeFor, strokeHint } from '../../review/keyboard'
 import { useTuning } from '../../db/hooks'
-import { inRanges, keyRanges } from '../../review/mask'
+import { hiddenRanges, inRanges } from '../../review/mask'
 import { applyValue, charStates, startTyping, typingStats } from '../../review/typing'
 import type { ReviewMode } from '../../db/schema'
 
@@ -49,7 +49,7 @@ export function TypingExercise({ text, mode, hiddenKey, reading, outcome, onDone
   const [now, setNow] = useState(() => Date.now())
   const finished = useRef(false)
   const input = useRef<HTMLInputElement>(null)
-  const ranges = useMemo(() => (mode === 'completa' && hiddenKey ? keyRanges(text, hiddenKey) : []), [mode, hiddenKey, text])
+  const ranges = useMemo(() => (mode === 'completa' ? hiddenRanges(text, hiddenKey ?? '') : []), [mode, hiddenKey, text])
 
   useEffect(() => {
     setState(startTyping(target))

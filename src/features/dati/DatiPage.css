@@ -301,3 +301,194 @@
   font-size: 0.875rem;
   font-variant-ligatures: none;
 }
+
+/* Importa da file .tex: file, anteprima a tabella con caselle, corso. */
+.tex {
+  display: grid;
+  gap: 32px;
+  max-width: 1200px;
+}
+
+.tex__section {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  min-width: 0;
+  padding-top: 14px;
+  border-top: 2px solid var(--text);
+}
+
+.tex__section h2 {
+  font-size: var(--fs-h2);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  word-spacing: var(--ws-heavy);
+}
+
+.tex__limits {
+  display: grid;
+  gap: 6px;
+  max-width: 62ch;
+  padding-left: 1.2em;
+  font-size: var(--fs-small);
+  color: var(--text-2);
+  list-style: disc;
+}
+
+.tex__envs,
+.tex__course {
+  max-width: 34rem;
+}
+
+.tex__problems {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--error-text);
+  border-radius: var(--radius-m);
+}
+
+.tex__problems-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--error-text);
+}
+
+.tex__problems ul {
+  display: grid;
+  gap: 8px;
+}
+
+.tex__problems li {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--error-text);
+}
+
+.tex__file {
+  color: var(--text);
+}
+
+.tex__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 16px;
+}
+
+.tex__status:focus {
+  outline: none;
+}
+
+.tex-table {
+  display: block;
+  width: 100%;
+}
+
+.tex-table thead,
+.tex-table tbody {
+  display: block;
+}
+
+/* Piccolo: l'intestazione resta per i lettori di schermo; ogni scheda è un blocco. */
+.tex-table__head {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.tex-table__row {
+  display: grid;
+  grid-template-columns: var(--tap) minmax(0, 1fr);
+  align-items: start;
+  gap: 4px 10px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+
+.tex-table__check {
+  display: grid;
+  place-items: center;
+  min-height: var(--tap);
+}
+
+.tex-table__check input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--disk);
+}
+
+.tex-table__card {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  min-height: var(--tap);
+  align-content: center;
+  text-align: left;
+  font-weight: inherit;
+}
+
+.tex-table__title {
+  font-size: 1.0625rem;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  word-spacing: var(--ws-heavy);
+  overflow-wrap: anywhere;
+}
+
+.tex-table__meta {
+  font-size: var(--fs-small);
+  font-weight: 400;
+  color: var(--text-2);
+  overflow-wrap: anywhere;
+}
+
+.tex-table__text {
+  grid-column: 2;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-m);
+  line-height: 1.55;
+  overflow-wrap: break-word;
+}
+
+@media (min-width: 760px) {
+  .tex-table__head {
+    position: static;
+    width: auto;
+    height: auto;
+    clip-path: none;
+    overflow: visible;
+    display: block;
+  }
+
+  .tex-table__head tr,
+  .tex-table__row {
+    display: grid;
+    grid-template-columns: var(--tap) minmax(0, 1fr) minmax(0, 2fr);
+    gap: 4px 24px;
+  }
+
+  .tex-table__head tr {
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--text);
+  }
+
+  .tex-table__head th {
+    text-align: left;
+    font-size: var(--fs-small);
+    font-weight: 700;
+    color: var(--text-2);
+  }
+
+  .tex-table__text {
+    grid-column: auto;
+  }
+}

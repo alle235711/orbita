@@ -46,14 +46,20 @@ function findInlineEnd(src: string, from: number): number {
   return -1
 }
 
-export function splitMath(source: string): MathSegment[] {
-  const out: MathSegment[] = []
+/** Un pezzo con la sua posizione nel sorgente: `start`..`end` coprono anche i delimitatori, `bodyStart`..`bodyEnd` solo il corpo. */
+export type MathSpan = MathSegment & { start: number; end: number; bodyStart: number; bodyEnd: number }
+
+/** Come `splitMath`, ma ogni pezzo porta le sue posizioni nel sorgente (serve a nascondere una formula senza toccare il resto). */
+export function scanMath(source: string): MathSpan[] {
+  const out: MathSpan[] = []
   let text = ''
-  const pushText = (s: string) => {
+  let textStart = 0
+  const pushText = (s: string, at: number) => {
+    if (!text) textStart = at
     text += s
   }
-  const flush = () => {
-    if (text) out.push({ type: 'text', value: text })
+  const flush = (at: number) => {
+    if (text) out.push({ type: 'text', value: text, start: textStart, end: at, bodyStart: textStart, bodyEnd: at })
     text = ''
   }
 
@@ -61,12 +67,12 @@ export function splitMath(source: string): MathSegment[] {
   while (i < source.length) {
     const ch = source[i]!
     if (ch === '\\' && source[i + 1] === '$') {
-      pushText('$')
+      pushText('$', i)
       i += 2
       continue
     }
     if (ch !== '$') {
-      pushText(ch)
+      pushText(ch, i)
       i++
       continue
     }
@@ -74,31 +80,37 @@ export function splitMath(source: string): MathSegment[] {
       const end = findDisplayEnd(source, i + 2)
       const body = end < 0 ? '' : source.slice(i + 2, end)
       if (end >= 0 && body.trim()) {
-        flush()
-        out.push({ type: 'display', value: body.trim() })
+        flush(i)
+        const lead = body.length - body.trimStart().length
+        const bodyStart = i + 2 + lead
+        out.push({ type: 'display', value: body.trim(), start: i, end: end + 2, bodyStart, bodyEnd: bodyStart + body.trim().length })
         i = end + 2
       } else if (end >= 0) {
         // `$$$$` o `$$  $$`: vuota, resta testo.
-        pushText(source.slice(i, end + 2))
+        pushText(source.slice(i, end + 2), i)
         i = end + 2
       } else {
-        pushText('$$')
+        pushText('$$', i)
         i += 2
       }
       continue
     }
     const end = isSpace(source[i + 1]) ? -1 : findInlineEnd(source, i + 1)
     if (end >= 0) {
-      flush()
-      out.push({ type: 'inline', value: source.slice(i + 1, end) })
+      flush(i)
+      out.push({ type: 'inline', value: source.slice(i + 1, end), start: i, end: end + 1, bodyStart: i + 1, bodyEnd: end })
       i = end + 1
     } else {
-      pushText('$')
+      pushText('$', i)
       i++
     }
   }
-  flush()
+  flush(source.length)
   return out
+}
+
+export function splitMath(source: string): MathSegment[] {
+  return scanMath(source).map(({ type, value }) => ({ type, value }))
 }
 
 /** Vero se il testo contiene almeno una formula ben chiusa. */

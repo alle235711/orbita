@@ -48,5 +48,19 @@ export const errors = {
     `No lessons ${f.from(p.from, { year: true })} ${f.to(p.to, { year: true })}: is the file for another academic year?`,
   icsTooLarge: (p: { mb: number }) => `The file is too large to be a timetable (over ${p.mb} MB).`,
   icsReadFailed: (p: { name: string }) => `I can’t read ${p.name}.`,
+  texUnclosedEnv: (p: { env: string; line: number }) => `Line ${p.line}: the “${p.env}” environment is never closed, its \\end is missing. The block is not imported.`,
+  texStrayEnd: (p: { env: string; line: number }) => `Line ${p.line}: there is an \\end of “${p.env}” with no matching \\begin.`,
+  texMismatch: (p: { end: string; begin: string; beginLine: number; line: number }) =>
+    `Line ${p.line}: the \\end of “${p.end}” does not match the \\begin of “${p.begin}” on line ${p.beginLine}. The block is not imported.`,
+  texBraces: (p: { env: string; line: number }) => `Line ${p.line}: the braces in the “${p.env}” block are not balanced. The block is not imported.`,
+  texBadTitle: (p: { env: string; line: number }) => `Line ${p.line}: the title in square brackets of the “${p.env}” block is never closed. The block is not imported.`,
+  texUnknownEnv: (p: { env: string; line: number }) =>
+    `Line ${p.line}: the “${p.env}” environment is not one of those to import. If it is a card, add it to the list of other environments.`,
+  texBadNewtheorem: (p: { line: number }) => `Line ${p.line}: this \\newtheorem is not written in a form I can read.`,
+  texBadHeading: (p: { line: number }) => `Line ${p.line}: the title of this section cannot be read (missing braces?). The section is skipped.`,
+  texEmpty: (p: { env: string; line: number }) => `Line ${p.line}: the “${p.env}” block is empty.`,
+  texInternal: () => 'This file cannot be read: no card is imported from it.',
+  texReadFailed: (p: { name: string }) => `I can’t read ${p.name}.`,
+  texTooLarge: (p: { mb: number }) => `The file is too large to be a .tex file (over ${p.mb} MB).`,
   generic:() => 'Something went wrong.',
 }

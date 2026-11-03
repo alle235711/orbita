@@ -23,6 +23,7 @@ import { ripasso } from './ripasso'
 import { ruler } from './ruler'
 import { sport } from './sport'
 import { stats } from './stats'
+import { tex } from './tex'
 import { typing } from './typing'
 
-export const en: Dict = { common, app, nav, oggi, plan, briefing, regole, ruler, agenda, ripasso, typing, stats, dati, quicklog, errors, energy, sport, art, modules, blocks, profilo, benvenuto, libretto, multiverso, math }
+export const en: Dict = { common, app, nav, oggi, plan, briefing, regole, ruler, agenda, ripasso, typing, stats, dati, quicklog, errors, energy, sport, art, modules, blocks, profilo, benvenuto, libretto, multiverso, math, tex }

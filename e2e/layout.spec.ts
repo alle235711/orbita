@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
+import { TEX_GOOD, TEX_MALFORMED } from '../src/test/tex-fixtures'
 import { importDemo, isoDate, walkWizard } from './helpers'
+import { aWednesday, writeTex } from './tex-helpers'
 
 // Controllo automatico delle sovrapposizioni, al posto degli screenshot da
 // guardare a occhio: su ogni schermata, a 1180×820 e 390×844, sulla build di
@@ -30,6 +32,7 @@ const SCREENS = [
   '#/dattilografia',
   '#/dati',
   '#/dati?vista=latex&corso=demo-c-1&sezione=Parte%20B',
+  '#/dati?vista=tex',
 ]
 
 const now = new Date()
@@ -250,6 +253,25 @@ for (const vp of VIEWPORTS) {
           }),
       )
       expect(review.map((r) => [r.mode, r.ok])).toEqual([['latex', true]])
+    })
+
+    test('importazione da .tex: anteprima con errori, formule e corso, nessuna sovrapposizione', async ({ page }, testInfo) => {
+      test.setTimeout(120_000)
+      const wednesday = aWednesday()
+      await page.clock.setFixedTime(wednesday)
+      await importDemo(page, testInfo, isoDate(wednesday))
+      await page.goto('/#/dati?vista=tex')
+      await page.reload()
+      await dismissNotice(page)
+      await page.locator('input[type=file]').setInputFiles([writeTex(testInfo, 'analisi.tex', TEX_GOOD), writeTex(testInfo, 'rotto.tex', TEX_MALFORMED)])
+      await expect(page.locator('.tex-table .katex').first()).toBeVisible()
+      await expect(page.locator('.tex__problems')).toBeVisible()
+      await page.getByLabel('Altri ambienti da importare').fill('exercise')
+      await page.getByLabel('Corso di destinazione').selectOption('demo-c-1')
+      await page.evaluate(() => document.fonts.ready)
+      await page.waitForTimeout(400)
+      const p = await inspect(page)
+      expect([...p.scroll, ...p.covered, ...p.clipped]).toEqual([])
     })
 
     test('il convertitore mostra la resa KaTeX con MathML leggibile e HTML nascosto', async ({ page }, testInfo) => {
