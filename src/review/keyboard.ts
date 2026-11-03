@@ -103,7 +103,7 @@ export const ROWS: Key[][] = [
     k('alt', 'pollice', L, { label: 'alt' }),
     k('space', 'pollice', R, { label: '', width: 330 }),
     k('altgr', 'pollice', R, { label: 'alt gr', width: 62 }),
-    k('<', null, R, { up: '>' }),
+    k('<', 'mignolo', R, { up: '>' }),
   ],
 ]
 
@@ -140,7 +140,7 @@ export function strokeHint(char: string, h: typeof typing.hint = typing.hint): s
   const stroke = strokeFor(char)
   if (!stroke) return h.special({ char })
   const { key, shift, altGr } = stroke
-  if (!key.finger) return h.rightOfAltGr({ char, shift: !!shift })
+  if (!key.finger) return h.special({ char })
   return h.finger({
     char,
     finger: key.finger,

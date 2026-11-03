@@ -34,8 +34,6 @@ export const typing = {
   hint: {
     space: 'Space, with the thumb',
     special: (p: { char: string }) => `«${p.char}»: special character`,
-    rightOfAltGr: (p: { char: string; shift?: boolean }) =>
-      `«${p.char}», bottom-right key next to alt gr${p.shift ? ', with the left Shift' : ''}`,
     /** `altGr` = the character is on the third level: Alt Gr with the right thumb, plus Shift on the fourth. */
     finger: (p: { char: string; finger: Finger; hand: Hand; shift?: Hand; altGr?: boolean }) =>
       `«${p.char}», ${handWord[p.hand]} ${fingerOne[p.finger]}${p.altGr ? ' with Alt Gr (right thumb)' : ''}${p.shift ? `${p.altGr ? ' and' : ' with'} the ${handWord[p.shift]} Shift` : ''}`,

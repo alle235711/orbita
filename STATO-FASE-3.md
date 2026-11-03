@@ -25,7 +25,6 @@ Fetta I: importazione delle schede da file `.tex` (vedi SPEC-FASE-3.md e il pian
 - WebKit mai provato: `sudo npx playwright install-deps webkit`, poi `WEBKIT=1 npm run test:e2e`.
 - Il convertitore non riconosce tutto: delle 502 schede ne propone 301; per 16 la chiave non si ritrova nella proposta (la vista lo segnala, la conversione in blocco le lascia da parte). Le "e" e "a" tra due pezzi di formula restano testo se accanto non c'è un operatore (`4 a c T^3` si spezza).
 - La mappa del terzo livello è quella di xkb `it` per Ubuntu. Su tastiere italiane Apple (Mac, iPad con tastiera fisica) i livelli sono diversi: da `it(mac)`, `{` è Alt+4 e `[` Alt+Maiusc+4, `}` Alt+7 e `]` Alt+Maiusc+7, `|` Alt+AB09 e `\` Alt+Maiusc+AB09, `@` e `#` stanno sul tasto TLDE senza Alt, `~` solo come tasto morto. Non implementato, e non verificato su una tastiera Apple vera (il file xkb descrive Linux): il suggerimento su Mac/iPad può indicare il tasto sbagliato. Serve una seconda tabella e la scelta della tastiera nelle impostazioni.
-- `<` e `>` stanno sul tasto ISO in basso a destra accanto ad Alt Gr, che il mockup disegna senza colore del dito: la tastiera disegnata non dice con quale dito si premono (il suggerimento dice solo «tasto in basso a destra accanto ad alt gr»). `>` compare 106 volte nel testo delle schede (le frecce `->`) e `<` 12. xkb li offre anche su Alt Gr+Maiusc+Z e +X (livello 4), ma non è il posto ovvio.
 - xkb offre più vie anche per le graffe e le quadre: `{` anche su Alt Gr+7, `}` su Alt Gr+0, `[` su Alt Gr+8, `]` su Alt Gr+9, `@` su Alt Gr+Q. Il suggerimento segue il piano (`[ ] @` con Alt Gr su `è + ò`, `{ }` con Alt Gr+Maiusc su `è +`); `{ }` su Alt Gr+7 e +0 sono più comode (niente Maiusc): basta cambiare `PREFERRED` in `layout-it.ts`.
 - In modalità LaTeX il campo di battitura è a una riga: se una scheda ha molte formule il sorgente da battere è lungo e va a capo nell'elenco dei caratteri; non c'è un indicatore di quale formula si sta battendo.
 - Le maiuscole accentate (`È`, `À`...) non esistono sulla tastiera italiana di xkb (Maiusc+è dà `é`): `strokeFor` oggi dà null per loro, prima le trovava in modo sbagliato su Maiusc+è. Non compaiono nelle schede.
@@ -39,11 +38,16 @@ Fetta I: importazione delle schede da file `.tex` (vedi SPEC-FASE-3.md e il pian
 - Tastiera da xkb `it` di Ubuntu: `[ ] @ # ~` con AltGr, `{ }` con AltGr+Maiusc, `\ ^ _` senza AltGr.
 - Un agente alla volta, un commit per fetta, `STATO-FASE-3.md` aggiornato nello stesso commit, pausa dopo J, nessun push.
 
+## Decisioni prese dopo H
+- `<` e `>` stanno sul tasto a destra di Alt Gr (così è sulla tastiera dell'utente e così lo disegna il mockup; in xkb è `LSGT`, che sulle tastiere ISO standard è a sinistra della Z: il codice resta il nome xkb, il disegno è `ROWS`). Dito: mignolo destro, con lo Shift sinistro per `>`. Il suggerimento è quello normale (««>», mignolo destro con lo Shift sinistro»); `hint.rightOfAltGr` e il caso «tasto senza dito» sono spariti. Il mockup non colora quel tasto: il colore del mignolo è una scelta dell'utente.
+- Niente simboli stampati sui tasti, per ora (terzo e quarto livello restano solo nel suggerimento).
+- `e2e/migration.spec.ts` (commit a5945b6): la fixture della fase 1 ha «martedì in inglese»; il test fissa un mercoledì con `page.clock.setFixedTime`. Non era un bug dell'app.
+
 ## Decisioni prese in H
 - La modalità LaTeX batte solo il sorgente delle formule (senza `$`, separate da uno spazio), non il testo intero: la spec dice "si batte il sorgente della formula", e il testo intero è già Copia. La resa KaTeX sopra è quella della scheda intera, per il contesto.
 - Dove xkb ha più posti per un carattere vince quello del piano (`[ ] { }` sui tasti `è` e `+` come sulla tastiera Windows, `@` su `ò`); per gli altri il livello più basso. Il piano e xkb coincidono per tutti i caratteri della lista (`\ { } [ ] ^ _ ~ @ #`).
 - Il tasto Alt Gr è già nel disegno (dito: pollice destro): si accende col colore dello Shift. Nessun carattere di terzo livello è stampato sui tasti: il mockup non lo mostra.
-- `hint.altGr` (il tasto accanto ad Alt Gr, per `<` e `>`) si chiama ora `hint.rightOfAltGr`; `hint.finger` ha il parametro `altGr`.
+- `hint.finger` ha il parametro `altGr`.
 
 ## Decisioni prese in G
 - Greche ambigue: `eta, nu, mu, pi, chi, xi, zeta, iota, gamma, delta, Gamma, Delta, Pi, Xi` diventano simboli solo in contesto di formula (pedice o apice attaccato, oppure una parola vicina che è numero, lettera, operatore o simbolo); le altre greche si convertono anche da sole. Sempre e solo parole intere ("pianeta" non si tocca).

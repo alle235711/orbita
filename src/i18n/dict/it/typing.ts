@@ -34,8 +34,6 @@ export const typing = {
   hint: {
     space: 'Spazio, col pollice',
     special: (p: { char: string }) => `«${p.char}»: carattere speciale`,
-    rightOfAltGr: (p: { char: string; shift?: boolean }) =>
-      `«${p.char}», tasto in basso a destra accanto ad alt gr${p.shift ? ', con lo Shift sinistro' : ''}`,
     /** `altGr` = il carattere è al terzo livello: Alt Gr col pollice destro, e Shift se è al quarto. */
     finger: (p: { char: string; finger: Finger; hand: Hand; shift?: Hand; altGr?: boolean }) =>
       `«${p.char}», ${fingerOne[p.finger]} ${handWord[p.hand]}${p.altGr ? ' con Alt Gr (pollice destro)' : ''}${p.shift ? `${p.altGr ? ' e' : ' con'} lo Shift ${p.shift === 'destra' ? 'destro' : 'sinistro'}` : ''}`,

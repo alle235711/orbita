@@ -174,7 +174,6 @@ export const SAMPLES: DictSamples = {
   'ripasso.correctedChars': [{ n: 2 }, f],
   'ripasso.youWrote': [{ text: 'esempio' }],
   'typing.hint.special': [{ char: '€' }],
-  'typing.hint.rightOfAltGr': [{ char: '>', shift: true }],
   'typing.hint.finger': [{ char: '@', finger: 'mignolo', hand: 'destra', shift: 'sinistra', altGr: true }],
   'typing.leadPractice': [{ accuracy: 95, wpm: 25 }],
   'typing.best': [{ wpm: 30, accuracy: 0.97 }, f],

@@ -14,9 +14,6 @@ import { LAYOUT_IT, positionFor, positionsOf } from './layout-it'
  */
 const UNREACHABLE: Record<string, string> = {}
 
-/** Caratteri che si risolvono in un tasto senza dito nel mockup (tasto ISO accanto ad Alt Gr, colore neutro). */
-const NO_FINGER = ['<', '>']
-
 const inventory = charInventory()
 const chars = [...inventory.keys()].filter((c) => c !== '\n').sort()
 
@@ -91,10 +88,13 @@ describe('il piano della fetta H contro xkb', () => {
     expect(!!stroke.shift).toBe(level === 2 || level === 4)
   })
 
-  it('< e > stanno sul tasto ISO accanto ad Alt Gr, senza dito nel mockup', () => {
+  it('< e > stanno sul tasto a destra di Alt Gr: mignolo destro, > con lo Shift sinistro', () => {
     expect(positionFor('<')).toEqual({ code: 'LSGT', key: '<', level: 1 })
     expect(positionFor('>')).toEqual({ code: 'LSGT', key: '<', level: 2 })
-    expect(strokeFor('<')!.key.finger).toBeNull()
+    expect(strokeFor('<')).toMatchObject({ key: { id: '<', finger: 'mignolo', hand: 'destra' }, level: 1 })
+    expect(strokeFor('<')!.shift).toBeUndefined()
+    expect(strokeFor('>')).toMatchObject({ key: { id: '<', finger: 'mignolo', hand: 'destra' }, level: 2, shift: { id: 'lshift' } })
+    expect(strokeHint('>')).toBe('«>», mignolo destro con lo Shift sinistro')
   })
 
   it('xkb offre anche altre vie: la tabella le conosce e il suggerimento ne sceglie una', () => {
@@ -132,7 +132,7 @@ describe('Alt Gr e Shift nel suggerimento', () => {
     expect(strokeHint('~')).toBe('«~», mignolo destro con Alt Gr (pollice destro)')
     expect(strokeHint('{')).toBe('«{», mignolo destro con Alt Gr (pollice destro) e lo Shift sinistro')
     expect(strokeHint('€')).toBe('«€», medio sinistro con Alt Gr (pollice destro)')
-    expect(strokeHint('>')).toBe('«>», tasto in basso a destra accanto ad alt gr, con lo Shift sinistro')
+    expect(strokeHint('>')).toBe('«>», mignolo destro con lo Shift sinistro')
     expect(strokeHint('ν')).toBe('«ν»: carattere speciale')
   })
 })
@@ -155,20 +155,18 @@ describe('ogni carattere dei mazzi ha un tasto, un livello e un dito', () => {
   })
 
   it('ogni carattere risolto ha livello, tasto e dito', () => {
-    const noFinger: string[] = []
     for (const c of chars) {
       const stroke = strokeFor(c)
       if (!stroke) continue
       expect([1, 2, 3, 4], c).toContain(stroke.level)
       expect(stroke.key.id.length).toBeGreaterThan(0)
-      if (!stroke.key.finger) noFinger.push(c)
-      else expect(stroke.key.hand, c).toMatch(/^(sinistra|destra)$/)
+      expect(stroke.key.finger, `${c} dito`).not.toBeNull()
+      expect(stroke.key.hand, c).toMatch(/^(sinistra|destra)$/)
       // Shift e Alt Gr coerenti con il livello
       expect(!!stroke.shift, `${c} shift`).toBe(stroke.level === 2 || stroke.level === 4)
       expect(!!stroke.altGr, `${c} altgr`).toBe(stroke.level >= 3)
       if (c !== ' ') expect(strokeHint(c)).toContain(`«${c}»`)
     }
-    expect(noFinger).toEqual(NO_FINGER.filter((c) => inventory.has(c)))
   })
 
   it('stampa l’inventario con INVENTORY=1', () => {
@@ -179,7 +177,7 @@ describe('ogni carattere dei mazzi ha un tasto, un livello e un dito', () => {
       .sort((a, b) => b.o.count - a.o.count)
       .map(({ c, o }) => {
         const s = strokeFor(c)
-        const where = s ? `${s.key.id} liv.${s.level} ${s.key.finger ?? 'nessun dito'} ${s.key.hand}` : 'NON RAGGIUNGIBILE'
+        const where = s ? `${s.key.id} liv.${s.level} ${s.key.finger} ${s.key.hand}` : 'NON RAGGIUNGIBILE'
         return `${JSON.stringify(c).padEnd(6)} ${String(o.count).padStart(6)}  ${where.padEnd(34)} ${JSON.stringify(o.bySource)}`
       })
     console.log(`${chars.length} caratteri distinti\n${rows.join('\n')}`)
