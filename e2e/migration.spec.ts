@@ -5,7 +5,13 @@ import { seedV1Database } from './helpers'
 // IndexedDB 10 a 30) li porta al formato nuovo e la copertina invita a
 // completare il profilo.
 
+// La fixture della fase 1 ha la lingua «martedì in inglese» (otherDays: [2]):
+// il giorno vero cambia l'interfaccia. Si fissa un mercoledì, giorno nella
+// lingua di base, così la prova non dipende dal giorno in cui gira.
+const MERCOLEDI = new Date('2026-11-04T10:00:00+01:00')
+
 test('un database della fase 1 si aggiorna e conserva i dati', async ({ page }) => {
+  await page.clock.setFixedTime(MERCOLEDI)
   await seedV1Database(page)
   await page.goto('/')
   await expect(page.getByRole('heading', { name: 'Completa il profilo' })).toBeVisible({ timeout: 20_000 })
@@ -66,6 +72,7 @@ test('un database della fase 1 si aggiorna e conserva i dati', async ({ page }) 
 })
 
 test('la scheda del profilo non sposta orbita, chip e gesso sul layout largo', async ({ page }) => {
+  await page.clock.setFixedTime(MERCOLEDI)
   await page.setViewportSize({ width: 1180, height: 820 })
   await seedV1Database(page)
   await page.goto('/')
