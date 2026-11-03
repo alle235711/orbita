@@ -11,6 +11,7 @@ const items: Record<RouteId, string> = {
   statistiche: 'Statistiche',
   ripasso: 'Ripasso',
   dattilografia: 'Dattilografia',
+  mazzi: 'Mazzi',
   dati: 'Dati',
 }
 

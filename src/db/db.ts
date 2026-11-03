@@ -7,7 +7,7 @@ export type OrbitaDB = Dexie & { [K in TableName]: EntityTable<Tables[K], 'id'> 
 
 // Indici: solo i campi su cui si filtra. I booleani non sono chiavi valide
 // in IndexedDB, quindi `done`, `suggested` e simili non sono indicizzati.
-export const SCHEMA_V1: Record<Exclude<TableName, 'results' | 'appelli' | 'universes'>, string> = {
+export const SCHEMA_V1: Record<Exclude<TableName, 'results' | 'appelli' | 'universes' | 'decks'>, string> = {
   days: 'id, updatedAt',
   sessions: 'id, date, type, courseId, updatedAt',
   workouts: 'id, date, type, updatedAt',
@@ -32,6 +32,9 @@ export const SCHEMA_V4_DELTA = {
   appelli: 'id, courseId, date, updatedAt',
   universes: 'id, order, updatedAt',
 } as const
+
+/** Versione 6: i mazzi da condividere; nuova tabella, niente da trasformare. */
+export const SCHEMA_V6_DELTA = { decks: 'id, courseId, updatedAt' } as const
 
 export function createDb(name = 'orbita'): OrbitaDB {
   const db = new Dexie(name) as OrbitaDB
@@ -60,6 +63,8 @@ export function createDb(name = 'orbita'): OrbitaDB {
       const changed = rows.map(normalizeCardV5).filter((r, i) => r !== rows[i])
       if (changed.length) await tx.table('cards').bulkPut(changed)
     })
+  // La versione 6 aggiunge solo la tabella dei mazzi: nessun dato esistente viene letto o toccato.
+  db.version(6).stores(SCHEMA_V6_DELTA)
   // Una scheda rimasta aperta con la versione vecchia deve lasciare la
   // connessione, altrimenti un'altra scheda non può aggiornare il database.
   db.on('versionchange', () => {

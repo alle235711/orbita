@@ -228,6 +228,27 @@ export interface Setting extends Syncable {
   value: unknown
 }
 
+/**
+ * Un mazzo da condividere: i metadati di un corso e delle sue schede. I mazzi si ricavano dai corsi
+ * (un corso con schede è un mazzo); il record esiste solo dopo la prima condivisione o importazione.
+ * id = uuid del mazzo, uguale su ogni dispositivo che lo riceve: serve a fondere gli aggiornamenti.
+ */
+export interface Deck extends Syncable {
+  /** Il corso locale che ospita le schede del mazzo. */
+  courseId: string
+  name: string
+  author: string
+  university: string
+  /** Il corso a cui si riferisce, scritto da chi ha fatto il mazzo (può non coincidere col nome del corso locale). */
+  course: string
+  /** Anno accademico, testo libero ('2026/2027'). */
+  year: string
+  license: string
+  notes: string
+  /** Presente solo se il mazzo è stato importato: chi l'ha firmato. Assente = creato qui. */
+  origin?: { author: string; university: string }
+}
+
 export interface Tables {
   days: DayRecord
   sessions: Session
@@ -246,6 +267,7 @@ export interface Tables {
   results: ExamResult
   appelli: Appello
   universes: Universe
+  decks: Deck
 }
 
 export type TableName = keyof Tables
@@ -268,4 +290,5 @@ export const TABLE_NAMES: TableName[] = [
   'results',
   'appelli',
   'universes',
+  'decks',
 ]

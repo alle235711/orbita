@@ -1,0 +1,55 @@
+/* Il codice QR: sempre nero su bianco, quadrato, mai più largo del foglio. */
+.qr {
+  display: block;
+  width: min(100%, 22rem, 44dvh);
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: var(--radius-m);
+}
+
+.qr-figure {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  margin: 0;
+}
+
+.qr-figure figcaption {
+  max-width: 34ch;
+  font-size: var(--fs-small);
+  color: var(--text-2);
+}
+
+.mazzi-sheet__status {
+  min-height: 1.45em;
+  font-size: 0.9375rem;
+  color: var(--text-rule);
+  overflow-wrap: anywhere;
+}
+
+.mazzi-sheet__status--error {
+  color: var(--error-text);
+}
+
+.mazzi-sheet__status:focus {
+  outline: none;
+}
+
+/* Anteprima dell'importazione: righe con il respiro delle altre sezioni di Dati. */
+.mazzi-preview {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.mazzi-preview p {
+  overflow-wrap: anywhere;
+}
+
+.mazzi-import__status:focus {
+  outline: none;
+}
+
+.mazzi-qr {
+  scroll-margin-bottom: 20px;
+}

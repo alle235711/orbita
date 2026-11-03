@@ -15,6 +15,7 @@ export const NAV_ITEMS: { id: RouteId }[] = [
   { id: 'statistiche' },
   { id: 'ripasso' },
   { id: 'dattilografia' },
+  { id: 'mazzi' },
   { id: 'dati' },
 ]
 

@@ -1,6 +1,7 @@
 .sheet {
   width: min(460px, calc(100vw - 2 * var(--gutter)));
-  max-height: calc(100dvh - 32px);
+  /* Sotto la barra e dentro lo schermo: un foglio lungo scorre, non esce dal bordo in basso. */
+  max-height: calc(100dvh - var(--nav-h) - env(safe-area-inset-top) - 16px);
   margin: calc(var(--nav-h) + env(safe-area-inset-top) + 8px) max(var(--gutter), env(safe-area-inset-right)) auto auto;
   padding: 0;
   border-radius: var(--radius-xl);
@@ -64,6 +65,7 @@
 
 @media (max-width: 599px) {
   .sheet {
+    max-height: calc(100dvh - 32px);
     width: 100vw;
     max-width: 100vw;
     margin: auto 0 0;

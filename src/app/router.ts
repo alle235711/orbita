@@ -11,6 +11,7 @@ export const ROUTES = [
   'statistiche',
   'ripasso',
   'dattilografia',
+  'mazzi',
   'dati',
   'regole',
   'multiverso',

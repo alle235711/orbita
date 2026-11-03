@@ -23,6 +23,7 @@ const PAGES: Record<RouteId, LazyExoticComponent<ComponentType>> = {
   statistiche: lazy(() => import('../features/statistiche/StatistichePage')),
   ripasso: lazy(() => import('../features/ripasso/RipassoPage')),
   dattilografia: lazy(() => import('../features/dattilografia/DattilografiaPage')),
+  mazzi: lazy(() => import('../features/mazzi/MazziPage')),
   dati: lazy(() => import('../features/dati/DatiPage')),
 }
 

@@ -11,7 +11,7 @@ describe('parseHash', () => {
   })
 
   it('l’elenco delle sezioni è in ordine', () => {
-    expect([...ROUTES]).toEqual(['oggi', 'agenda', 'briefing', 'libretto', 'statistiche', 'ripasso', 'dattilografia', 'dati', 'regole', 'multiverso'])
+    expect([...ROUTES]).toEqual(['oggi', 'agenda', 'briefing', 'libretto', 'statistiche', 'ripasso', 'dattilografia', 'mazzi', 'dati', 'regole', 'multiverso'])
   })
 
   it('torna a Oggi per hash vuoti o sconosciuti', () => {

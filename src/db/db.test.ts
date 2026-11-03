@@ -231,7 +231,7 @@ describe('aggiornamento di Dexie dalla versione 1 alla 2', () => {
     const upgraded = createDb(name)
     try {
       await upgraded.open()
-      expect(upgraded.verno).toBe(5)
+      expect(upgraded.verno).toBe(6)
       expect(await upgraded.results.count()).toBe(0)
       expect(await upgraded.appelli.count()).toBe(0)
       const expected = migrateToV2(fixture)
@@ -270,7 +270,7 @@ describe('aggiornamento di Dexie dalla versione 1 alla 2', () => {
     const upgraded = createDb(name)
     try {
       await upgraded.open()
-      expect(upgraded.verno).toBe(5)
+      expect(upgraded.verno).toBe(6)
       expect(await getSetting(upgraded, 'newCardsPerDay')).toBe(7)
       expect(upgraded.results.schema.idxByName.courseId).toBeDefined()
       expect(upgraded.results.schema.idxByName.date).toBeDefined()
@@ -292,7 +292,7 @@ describe('aggiornamento di Dexie dalla versione 1 alla 2', () => {
     const upgraded = createDb(name)
     try {
       await upgraded.open()
-      expect(upgraded.verno).toBe(5)
+      expect(upgraded.verno).toBe(6)
       expect(await getSetting(upgraded, 'newCardsPerDay')).toBe(9)
       expect((await upgraded.results.get('r1'))?.grade).toBe(27)
       expect(upgraded.appelli.schema.idxByName.courseId).toBeDefined()
@@ -323,7 +323,7 @@ describe('aggiornamento di Dexie dalla versione 1 alla 2', () => {
     const upgraded = createDb(name)
     try {
       await upgraded.open()
-      expect(upgraded.verno).toBe(5)
+      expect(upgraded.verno).toBe(6)
       expect(await upgraded.cards.get('a')).toEqual({ id: 'a', ...base, updatedAt: 1 })
       expect(await upgraded.cards.get('b')).toEqual({ id: 'b', ...base, formulaReading: 'E con n', updatedAt: 2 })
       expect(await upgraded.cards.get('c')).toEqual({ id: 'c', ...base, updatedAt: 3 })
@@ -333,9 +333,9 @@ describe('aggiornamento di Dexie dalla versione 1 alla 2', () => {
     }
   })
 
-  it('un database nuovo parte direttamente dalla versione 5, vuoto', async () => {
+  it('un database nuovo parte direttamente dalla versione 6, vuoto', async () => {
     await db.open()
-    expect(db.verno).toBe(5)
+    expect(db.verno).toBe(6)
     expect(await db.results.count()).toBe(0)
     expect(await db.appelli.count()).toBe(0)
     expect(await db.universes.count()).toBe(0)

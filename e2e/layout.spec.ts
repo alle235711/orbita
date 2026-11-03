@@ -2,6 +2,7 @@ import { expect, test, type Page } from '@playwright/test'
 import { TEX_GOOD, TEX_MALFORMED } from '../src/test/tex-fixtures'
 import { importDemo, isoDate, walkWizard } from './helpers'
 import { aWednesday, writeTex } from './tex-helpers'
+import { bigDeck, chooseDeck, downloadWith, importSection, MINI, openMazzi, openShare, writeDeckJson, asOtherPerson, readDeckJson } from './mazzi-helpers'
 
 // Controllo automatico delle sovrapposizioni, al posto degli screenshot da
 // guardare a occhio: su ogni schermata, a 1180×820 e 390×844, sulla build di
@@ -30,6 +31,7 @@ const SCREENS = [
   '#/ripasso?materia=demo-c-1',
   '#/ripasso?materia=demo-c-1&sezione=Parte%20B',
   '#/dattilografia',
+  '#/mazzi',
   '#/dati',
   '#/dati?vista=latex&corso=demo-c-1&sezione=Parte%20B',
   '#/dati?vista=tex',
@@ -100,6 +102,8 @@ function inspect(page: Page): Promise<Problems> {
         .map((e) => ({ el: e, r: e.getBoundingClientRect() }))
     const interactive = 'a[href], button, input:not([type=hidden]), select, textarea, summary, [role=button], [role=switch], [role=radio], [role=checkbox], [role=tab], [tabindex]:not([tabindex="-1"])'
     const seen = new Set<Element>()
+    // Con un pannello modale aperto, il resto della pagina è inerte (sta sotto di proposito): si controlla solo il pannello.
+    const modal = document.querySelector('dialog[open]')
     const height = Math.max(doc.scrollHeight, window.innerHeight)
     for (let y = 0; ; y += Math.floor(window.innerHeight * 0.7)) {
       window.scrollTo(0, y)
@@ -107,6 +111,7 @@ function inspect(page: Page): Promise<Problems> {
       const fixed = fixedRects()
       for (const el of document.querySelectorAll(interactive)) {
         if (seen.has(el) || !visible(el) || el.closest('[inert], [aria-hidden="true"]')) continue
+        if (modal && !modal.contains(el)) continue
         const r = el.getBoundingClientRect()
         const x = r.left + r.width / 2
         const cy = r.top + r.height / 2
@@ -272,6 +277,71 @@ for (const vp of VIEWPORTS) {
       await page.waitForTimeout(400)
       const p = await inspect(page)
       expect([...p.scroll, ...p.covered, ...p.clipped]).toEqual([])
+    })
+
+    test('mazzi: pagina vuota, foglio di condivisione con il QR, messaggio per il mazzo grande e anteprima di importazione, nessuna sovrapposizione', async ({ page }, testInfo) => {
+      test.setTimeout(120_000)
+      const wednesday = aWednesday()
+      await page.clock.setFixedTime(wednesday)
+      const big = bigDeck()
+      await importDemo(page, testInfo, isoDate(wednesday), { courses: [...MINI.courses, ...big.courses], cards: [...MINI.cards, ...big.cards] })
+      const check = async () => {
+        await page.evaluate(() => document.fonts.ready)
+        await page.waitForTimeout(400)
+        const p = await inspect(page)
+        expect([...p.scroll, ...p.covered, ...p.clipped]).toEqual([])
+      }
+
+      // Elenco con più mazzi.
+      await openMazzi(page)
+      await page.reload()
+      await dismissNotice(page)
+      await check()
+
+      // Foglio di condivisione con il codice QR.
+      let sheet = await openShare(page, 'Mini Corso')
+      await sheet.getByLabel('Autore').fill('Ada Demo')
+      await sheet.getByLabel('Note').fill('Una nota abbastanza lunga da andare a capo nel campo delle note del foglio di condivisione.')
+      await sheet.getByRole('button', { name: 'Mostra il codice QR' }).click()
+      await expect(sheet.getByRole('img', { name: /Codice QR/ })).toBeVisible()
+      await check()
+      await page.keyboard.press('Escape')
+
+      // Mazzo grande: il messaggio al posto del QR.
+      sheet = await openShare(page, 'Corso Grande')
+      await sheet.getByRole('button', { name: 'Mostra il codice QR' }).click()
+      await expect(sheet.locator('.mazzi-sheet__status')).toContainText('scarica il file')
+      await check()
+      const json = await downloadWith(page, testInfo, () => sheet.getByRole('button', { name: 'Scarica il file .json' }).click())
+      await page.keyboard.press('Escape')
+
+      // Anteprima di importazione, con le informazioni del mazzo.
+      const copy = asOtherPerson(readDeckJson(json.path), 'altra')
+      copy.mazzo.autore = 'Ada Demo'
+      copy.mazzo.ateneo = 'Università di Prova'
+      copy.mazzo.note = 'Un mazzo di prova con una nota lunga che deve andare a capo senza uscire dalla colonna.'
+      await chooseDeck(page, writeDeckJson(testInfo, 'altra.json', copy))
+      await expect(importSection(page).locator('.mazzi-preview')).toBeVisible()
+      await check()
+
+      // Pagina senza mazzi.
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) => {
+            const open = indexedDB.open('orbita')
+            open.onsuccess = () => {
+              const tx = open.result.transaction('cards', 'readwrite')
+              tx.objectStore('cards').clear()
+              tx.oncomplete = () => {
+                open.result.close()
+                resolve()
+              }
+            }
+          }),
+      )
+      await page.reload()
+      await expect(page.getByText('Non hai ancora mazzi')).toBeVisible()
+      await check()
     })
 
     test('il convertitore mostra la resa KaTeX con MathML leggibile e HTML nascosto', async ({ page }, testInfo) => {

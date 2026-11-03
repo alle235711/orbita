@@ -55,6 +55,7 @@ export function parseBackup(json: unknown): Backup {
       }
       if (name === 'results' && !validResultRow(row as unknown as Record<string, unknown>)) throw new BackupError('backupResultRow')
       if (name === 'appelli' && !validAppelloRow(row as unknown as Record<string, unknown>)) throw new BackupError('backupAppelloRow')
+      if (name === 'decks' && !validDeckRow(row as unknown as Record<string, unknown>)) throw new BackupError('backupDeckRow')
       if (name === 'universes' && !validUniverseRow(row as unknown as Record<string, unknown>)) throw new BackupError('backupUniverseRow')
     }
   }
@@ -82,6 +83,13 @@ function validAppelloRow(r: Record<string, unknown>): boolean {
   if (typeof r.courseId !== 'string' || !r.courseId) return false
   if (!isUsableDate(r.date)) return false
   return r.note === undefined || typeof r.note === 'string'
+}
+
+function validDeckRow(r: Record<string, unknown>): boolean {
+  if (typeof r.courseId !== 'string' || typeof r.name !== 'string') return false
+  for (const k of ['author', 'university', 'course', 'year', 'license', 'notes']) if (typeof r[k] !== 'string') return false
+  if (r.origin === undefined) return true
+  return isPlainObject(r.origin) && typeof r.origin.author === 'string' && typeof r.origin.university === 'string'
 }
 
 function validUniverseRow(r: Record<string, unknown>): boolean {

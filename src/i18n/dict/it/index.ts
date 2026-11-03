@@ -8,6 +8,7 @@ import { common } from './common'
 import { dati } from './dati'
 import { libretto } from './libretto'
 import { math } from './math'
+import { mazzi } from './mazzi'
 import { multiverso } from './multiverso'
 import { energy } from './energy'
 import { errors } from './errors'
@@ -27,4 +28,4 @@ import { stats } from './stats'
 import { tex } from './tex'
 import { typing } from './typing'
 
-export const it = { common, app, nav, oggi, plan, briefing, regole, ruler, agenda, ripasso, typing, stats, dati, quicklog, errors, energy, sport, art, modules, blocks, profilo, benvenuto, libretto, multiverso, math, tex }
+export const it = { common, app, nav, oggi, plan, briefing, regole, ruler, agenda, ripasso, typing, stats, dati, quicklog, errors, energy, sport, art, modules, blocks, profilo, benvenuto, libretto, multiverso, math, mazzi, tex }
